@@ -71,19 +71,19 @@ export async function parseNifti(file: File): Promise<NiftiVolume> {
   }
 
   // Decompress if needed
-  let data = arrayBuffer;
+  let data: ArrayBufferLike = arrayBuffer;
   if (nifti.isCompressed(arrayBuffer)) {
     data = nifti.decompress(arrayBuffer);
   }
 
   // Read header
-  const header = nifti.readHeader(data);
+  const header = nifti.readHeader(data as ArrayBuffer);
   if (!header) {
     throw new Error('Failed to read NIfTI header');
   }
 
   // Get image data
-  const imageData = nifti.readImage(header, data);
+  const imageData = nifti.readImage(header, data as ArrayBuffer);
   const typedData = getTypedArray(imageData, header);
 
   // Extract dimensions
