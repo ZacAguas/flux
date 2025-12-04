@@ -7,36 +7,30 @@
 
 import { useEffect, useRef, useState } from 'react';
 import * as THREE from 'three/webgpu';
-import type { NiftiVolume } from '../types';
-import { createVolumeTexture } from '../utils/volumeTextureConverter';
 import { createVolumeRaymarchMaterial } from '../shaders/volumeRaymarch';
+import { useViewerStore } from '../store/viewerStore';
 
 interface VolumeRendererProps {
-  volume: NiftiVolume;
   stepSize?: number;
   opacity?: number;
   threshold?: number;
-  timeStep?: number;
 }
 
 export function VolumeRenderer({
-  volume,
   stepSize = 0.01,
   opacity = 1.0,
   threshold = 0.1,
-  timeStep = 0,
 }: VolumeRendererProps) {
+  const volume = useViewerStore((state) => state.volume);
+  const volumeTexture = useViewerStore((state) => state.volumeTexture);
   const meshRef = useRef<THREE.Mesh>(null);
   const [material, setMaterial] = useState<THREE.MeshBasicNodeMaterial | null>(
     null
   );
 
-  // Create texture and material when volume loads or time step changes
+  // Create material when volume texture is available
   useEffect(() => {
-    if (!volume) return;
-
-    // Create 3D texture from volume data
-    const volumeTexture = createVolumeTexture(volume, timeStep);
+    if (!volumeTexture) return;
 
     // Create raymarching material
     const raymarchMaterial = createVolumeRaymarchMaterial(volumeTexture, {
@@ -48,10 +42,9 @@ export function VolumeRenderer({
 
     // Cleanup on unmount or volume change
     return () => {
-      volumeTexture.dispose();
       raymarchMaterial.dispose();
     };
-  }, [volume, timeStep, stepSize, opacity, threshold]);
+  }, [volumeTexture, stepSize, opacity, threshold]);
 
   // Update material when it's created
   useEffect(() => {
@@ -61,6 +54,10 @@ export function VolumeRenderer({
   }, [material]);
 
   // FIXME: rotating mesh/camera results in weird clipping artifacts along volume edges
+
+  if (!volume || !material) {
+    return null;
+  }
 
   // Calculate volume aspect ratio for proper scaling
   const { dimensions, spacing } = volume;
@@ -79,10 +76,6 @@ export function VolumeRenderer({
     dimensions.y * spacing.y,
     dimensions.z * spacing.z
   );
-
-  if (!material) {
-    return null;
-  }
 
   return (
     <mesh ref={meshRef} scale={[scaleX, scaleY, scaleZ]}>

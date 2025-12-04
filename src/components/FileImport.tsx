@@ -3,14 +3,12 @@
  */
 
 import { useState } from 'react';
-import type { NiftiVolume } from '../types';
 import { parseNifti } from '../utils/niftiParser';
+import { createVolumeTexture } from '../utils/volumeTextureConverter';
+import { useViewerStore } from '../store/viewerStore';
 
-interface FileImportProps {
-  onVolumeLoaded: (volume: NiftiVolume) => void;
-}
-
-export function FileImport({ onVolumeLoaded }: FileImportProps) {
+export function FileImport() {
+  const setVolume = useViewerStore((state) => state.setVolume);
   const [isDragging, setIsDragging] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -27,7 +25,8 @@ export function FileImport({ onVolumeLoaded }: FileImportProps) {
 
     try {
       const volume = await parseNifti(file);
-      onVolumeLoaded(volume);
+      const texture = createVolumeTexture(volume, 0);
+      setVolume(volume, texture);
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Failed to load file';
       setError(message);
