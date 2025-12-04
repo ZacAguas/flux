@@ -5,6 +5,8 @@ import * as THREE from 'three/webgpu';
 import './App.css';
 import { VolumeRenderer } from './components';
 import { FileImport } from './components/FileImport';
+import { SliceViewer } from './components/SliceViewer';
+import { InspectorControls } from './components/debug/InspectorControls';
 import { useViewerStore } from './store/viewerStore';
 
 declare module '@react-three/fiber' {
@@ -25,17 +27,26 @@ function App() {
           const renderer = new THREE.WebGPURenderer(props as any);
 
           if (import.meta.env.DEV) {
-            // HACK: Type definitions don't include inspector, even though it is part of r181
-            (renderer as any).inspector = new Inspector();
+            renderer.inspector = new Inspector();
           }
 
           await renderer.init();
 
           return renderer;
         }}>
-        {volume &&
-          <VolumeRenderer />
-        }
+        {volume && (
+          <>
+            <VolumeRenderer />
+            {/* FIX: The slice view here is just for testing  */}
+            <group position={[2, 0, 0]}>
+              <SliceViewer orientation="axial" />
+            </group>
+
+            {import.meta.env.DEV &&
+              <InspectorControls />
+            }
+          </>
+        )}
         <OrbitControls />
       </Canvas>
 
