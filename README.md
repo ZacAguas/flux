@@ -1,6 +1,10 @@
-# React + TypeScript + Vite
+# 4D Medical Imaging Viewer
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+A WebGPU-accelerated medical imaging viewer for NIfTI files built with React, Three.js, and TypeScript.
+
+## Requirements
+
+**IMPORTANT**: This project requires **Three.js r181+** for WebGPU support and the Inspector API.
 
 Currently, two official plugins are available:
 

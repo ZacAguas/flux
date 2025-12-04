@@ -6,6 +6,7 @@ import type { NiftiVolume } from './types';
 import { useState } from 'react';
 import { VolumeRenderer } from './components';
 import { OrbitControls } from '@react-three/drei';
+import { Inspector } from 'three/examples/jsm/inspector/Inspector.js';
 
 declare module '@react-three/fiber' {
   interface ThreeElements extends ThreeToJSXElements<typeof THREE> { }
@@ -21,21 +22,25 @@ function App() {
 
   return (
     <>
-      <div style={{ position: 'absolute', width: '100%', height: '100%', top: 0, left: 0 }}>
-        <Canvas
-          orthographic
-          camera={{ zoom: 100, position: [0, 0, 5] }}
-          gl={async (props) => {
-            const renderer = new THREE.WebGPURenderer(props as any);
-            await renderer.init();
-            return renderer;
-          }}>
-          {volume &&
-            <VolumeRenderer volume={volume} />
-          }
-          <OrbitControls />
-        </Canvas>
-      </div>
+      <Canvas
+        orthographic
+        camera={{ zoom: 100, position: [0, 0, 5] }}
+        gl={async (props) => {
+          const renderer = new THREE.WebGPURenderer(props as any);
+
+          // HACK: Type definitions don't include inspector, even though it is part of r181
+          (renderer as any).inspector = new Inspector();
+
+          await renderer.init();
+
+          return renderer;
+        }}>
+        {volume &&
+          <VolumeRenderer volume={volume} />
+        }
+        <OrbitControls />
+      </Canvas>
+
       {!volume &&
         <div style={{
           position: 'absolute',
