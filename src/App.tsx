@@ -1,12 +1,11 @@
-import './App.css';
-import * as THREE from 'three/webgpu';
-import { Canvas, extend, type ThreeToJSXElements } from '@react-three/fiber';
-import { FileImport } from './components/FileImport';
-import type { NiftiVolume } from './types';
-import { useState } from 'react';
-import { VolumeRenderer } from './components';
 import { OrbitControls } from '@react-three/drei';
+import { Canvas, extend, type ThreeToJSXElements } from '@react-three/fiber';
 import { Inspector } from 'three/examples/jsm/inspector/Inspector.js';
+import * as THREE from 'three/webgpu';
+import './App.css';
+import { VolumeRenderer } from './components';
+import { FileImport } from './components/FileImport';
+import { useViewerStore } from './store/viewerStore';
 
 declare module '@react-three/fiber' {
   interface ThreeElements extends ThreeToJSXElements<typeof THREE> { }
@@ -15,10 +14,7 @@ extend(THREE as any);
 
 
 function App() {
-  const [volume, setVolume] = useState<NiftiVolume | null>(null);
-  function onVolumeLoaded(volume: NiftiVolume) {
-    setVolume(volume);
-  }
+  const volume = useViewerStore((state) => state.volume);
 
   return (
     <>
@@ -28,15 +24,17 @@ function App() {
         gl={async (props) => {
           const renderer = new THREE.WebGPURenderer(props as any);
 
-          // HACK: Type definitions don't include inspector, even though it is part of r181
-          (renderer as any).inspector = new Inspector();
+          if (import.meta.env.DEV) {
+            // HACK: Type definitions don't include inspector, even though it is part of r181
+            (renderer as any).inspector = new Inspector();
+          }
 
           await renderer.init();
 
           return renderer;
         }}>
         {volume &&
-          <VolumeRenderer volume={volume} />
+          <VolumeRenderer />
         }
         <OrbitControls />
       </Canvas>
@@ -51,7 +49,7 @@ function App() {
           maxWidth: '500px',
           width: '90%'
         }}>
-          <FileImport onVolumeLoaded={onVolumeLoaded} />
+          <FileImport />
         </div>
       }
     </>
