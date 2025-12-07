@@ -292,8 +292,10 @@ function ViewportRenderer() {
 export function LayoutQuad() {
   const controlPanelOpen = useViewerStore((state) => state.controlPanelOpen);
   const controlPanelPinned = useViewerStore((state) => state.controlPanelPinned);
+
   // HACK: This shouldn't be hardcoded here, but derived from ControlPanel height
   const panelHeight = controlPanelOpen && controlPanelPinned ? 204 : 0;
+  const labelOffset = controlPanelOpen ? 204 : 0; // Shift labels even when panel is unpinned
 
   return (
     <div style={{
@@ -331,7 +333,7 @@ export function LayoutQuad() {
       {/* Viewport labels */}
       <div style={{
         position: 'absolute',
-        top: `${panelHeight + 10}px`,
+        top: `${labelOffset + 10}px`,
         left: '10px',
         color: 'white',
         fontSize: '14px',
@@ -343,7 +345,7 @@ export function LayoutQuad() {
       </div>
       <div style={{
         position: 'absolute',
-        top: `${panelHeight + 10}px`,
+        top: `${labelOffset + 10}px`,
         right: '10px',
         color: 'white',
         fontSize: '14px',

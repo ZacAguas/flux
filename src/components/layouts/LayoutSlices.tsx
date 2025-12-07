@@ -222,8 +222,10 @@ function ViewportRenderer() {
 export function LayoutSlices() {
   const controlPanelOpen = useViewerStore((state) => state.controlPanelOpen);
   const controlPanelPinned = useViewerStore((state) => state.controlPanelPinned);
+
   // HACK: This shouldn't be hardcoded here, but derived from ControlPanel height
   const panelHeight = controlPanelOpen && controlPanelPinned ? 204 : 0;
+  const labelOffset = controlPanelOpen ? 204 : 0; // Shift labels even when panel is unpinned
 
   return (
     <div style={{
@@ -261,7 +263,7 @@ export function LayoutSlices() {
       {/* Viewport labels */}
       <div style={{
         position: 'absolute',
-        top: `${panelHeight + 10}px`,
+        top: `${labelOffset + 10}px`,
         left: '10px',
         color: 'white',
         fontSize: '14px',
@@ -273,7 +275,7 @@ export function LayoutSlices() {
       </div>
       <div style={{
         position: 'absolute',
-        top: `${panelHeight + 10}px`,
+        top: `${labelOffset + 10}px`,
         left: '33.33%',
         marginLeft: '10px',
         color: 'white',
@@ -286,7 +288,7 @@ export function LayoutSlices() {
       </div>
       <div style={{
         position: 'absolute',
-        top: `${panelHeight + 10}px`,
+        top: `${labelOffset + 10}px`,
         left: '66.66%',
         marginLeft: '10px',
         color: 'white',

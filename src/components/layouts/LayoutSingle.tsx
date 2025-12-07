@@ -91,8 +91,10 @@ function VolumeRenderer() {
 export function LayoutSingle() {
   const controlPanelOpen = useViewerStore((state) => state.controlPanelOpen);
   const controlPanelPinned = useViewerStore((state) => state.controlPanelPinned);
+
   // HACK: This shouldn't be hardcoded here, but derived from ControlPanel height
   const panelHeight = controlPanelOpen && controlPanelPinned ? 204 : 0;
+  const labelOffset = controlPanelOpen ? 204 : 0; // Shift labels even when panel is unpinned
 
   return (
     <div style={{
@@ -130,7 +132,7 @@ export function LayoutSingle() {
       {/* View label */}
       <div style={{
         position: 'absolute',
-        top: `${panelHeight + 10}px`,
+        top: `${labelOffset + 10}px`,
         left: '10px',
         color: 'white',
         fontSize: '14px',
