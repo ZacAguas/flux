@@ -3,7 +3,7 @@ import * as THREE from 'three/webgpu';
 import './App.css';
 import { FileImport } from './components/FileImport';
 import { LayoutManager } from './components/layouts/LayoutManager';
-import { LayoutModeSelector } from './components/ui/LayoutModeSelector';
+import { ControlPanel } from './components/ui/ControlPanel';
 import { useViewerStore } from './store/viewerStore';
 
 declare module '@react-three/fiber' {
@@ -22,7 +22,7 @@ function App() {
       {volume ? (
         <>
           <LayoutManager />
-          <LayoutModeSelector />
+          <ControlPanel />
         </>
       ) : (
         <div style={{
