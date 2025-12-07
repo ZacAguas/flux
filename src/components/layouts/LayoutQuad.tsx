@@ -284,8 +284,16 @@ function ViewportRenderer() {
 }
 
 export function LayoutQuad() {
+  const controlPanelOpen = useViewerStore((state) => state.controlPanelOpen);
+
   return (
-    <div style={{ width: '100vw', height: '100vh', position: 'relative' }}>
+    <div style={{
+      width: '100vw',
+      height: '100vh',
+      position: 'relative',
+      paddingTop: controlPanelOpen ? '140px' : '0',
+      transition: 'padding-top 0.3s ease-in-out',
+    }}>
       <Canvas
         orthographic
         camera={{ zoom: 100, position: [0, 0, 5] }}
