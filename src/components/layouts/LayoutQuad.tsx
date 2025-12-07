@@ -63,7 +63,8 @@ function ViewportRenderer() {
     volumeSceneRef.current = new THREE.Scene();
 
     // Create cameras
-    const aspect = 1; // Square viewports
+    // NOTE: Initial aspect=1, updated dynamically based on window size
+    const aspect = 1;
     const frustumSize = 2;
     axialCameraRef.current = new THREE.OrthographicCamera(
       -frustumSize * aspect / 2, frustumSize * aspect / 2,
@@ -193,6 +194,28 @@ function ViewportRenderer() {
       windowWidth: normalizedWidth,
     });
   }, [sliceIndices, windowLevel, volume]);
+
+  // Update camera aspect ratios when viewport size changes
+  useEffect(() => {
+    if (
+      !axialCameraRef.current || !coronalCameraRef.current ||
+      !sagittalCameraRef.current || !volumeCameraRef.current
+    ) return;
+
+    const halfWidth = size.width / 2;
+    const halfHeight = size.height / 2;
+    const viewportAspect = halfWidth / halfHeight;
+    const frustumSize = 2;
+
+    // Update all camera projections to match viewport aspect ratio
+    [axialCameraRef.current, coronalCameraRef.current, sagittalCameraRef.current, volumeCameraRef.current].forEach(camera => {
+      camera.left = -frustumSize * viewportAspect / 2;
+      camera.right = frustumSize * viewportAspect / 2;
+      camera.top = frustumSize / 2;
+      camera.bottom = -frustumSize / 2;
+      camera.updateProjectionMatrix();
+    });
+  }, [size]);
 
   // Render to viewports
   useFrame(() => {
