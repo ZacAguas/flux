@@ -12,6 +12,7 @@ import * as THREE from 'three/webgpu';
 import { useViewerStore } from '../../store/viewerStore';
 import { createVolumeRaymarchMaterial } from '../../shaders/volumeRaymarch';
 import { InspectorControls } from '../debug/InspectorControls';
+import { getVolumeDimensions } from '../../utils/layout';
 
 /**
  * Volume renderer - renders 3D volume with orbit controls
@@ -41,26 +42,10 @@ function VolumeRenderer() {
     });
 
     // Create volume mesh with correct aspect ratio
-    const { dimensions, spacing } = volume;
-    const scaleX = (dimensions.x * spacing.x) / Math.max(
-      dimensions.x * spacing.x,
-      dimensions.y * spacing.y,
-      dimensions.z * spacing.z
-    );
-    const scaleY = (dimensions.y * spacing.y) / Math.max(
-      dimensions.x * spacing.x,
-      dimensions.y * spacing.y,
-      dimensions.z * spacing.z
-    );
-    const scaleZ = (dimensions.z * spacing.z) / Math.max(
-      dimensions.x * spacing.x,
-      dimensions.y * spacing.y,
-      dimensions.z * spacing.z
-    );
-
+    const volDims = getVolumeDimensions(volume);
     const volumeGeometry = new THREE.BoxGeometry(1, 1, 1);
     const volumeMesh = new THREE.Mesh(volumeGeometry, volumeMaterialRef.current);
-    volumeMesh.scale.set(scaleX, scaleY, scaleZ);
+    volumeMesh.scale.set(volDims.width, volDims.height, volDims.depth);
     sceneRef.current.add(volumeMesh);
 
     // Cleanup
