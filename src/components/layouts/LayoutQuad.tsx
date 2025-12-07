@@ -43,6 +43,7 @@ function ViewportRenderer() {
   const volumeCameraRef = useRef<THREE.OrthographicCamera | undefined>(undefined);
 
   // Controls for 3D volume view
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const controlsRef = useRef<any>(undefined);
 
   // Materials
@@ -266,6 +267,7 @@ export function LayoutQuad() {
         orthographic
         camera={{ zoom: 100, position: [0, 0, 5] }}
         gl={async (props) => {
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
           const renderer = new THREE.WebGPURenderer(props as any);
 
           if (import.meta.env.DEV) {

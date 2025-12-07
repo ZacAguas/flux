@@ -6,8 +6,10 @@ import { LayoutQuad } from './components/layouts/LayoutQuad';
 import { useViewerStore } from './store/viewerStore';
 
 declare module '@react-three/fiber' {
+  // eslint-disable-next-line @typescript-eslint/no-empty-object-type
   interface ThreeElements extends ThreeToJSXElements<typeof THREE> { }
 }
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 extend(THREE as any);
 
 
