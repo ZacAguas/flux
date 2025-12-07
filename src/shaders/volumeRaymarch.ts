@@ -7,6 +7,8 @@
  * See docs/raymarching.md for algorithm details.
  */
 
+import type MathNode from 'three/src/nodes/math/MathNode.js';
+import type OperatorNode from 'three/src/nodes/math/OperatorNode.js';
 import {
   Fn,
   texture3D,
@@ -30,8 +32,7 @@ import * as THREE from 'three/webgpu';
  * Ray-box intersection function (inline)
  * Returns entry (tNear) and exit (tFar) distances along ray
  */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-const intersectBox = (rayOrigin: any, rayDir: any) => {
+const intersectBox = (rayOrigin: OperatorNode, rayDir: MathNode) => {
   // Box bounds in texture space [0, 1]
   const boxMin = vec3(0.0, 0.0, 0.0);
   const boxMax = vec3(1.0, 1.0, 1.0);
@@ -113,8 +114,6 @@ export function createVolumeRaymarchMaterial(
     // Only raymarch if there's a valid intersection
     If(tNear.lessThan(tFar), () => {
       // Raymarching parameters
-      // PERF: Cap max steps to reduce GPU load (fill rate is the main bottleneck)
-      // NOTE: Step cap alone doesn't solve inside-volume performance (see OrbitControls minDistance)
       const calculatedSteps = tFar.sub(tNear).div(stepSizeUniform);
       const maxSteps = min(calculatedSteps, float(256)).toInt();
       const stepIndex = float(0).toVar();
