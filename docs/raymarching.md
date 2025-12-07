@@ -4,7 +4,7 @@ This document explains the raymarching algorithm used for volume rendering in th
 
 ## What is Raymarching?
 
-Raymarching (also called ray casting) is a technique for rendering 3D volumetric data. Instead of rendering surfaces (like traditional 3D graphics), we:
+Raymarching is a technique for rendering 3D volumetric data. Instead of rendering surfaces (like traditional 3D graphics), we:
 
 1. Cast a ray from the camera through each pixel
 2. Sample the 3D volume texture at regular intervals along the ray
@@ -20,7 +20,7 @@ For each pixel:
   3. March along ray taking samples
   4. For each sample:
      - Read intensity from 3D texture
-     - Apply transfer function (intensity → color/opacity)
+     - Apply transfer function (intensity -> color/opacity)
      - Composite with accumulated color (front-to-back blending)
      - Early termination if opacity reaches threshold
   5. Output final pixel color
@@ -63,7 +63,7 @@ If `tNear >= tFar`, the ray misses the box entirely.
 Maps raw intensity values [0, 1] to visible colors and opacity:
 
 ```
-intensity → (red, green, blue, alpha)
+intensity -> (red, green, blue, alpha)
 ```
 
 **Simple Linear (current implementation)**:
@@ -208,13 +208,14 @@ Typical performance targets:
 **Reason**: Fill rate bottleneck when camera enters volume:
 
 - **Outside volume**: Volume covers 20-30% of screen → Fast
-- **Inside volume**: Volume covers 100% of screen → 3-5x more fragment shader invocations → Severe performance degradation
+- **Inside volume**: Volume covers 100% of screen → 3-5x more fragment shader invocations -> Severe performance degradation
 
 **Impact**:
 
-- ✅ Consistent 60 FPS performance
-- ✅ Better UX (less disorienting)
-- ❌ Cannot perform virtual endoscopy/fly-through
+- Consistent 60 FPS performance
+- Better UX (less disorienting)
+
+- Cannot perform virtual endoscopy/fly-through
 
 **Future improvements** if internal views are needed:
 
