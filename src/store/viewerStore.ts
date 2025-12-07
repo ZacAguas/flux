@@ -12,6 +12,7 @@ interface ViewerStore {
   windowLevel: WindowLevel;
   showCrosshairs: boolean;
   timeStep: number;
+  controlPanelOpen: boolean;
 
   // Actions
   setLayoutMode: (mode: LayoutMode) => void;
@@ -20,6 +21,7 @@ interface ViewerStore {
   setWindowLevel: (windowLevel: Partial<WindowLevel>) => void;
   setShowCrosshairs: (show: boolean) => void;
   setTimeStep: (step: number) => void;
+  setControlPanelOpen: (open: boolean) => void;
 }
 
 export const useViewerStore = create<ViewerStore>((set, get) => ({
@@ -38,6 +40,7 @@ export const useViewerStore = create<ViewerStore>((set, get) => ({
   },
   showCrosshairs: true,
   timeStep: 0,
+  controlPanelOpen: true,
 
   // Actions
   setLayoutMode: (mode) => set({ layoutMode: mode }),
@@ -90,4 +93,6 @@ export const useViewerStore = create<ViewerStore>((set, get) => ({
   setShowCrosshairs: (show) => set({ showCrosshairs: show }),
 
   setTimeStep: (step) => set({ timeStep: step }),
+
+  setControlPanelOpen: (open) => set({ controlPanelOpen: open }),
 }));
