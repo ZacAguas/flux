@@ -344,8 +344,7 @@ export function LayoutQuad() {
       <div style={{
         position: 'absolute',
         top: `${panelHeight + 10}px`,
-        left: '50%',
-        marginLeft: '10px',
+        right: '10px',
         color: 'white',
         fontSize: '14px',
         fontWeight: 'bold',
@@ -370,8 +369,7 @@ export function LayoutQuad() {
       <div style={{
         position: 'absolute',
         top: `calc(50% + ${panelHeight / 2}px)`,
-        left: '50%',
-        marginLeft: '10px',
+        right: '10px',
         marginTop: '10px',
         color: 'white',
         fontSize: '14px',
