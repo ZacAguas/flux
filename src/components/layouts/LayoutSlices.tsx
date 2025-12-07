@@ -221,8 +221,9 @@ function ViewportRenderer() {
 
 export function LayoutSlices() {
   const controlPanelOpen = useViewerStore((state) => state.controlPanelOpen);
+  const controlPanelPinned = useViewerStore((state) => state.controlPanelPinned);
   // HACK: This shouldn't be hardcoded here, but derived from ControlPanel height
-  const panelHeight = controlPanelOpen ? 204 : 0;
+  const panelHeight = controlPanelOpen && controlPanelPinned ? 204 : 0;
 
   return (
     <div style={{

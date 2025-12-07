@@ -13,6 +13,7 @@ interface ViewerStore {
   showCrosshairs: boolean;
   timeStep: number;
   controlPanelOpen: boolean;
+  controlPanelPinned: boolean;
 
   // Actions
   setLayoutMode: (mode: LayoutMode) => void;
@@ -22,6 +23,7 @@ interface ViewerStore {
   setShowCrosshairs: (show: boolean) => void;
   setTimeStep: (step: number) => void;
   setControlPanelOpen: (open: boolean) => void;
+  setControlPanelPinned: (isPinned: boolean) => void;
 }
 
 export const useViewerStore = create<ViewerStore>((set, get) => ({
@@ -41,6 +43,7 @@ export const useViewerStore = create<ViewerStore>((set, get) => ({
   showCrosshairs: true,
   timeStep: 0,
   controlPanelOpen: true,
+  controlPanelPinned: true,
 
   // Actions
   setLayoutMode: (mode) => set({ layoutMode: mode }),
@@ -95,4 +98,6 @@ export const useViewerStore = create<ViewerStore>((set, get) => ({
   setTimeStep: (step) => set({ timeStep: step }),
 
   setControlPanelOpen: (open) => set({ controlPanelOpen: open }),
+
+  setControlPanelPinned: (isPinned) => set({ controlPanelPinned: isPinned }),
 }));

@@ -6,7 +6,6 @@
  * - Click toggle button to pin open/closed
  */
 
-import { useState } from 'react';
 import { Button } from '@heroui/react';
 import { LayoutModeButtons } from './LayoutModeButtons';
 import { SliceControls } from './SliceControls';
@@ -15,25 +14,26 @@ import { ViewOptionsControls } from './ViewOptionsControls';
 import { useViewerStore } from '../../store/viewerStore';
 
 export function ControlPanel() {
-  const [isPinned, setIsPinned] = useState(true);
   const controlPanelOpen = useViewerStore((state) => state.controlPanelOpen);
   const setControlPanelOpen = useViewerStore((state) => state.setControlPanelOpen);
+  const controlPanelPinned = useViewerStore((state) => state.controlPanelPinned);
+  const setControlPanelPinned = useViewerStore((state) => state.setControlPanelPinned);
 
   const handleMouseEnter = () => {
-    if (!isPinned) {
+    if (!controlPanelPinned) {
       setControlPanelOpen(true);
     }
   };
 
   const handleMouseLeave = () => {
-    if (!isPinned) {
+    if (!controlPanelPinned) {
       setControlPanelOpen(false);
     }
   };
 
   const handleToggleClick = () => {
-    const newPinnedState = !isPinned;
-    setIsPinned(newPinnedState);
+    const newPinnedState = !controlPanelPinned;
+    setControlPanelPinned(newPinnedState);
     setControlPanelOpen(newPinnedState);
   };
 
