@@ -12,12 +12,24 @@ import { SliceControls } from './SliceControls';
 import { WindowLevelControls } from './WindowLevelControls';
 import { ViewOptionsControls } from './ViewOptionsControls';
 import { useViewerStore } from '../../store/viewerStore';
+import { useState } from 'react';
 
 export function ControlPanel() {
   const controlPanelOpen = useViewerStore((state) => state.controlPanelOpen);
   const setControlPanelOpen = useViewerStore((state) => state.setControlPanelOpen);
   const controlPanelPinned = useViewerStore((state) => state.controlPanelPinned);
   const setControlPanelPinned = useViewerStore((state) => state.setControlPanelPinned);
+  const [isHoveringButton, setIsHoveringButton] = useState(false);
+
+  const getButtonLabel = () => {
+    if (controlPanelOpen) {
+      if (isHoveringButton) {
+        return controlPanelPinned ? '↑' : '📌';
+      }
+      return controlPanelPinned ? '↑' : '📌';
+    }
+    return '↓';
+  };
 
   const handleMouseEnter = () => {
     if (!controlPanelPinned) {
@@ -99,10 +111,11 @@ export function ControlPanel() {
           size="sm"
           variant="secondary"
           onPress={handleToggleClick}
+          onHoverChange={(isHovering) => setIsHoveringButton(isHovering)}
           className="!rounded-t-none !rounded-b-lg !bg-black/20 backdrop-blur-sm !border !border-white/10 !border-t-0 px-4 py-1 shadow-lg"
         >
           <span className="text-xs text-white/70">
-            {controlPanelOpen ? '▲' : '▼'}
+            {getButtonLabel()}
           </span>
         </Button>
       </div>
