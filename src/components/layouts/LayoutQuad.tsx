@@ -19,6 +19,7 @@ import { useViewerStore } from '../../store/viewerStore';
 import { createSliceMaterial, updateSliceMaterial } from '../../shaders/sliceShader';
 import { createVolumeRaymarchMaterial } from '../../shaders/volumeRaymarch';
 import { InspectorControls } from '../debug/InspectorControls';
+import { getSliceDimensions, getVolumeDimensions } from '../../utils/layout';
 
 /**
  * Viewport renderer - handles rendering to 4 viewports
@@ -62,36 +63,34 @@ function ViewportRenderer() {
     sagittalSceneRef.current = new THREE.Scene();
     volumeSceneRef.current = new THREE.Scene();
 
+    // Get slice dimensions
+    const axialDims = getSliceDimensions(volume, 'axial');
+    const coronalDims = getSliceDimensions(volume, 'coronal');
+    const sagittalDims = getSliceDimensions(volume, 'sagittal');
+
     // Create cameras
-    // NOTE: Initial aspect=1, updated dynamically based on window size
-    const aspect = 1;
-    const frustumSize = 2;
     axialCameraRef.current = new THREE.OrthographicCamera(
-      -frustumSize * aspect / 2, frustumSize * aspect / 2,
-      frustumSize / 2, -frustumSize / 2,
+      -axialDims.width / 2, axialDims.width / 2,
+      axialDims.height / 2, -axialDims.height / 2,
       0.1, 1000
     );
     axialCameraRef.current.position.set(0, 0, 5);
 
     coronalCameraRef.current = new THREE.OrthographicCamera(
-      -frustumSize * aspect / 2, frustumSize * aspect / 2,
-      frustumSize / 2, -frustumSize / 2,
+      -coronalDims.width / 2, coronalDims.width / 2,
+      coronalDims.height / 2, -coronalDims.height / 2,
       0.1, 1000
     );
     coronalCameraRef.current.position.set(0, 0, 5);
 
     sagittalCameraRef.current = new THREE.OrthographicCamera(
-      -frustumSize * aspect / 2, frustumSize * aspect / 2,
-      frustumSize / 2, -frustumSize / 2,
+      -sagittalDims.width / 2, sagittalDims.width / 2,
+      sagittalDims.height / 2, -sagittalDims.height / 2,
       0.1, 1000
     );
     sagittalCameraRef.current.position.set(0, 0, 5);
 
-    volumeCameraRef.current = new THREE.OrthographicCamera(
-      -frustumSize * aspect / 2, frustumSize * aspect / 2,
-      frustumSize / 2, -frustumSize / 2,
-      0.1, 1000
-    );
+    volumeCameraRef.current = new THREE.OrthographicCamera(-1, 1, 1, -1, 0.1, 1000);
     volumeCameraRef.current.position.set(0, 0, 5);
 
     // Create slice materials
@@ -120,39 +119,23 @@ function ViewportRenderer() {
     });
 
     // Create slice meshes
-    const axialGeometry = new THREE.PlaneGeometry(1, 1);
+    const axialGeometry = new THREE.PlaneGeometry(axialDims.width, axialDims.height);
     const axialMesh = new THREE.Mesh(axialGeometry, axialMaterialRef.current);
     axialSceneRef.current.add(axialMesh);
 
-    const coronalGeometry = new THREE.PlaneGeometry(1, 1);
+    const coronalGeometry = new THREE.PlaneGeometry(coronalDims.width, coronalDims.height);
     const coronalMesh = new THREE.Mesh(coronalGeometry, coronalMaterialRef.current);
     coronalSceneRef.current.add(coronalMesh);
 
-    const sagittalGeometry = new THREE.PlaneGeometry(1, 1);
+    const sagittalGeometry = new THREE.PlaneGeometry(sagittalDims.width, sagittalDims.height);
     const sagittalMesh = new THREE.Mesh(sagittalGeometry, sagittalMaterialRef.current);
     sagittalSceneRef.current.add(sagittalMesh);
 
     // Create volume mesh
-    const { dimensions, spacing } = volume;
-    const scaleX = (dimensions.x * spacing.x) / Math.max(
-      dimensions.x * spacing.x,
-      dimensions.y * spacing.y,
-      dimensions.z * spacing.z
-    );
-    const scaleY = (dimensions.y * spacing.y) / Math.max(
-      dimensions.x * spacing.x,
-      dimensions.y * spacing.y,
-      dimensions.z * spacing.z
-    );
-    const scaleZ = (dimensions.z * spacing.z) / Math.max(
-      dimensions.x * spacing.x,
-      dimensions.y * spacing.y,
-      dimensions.z * spacing.z
-    );
-
+    const volDims = getVolumeDimensions(volume);
     const volumeGeometry = new THREE.BoxGeometry(1, 1, 1);
     const volumeMesh = new THREE.Mesh(volumeGeometry, volumeMaterialRef.current);
-    volumeMesh.scale.set(scaleX, scaleY, scaleZ);
+    volumeMesh.scale.set(volDims.width, volDims.height, volDims.depth);
     volumeSceneRef.current.add(volumeMesh);
 
     // Cleanup
@@ -199,23 +182,46 @@ function ViewportRenderer() {
   useEffect(() => {
     if (
       !axialCameraRef.current || !coronalCameraRef.current ||
-      !sagittalCameraRef.current || !volumeCameraRef.current
+      !sagittalCameraRef.current || !volumeCameraRef.current ||
+      !volume
     ) return;
 
     const halfWidth = size.width / 2;
     const halfHeight = size.height / 2;
     const viewportAspect = halfWidth / halfHeight;
-    const frustumSize = 2;
 
-    // Update all camera projections to match viewport aspect ratio
-    [axialCameraRef.current, coronalCameraRef.current, sagittalCameraRef.current, volumeCameraRef.current].forEach(camera => {
-      camera.left = -frustumSize * viewportAspect / 2;
-      camera.right = frustumSize * viewportAspect / 2;
-      camera.top = frustumSize / 2;
-      camera.bottom = -frustumSize / 2;
-      camera.updateProjectionMatrix();
+    // Update slice cameras
+    const cameras = [
+      { cam: axialCameraRef.current, dims: getSliceDimensions(volume, 'axial') },
+      { cam: coronalCameraRef.current, dims: getSliceDimensions(volume, 'coronal') },
+      { cam: sagittalCameraRef.current, dims: getSliceDimensions(volume, 'sagittal') },
+    ];
+
+    cameras.forEach(({ cam, dims }) => {
+      const sliceAspect = dims.width / dims.height;
+      const isHorizontal = sliceAspect > viewportAspect;
+
+      // Fit to viewport
+      const zoomFactor = isHorizontal
+        ? dims.width / 2
+        : dims.height / 2 * viewportAspect;
+
+      cam.left = -zoomFactor;
+      cam.right = zoomFactor;
+      cam.top = zoomFactor / viewportAspect;
+      cam.bottom = -zoomFactor / viewportAspect;
+      cam.updateProjectionMatrix();
     });
-  }, [size]);
+
+    // Update volume camera
+    const volCam = volumeCameraRef.current;
+    volCam.left = -viewportAspect;
+    volCam.right = viewportAspect;
+    volCam.top = 1;
+    volCam.bottom = -1;
+    volCam.updateProjectionMatrix();
+
+  }, [size, volume]);
 
   // Render to viewports
   useFrame(() => {
