@@ -115,6 +115,7 @@ function ViewportRenderer() {
       coronalMaterialRef.current?.dispose();
       sagittalMaterialRef.current?.dispose();
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [volumeTexture, volume]);
 
   // Update materials when slice indices or window/level change
