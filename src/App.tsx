@@ -1,12 +1,8 @@
-import { OrbitControls } from '@react-three/drei';
-import { Canvas, extend, type ThreeToJSXElements } from '@react-three/fiber';
-import { Inspector } from 'three/examples/jsm/inspector/Inspector.js';
+import { extend, type ThreeToJSXElements } from '@react-three/fiber';
 import * as THREE from 'three/webgpu';
 import './App.css';
-import { VolumeRenderer } from './components';
 import { FileImport } from './components/FileImport';
-import { SliceViewer } from './components/SliceViewer';
-import { InspectorControls } from './components/debug/InspectorControls';
+import { LayoutQuad } from './components/layouts/LayoutQuad';
 import { useViewerStore } from './store/viewerStore';
 
 declare module '@react-three/fiber' {
@@ -20,37 +16,9 @@ function App() {
 
   return (
     <>
-      <Canvas
-        orthographic
-        camera={{ zoom: 100, position: [0, 0, 5] }}
-        gl={async (props) => {
-          const renderer = new THREE.WebGPURenderer(props as any);
-
-          if (import.meta.env.DEV) {
-            renderer.inspector = new Inspector();
-          }
-
-          await renderer.init();
-
-          return renderer;
-        }}>
-        {volume && (
-          <>
-            <VolumeRenderer />
-            {/* FIX: The slice view here is just for testing  */}
-            <group position={[2, 0, 0]}>
-              <SliceViewer orientation="axial" />
-            </group>
-
-            {import.meta.env.DEV &&
-              <InspectorControls />
-            }
-          </>
-        )}
-        <OrbitControls />
-      </Canvas>
-
-      {!volume &&
+      {volume ? (
+        <LayoutQuad />
+      ) : (
         <div style={{
           position: 'absolute',
           top: '50%',
@@ -62,7 +30,7 @@ function App() {
         }}>
           <FileImport />
         </div>
-      }
+      )}
     </>
   );
 }
