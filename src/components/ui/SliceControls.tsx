@@ -30,7 +30,7 @@ export function SliceControls() {
       >
         <Label className="text-white/50 text-xs font-medium">Axial</Label>
         <Slider.Output className="text-xs" />
-        <Slider.Track>
+        <Slider.Track className="bg-white/15 backdrop-blur-sm rounded-md">
           <Slider.Fill />
           <Slider.Thumb />
         </Slider.Track>
@@ -48,7 +48,7 @@ export function SliceControls() {
       >
         <Label className="text-white/50 text-xs font-medium">Coronal</Label>
         <Slider.Output className="text-xs" />
-        <Slider.Track>
+        <Slider.Track className="bg-white/15 backdrop-blur-sm rounded-md">
           <Slider.Fill />
           <Slider.Thumb />
         </Slider.Track>
@@ -66,7 +66,7 @@ export function SliceControls() {
       >
         <Label className="text-white/50 text-xs font-medium">Sagittal</Label>
         <Slider.Output className="text-xs" />
-        <Slider.Track>
+        <Slider.Track className="bg-white/15 backdrop-blur-sm rounded-md">
           <Slider.Fill />
           <Slider.Thumb />
         </Slider.Track>
