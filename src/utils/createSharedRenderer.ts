@@ -1,4 +1,7 @@
 /**
+ ** @deprecated This utility is unused.
+ * See LayoutQuad.tsx and LayoutSingle.tsx for the actual implementation.
+ *
  * Shared WebGPU Renderer Utility
  *
  * Creates a single WebGPURenderer instance that can render to multiple canvas elements

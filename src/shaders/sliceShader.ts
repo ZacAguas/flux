@@ -106,6 +106,7 @@ export function createSliceMaterial(
   material.transparent = false;
 
   // Store uniforms for later updates
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   (material as any).uniforms = {
     sliceIndex: sliceIndexUniform,
     windowCenter: windowCenterUniform,
@@ -129,6 +130,7 @@ export function updateSliceMaterial(
     windowWidth?: number;
   }
 ) {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const uniforms = (material as any).uniforms;
 
   if (uniforms) {
