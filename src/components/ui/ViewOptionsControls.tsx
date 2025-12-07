@@ -21,10 +21,16 @@ export function ViewOptionsControls() {
         isDisabled={layoutMode === 'single'}
         onChange={setShowCrosshairs}
       >
-        <Switch.Control>
-          <Switch.Thumb />
-        </Switch.Control>
-        <Label className="text-white/50 text-xs font-medium">Crosshairs</Label>
+        {({ isSelected }) => (
+          <>
+            <Switch.Control
+              className={`backdrop-blur-sm rounded-full ${isSelected ? '' : 'bg-white/15'}`}
+            >
+              <Switch.Thumb />
+            </Switch.Control>
+            <Label className="text-white/50 text-xs font-medium">Crosshairs</Label>
+          </>
+        )}
       </Switch>
 
       {/* TODO: Time step slider for 4D data */}
