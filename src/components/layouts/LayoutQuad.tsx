@@ -164,6 +164,8 @@ function ViewportRenderer() {
       sagittalMaterialRef.current?.dispose();
       volumeMaterialRef.current?.dispose();
     };
+    // NOTE: We don't want to recreate everything on every slice/window change
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [volumeTexture, volume]);
 
   // Update materials when slice indices or window/level change
@@ -214,24 +216,25 @@ function ViewportRenderer() {
     gl.clear(true, true, true);
 
     // Render axial (top-left)
-    gl.setViewport(0, halfHeight, halfWidth, halfHeight);
-    gl.setScissor(0, halfHeight, halfWidth, halfHeight);
+    // NOTE: for WebGPU viewport Y=0 is at TOP of canvas (WebGL has Y=0 at bottom)
+    gl.setViewport(0, 0, halfWidth, halfHeight);
+    gl.setScissor(0, 0, halfWidth, halfHeight);
     gl.setScissorTest(true);
     gl.render(axialSceneRef.current, axialCameraRef.current);
 
     // Render coronal (top-right)
-    gl.setViewport(halfWidth, halfHeight, halfWidth, halfHeight);
-    gl.setScissor(halfWidth, halfHeight, halfWidth, halfHeight);
+    gl.setViewport(halfWidth, 0, halfWidth, halfHeight);
+    gl.setScissor(halfWidth, 0, halfWidth, halfHeight);
     gl.render(coronalSceneRef.current, coronalCameraRef.current);
 
     // Render sagittal (bottom-left)
-    gl.setViewport(0, 0, halfWidth, halfHeight);
-    gl.setScissor(0, 0, halfWidth, halfHeight);
+    gl.setViewport(0, halfHeight, halfWidth, halfHeight);
+    gl.setScissor(0, halfHeight, halfWidth, halfHeight);
     gl.render(sagittalSceneRef.current, sagittalCameraRef.current);
 
     // Render volume (bottom-right)
-    gl.setViewport(halfWidth, 0, halfWidth, halfHeight);
-    gl.setScissor(halfWidth, 0, halfWidth, halfHeight);
+    gl.setViewport(halfWidth, halfHeight, halfWidth, halfHeight);
+    gl.setScissor(halfWidth, halfHeight, halfWidth, halfHeight);
     gl.render(volumeSceneRef.current, volumeCameraRef.current);
 
     // Reset scissor test
