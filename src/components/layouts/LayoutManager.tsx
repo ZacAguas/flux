@@ -6,6 +6,7 @@
 
 import { useViewerStore } from '../../store/viewerStore';
 import { LayoutSingle } from './LayoutSingle';
+import { LayoutSlices } from './LayoutSlices';
 import { LayoutQuad } from './LayoutQuad';
 
 export function LayoutManager() {
@@ -14,8 +15,8 @@ export function LayoutManager() {
   return (
     <>
       {layoutMode === 'single' && <LayoutSingle />}
+      {layoutMode === 'slices' && <LayoutSlices />}
       {layoutMode === 'quad' && <LayoutQuad />}
-      {/* NOTE: 'slices' mode not implemented yet */}
     </>
   );
 }

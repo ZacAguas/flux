@@ -2,7 +2,7 @@
  * Layout Mode Selector
  *
  * UI overlay for switching between different layout modes.
- * Currently supports 'single' and 'quad' modes.
+ * Supports 'single', 'slices', and 'quad' modes.
  */
 
 import { useViewerStore } from '../../store/viewerStore';
@@ -53,6 +53,32 @@ export function LayoutModeSelector() {
         }}
       >
         Single
+      </button>
+      <button
+        onClick={() => handleModeChange('slices')}
+        style={{
+          padding: '8px 16px',
+          backgroundColor: layoutMode === 'slices' ? '#4a9eff' : '#333',
+          color: 'white',
+          border: 'none',
+          borderRadius: '4px',
+          cursor: 'pointer',
+          fontSize: '14px',
+          fontWeight: layoutMode === 'slices' ? 'bold' : 'normal',
+          transition: 'background-color 0.2s',
+        }}
+        onMouseEnter={(e) => {
+          if (layoutMode !== 'slices') {
+            e.currentTarget.style.backgroundColor = '#444';
+          }
+        }}
+        onMouseLeave={(e) => {
+          if (layoutMode !== 'slices') {
+            e.currentTarget.style.backgroundColor = '#333';
+          }
+        }}
+      >
+        Slices
       </button>
       <button
         onClick={() => handleModeChange('quad')}
