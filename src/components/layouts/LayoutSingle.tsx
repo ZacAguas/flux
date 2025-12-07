@@ -90,18 +90,27 @@ function VolumeRenderer() {
 
 export function LayoutSingle() {
   const controlPanelOpen = useViewerStore((state) => state.controlPanelOpen);
+  const controlPanelPinned = useViewerStore((state) => state.controlPanelPinned);
+  // HACK: This shouldn't be hardcoded here, but derived from ControlPanel height
+  const panelHeight = controlPanelOpen && controlPanelPinned ? 204 : 0;
 
   return (
     <div style={{
       width: '100vw',
       height: '100vh',
       position: 'relative',
-      paddingTop: controlPanelOpen ? '140px' : '0',
-      transition: 'padding-top 0.3s ease-in-out',
     }}>
       <Canvas
         orthographic
         camera={{ zoom: 100, position: [0, 0, 5] }}
+        style={{
+          position: 'absolute',
+          top: `${panelHeight}px`,
+          left: 0,
+          width: '100%',
+          height: `calc(100% - ${panelHeight}px)`,
+          transition: 'top 0.3s ease-in-out, height 0.3s ease-in-out',
+        }}
         gl={async (props) => {
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
           const renderer = new THREE.WebGPURenderer(props as any);
@@ -121,12 +130,13 @@ export function LayoutSingle() {
       {/* View label */}
       <div style={{
         position: 'absolute',
-        top: '10px',
+        top: `${panelHeight + 10}px`,
         left: '10px',
         color: 'white',
         fontSize: '14px',
         fontWeight: 'bold',
         pointerEvents: 'none',
+        transition: 'top 0.3s ease-in-out',
       }}>
         3D Volume
       </div>
