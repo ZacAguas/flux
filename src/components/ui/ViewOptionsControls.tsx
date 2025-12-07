@@ -9,6 +9,7 @@ import { Switch, Label } from '@heroui/react';
 import { useViewerStore } from '../../store/viewerStore';
 
 export function ViewOptionsControls() {
+  const layoutMode = useViewerStore((state) => state.layoutMode);
   const showCrosshairs = useViewerStore((state) => state.showCrosshairs);
   const setShowCrosshairs = useViewerStore((state) => state.setShowCrosshairs);
 
@@ -17,12 +18,13 @@ export function ViewOptionsControls() {
       {/* Crosshairs Toggle */}
       <Switch
         isSelected={showCrosshairs}
+        isDisabled={layoutMode === 'single'}
         onChange={setShowCrosshairs}
       >
         <Switch.Control>
           <Switch.Thumb />
         </Switch.Control>
-        <Label className="text-xs font-medium">Crosshairs</Label>
+        <Label className="text-white/50 text-xs font-medium">Crosshairs</Label>
       </Switch>
 
       {/* TODO: Time step slider for 4D data */}
