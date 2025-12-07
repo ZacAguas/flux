@@ -82,32 +82,9 @@ export function SliceViewer({ orientation }: SliceViewerProps) {
     return null;
   }
 
-  // Calculate plane geometry size based on volume dimensions and spacing
-  const { dimensions, spacing } = volume;
-  let width, height;
-
-  if (orientation === 'axial') {
-    // XY plane
-    width = dimensions.x * spacing.x;
-    height = dimensions.y * spacing.y;
-  } else if (orientation === 'coronal') {
-    // XZ plane
-    width = dimensions.x * spacing.x;
-    height = dimensions.z * spacing.z;
-  } else {
-    // Sagittal: YZ plane
-    width = dimensions.y * spacing.y;
-    height = dimensions.z * spacing.z;
-  }
-
-  // Normalize to unit square while maintaining aspect ratio
-  const maxDim = Math.max(width, height);
-  const normalizedWidth = width / maxDim;
-  const normalizedHeight = height / maxDim;
-
   return (
     <mesh ref={meshRef}>
-      <planeGeometry args={[normalizedWidth, normalizedHeight]} />
+      <planeGeometry args={[1, 1]} />
       {/* Material is set via ref in useEffect */}
     </mesh>
   );
