@@ -2,7 +2,8 @@ import { extend, type ThreeToJSXElements } from '@react-three/fiber';
 import * as THREE from 'three/webgpu';
 import './App.css';
 import { FileImport } from './components/FileImport';
-import { LayoutQuad } from './components/layouts/LayoutQuad';
+import { LayoutManager } from './components/layouts/LayoutManager';
+import { LayoutModeSelector } from './components/ui/LayoutModeSelector';
 import { useViewerStore } from './store/viewerStore';
 
 declare module '@react-three/fiber' {
@@ -19,7 +20,10 @@ function App() {
   return (
     <>
       {volume ? (
-        <LayoutQuad />
+        <>
+          <LayoutManager />
+          <LayoutModeSelector />
+        </>
       ) : (
         <div style={{
           position: 'absolute',
