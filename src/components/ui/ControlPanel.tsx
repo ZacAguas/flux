@@ -48,7 +48,7 @@ export function ControlPanel() {
       onMouseLeave={handleMouseLeave}
     >
       {/* Main panel content */}
-      <div className="bg-black/80 backdrop-blur-sm border-b border-white/10">
+      <div className="bg-black/20 backdrop-blur-sm border-b border-white/10">
         <div className="flex items-stretch gap-6 px-4 py-3 max-w-full overflow-x-auto">
           {/* Layout Mode Selection */}
           <div className="flex flex-col gap-2 min-w-fit">
@@ -99,7 +99,7 @@ export function ControlPanel() {
           size="sm"
           variant="secondary"
           onPress={handleToggleClick}
-          className="!rounded-t-none !rounded-b-lg bg-black/80 backdrop-blur-sm !border !border-white/10 !border-t-0 px-4 py-1 shadow-lg"
+          className="!rounded-t-none !rounded-b-lg !bg-black/20 backdrop-blur-sm !border !border-white/10 !border-t-0 px-4 py-1 shadow-lg"
         >
           <span className="text-xs text-white/70">
             {controlPanelOpen ? '▲' : '▼'}
