@@ -9,6 +9,7 @@ import { Slider, Label } from '@heroui/react';
 import { useViewerStore } from '../../store/viewerStore';
 
 export function SliceControls() {
+  const layoutMode = useViewerStore((state) => state.layoutMode);
   const volume = useViewerStore((state) => state.volume);
   const sliceIndices = useViewerStore((state) => state.sliceIndices);
   const setSliceIndex = useViewerStore((state) => state.setSliceIndex);
@@ -20,13 +21,14 @@ export function SliceControls() {
       {/* Axial Slider */}
       <Slider
         value={sliceIndices.axial}
+        isDisabled={layoutMode === 'single'}
         onChange={(value) => setSliceIndex('axial', value as number)}
         minValue={0}
         maxValue={volume.dimensions.z - 1}
         step={1}
         className="w-full"
       >
-        <Label className="text-xs font-medium">Axial</Label>
+        <Label className="text-white/50 text-xs font-medium">Axial</Label>
         <Slider.Output className="text-xs" />
         <Slider.Track>
           <Slider.Fill />
@@ -37,13 +39,14 @@ export function SliceControls() {
       {/* Coronal Slider */}
       <Slider
         value={sliceIndices.coronal}
+        isDisabled={layoutMode === 'single'}
         onChange={(value) => setSliceIndex('coronal', value as number)}
         minValue={0}
         maxValue={volume.dimensions.y - 1}
         step={1}
         className="w-full"
       >
-        <Label className="text-xs font-medium">Coronal</Label>
+        <Label className="text-white/50 text-xs font-medium">Coronal</Label>
         <Slider.Output className="text-xs" />
         <Slider.Track>
           <Slider.Fill />
@@ -54,13 +57,14 @@ export function SliceControls() {
       {/* Sagittal Slider */}
       <Slider
         value={sliceIndices.sagittal}
+        isDisabled={layoutMode === 'single'}
         onChange={(value) => setSliceIndex('sagittal', value as number)}
         minValue={0}
         maxValue={volume.dimensions.x - 1}
         step={1}
         className="w-full"
       >
-        <Label className="text-xs font-medium">Sagittal</Label>
+        <Label className="text-white/50 text-xs font-medium">Sagittal</Label>
         <Slider.Output className="text-xs" />
         <Slider.Track>
           <Slider.Fill />

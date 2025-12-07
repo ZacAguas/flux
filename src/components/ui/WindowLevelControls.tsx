@@ -9,6 +9,7 @@ import { Slider, Label } from '@heroui/react';
 import { useViewerStore } from '../../store/viewerStore';
 
 export function WindowLevelControls() {
+  const layoutMode = useViewerStore((state) => state.layoutMode);
   const volume = useViewerStore((state) => state.volume);
   const windowLevel = useViewerStore((state) => state.windowLevel);
   const setWindowLevel = useViewerStore((state) => state.setWindowLevel);
@@ -23,15 +24,16 @@ export function WindowLevelControls() {
       {/* Window Center Slider */}
       <Slider
         value={windowLevel.center}
+        isDisabled={layoutMode === 'single'}
         onChange={(value) => setWindowLevel({ center: value as number })}
         minValue={min}
         maxValue={max}
         step={range / 1000}
         className="w-full"
       >
-        <Label className="text-xs font-medium">W Center</Label>
+        <Label className="text-white/50 text-xs font-medium">W Center</Label>
         <Slider.Output className="text-xs">
-          {({state}) => Math.round(Number(state.getThumbValueLabel(0)))}
+          {({ state }) => Math.round(Number(state.getThumbValueLabel(0)))}
         </Slider.Output>
         <Slider.Track>
           <Slider.Fill />
@@ -42,15 +44,16 @@ export function WindowLevelControls() {
       {/* Window Width Slider */}
       <Slider
         value={windowLevel.width}
+        isDisabled={layoutMode === 'single'}
         onChange={(value) => setWindowLevel({ width: value as number })}
         minValue={0}
         maxValue={range}
         step={range / 1000}
         className="w-full"
       >
-        <Label className="text-xs font-medium">W Width</Label>
+        <Label className="text-white/50 text-xs font-medium">W Width</Label>
         <Slider.Output className="text-xs">
-          {({state}) => Math.round(Number(state.getThumbValueLabel(0)))}
+          {({ state }) => Math.round(Number(state.getThumbValueLabel(0)))}
         </Slider.Output>
         <Slider.Track>
           <Slider.Fill />
