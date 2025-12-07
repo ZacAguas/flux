@@ -291,18 +291,26 @@ function ViewportRenderer() {
 
 export function LayoutQuad() {
   const controlPanelOpen = useViewerStore((state) => state.controlPanelOpen);
+  // HACK: This shouldn't be hardcoded here, but derived from ControlPanel height
+  const panelHeight = controlPanelOpen ? 204 : 0;
 
   return (
     <div style={{
       width: '100vw',
       height: '100vh',
       position: 'relative',
-      paddingTop: controlPanelOpen ? '140px' : '0',
-      transition: 'padding-top 0.3s ease-in-out',
     }}>
       <Canvas
         orthographic
         camera={{ zoom: 100, position: [0, 0, 5] }}
+        style={{
+          position: 'absolute',
+          top: `${panelHeight}px`,
+          left: 0,
+          width: '100%',
+          height: `calc(100% - ${panelHeight}px)`,
+          transition: 'top 0.3s ease-in-out, height 0.3s ease-in-out',
+        }}
         gl={async (props) => {
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
           const renderer = new THREE.WebGPURenderer(props as any);
@@ -322,42 +330,45 @@ export function LayoutQuad() {
       {/* Viewport labels */}
       <div style={{
         position: 'absolute',
-        top: '10px',
+        top: `${panelHeight + 10}px`,
         left: '10px',
         color: 'white',
         fontSize: '14px',
         fontWeight: 'bold',
         pointerEvents: 'none',
+        transition: 'top 0.3s ease-in-out',
       }}>
         Axial
       </div>
       <div style={{
         position: 'absolute',
-        top: '10px',
+        top: `${panelHeight + 10}px`,
         left: '50%',
         marginLeft: '10px',
         color: 'white',
         fontSize: '14px',
         fontWeight: 'bold',
         pointerEvents: 'none',
+        transition: 'top 0.3s ease-in-out',
       }}>
         Coronal
       </div>
       <div style={{
         position: 'absolute',
-        top: '50%',
+        top: `calc(50% + ${panelHeight / 2}px)`,
         left: '10px',
         marginTop: '10px',
         color: 'white',
         fontSize: '14px',
         fontWeight: 'bold',
         pointerEvents: 'none',
+        transition: 'top 0.3s ease-in-out',
       }}>
         Sagittal
       </div>
       <div style={{
         position: 'absolute',
-        top: '50%',
+        top: `calc(50% + ${panelHeight / 2}px)`,
         left: '50%',
         marginLeft: '10px',
         marginTop: '10px',
@@ -365,6 +376,7 @@ export function LayoutQuad() {
         fontSize: '14px',
         fontWeight: 'bold',
         pointerEvents: 'none',
+        transition: 'top 0.3s ease-in-out',
       }}>
         3D Volume
       </div>
@@ -372,21 +384,23 @@ export function LayoutQuad() {
       {/* Grid lines */}
       <div style={{
         position: 'absolute',
-        top: '50%',
+        top: `calc(50% + ${panelHeight / 2}px)`,
         left: 0,
         right: 0,
         height: '2px',
         backgroundColor: '#333',
         pointerEvents: 'none',
+        transition: 'top 0.3s ease-in-out',
       }} />
       <div style={{
         position: 'absolute',
-        top: 0,
+        top: `${panelHeight}px`,
         bottom: 0,
         left: '50%',
         width: '2px',
         backgroundColor: '#333',
         pointerEvents: 'none',
+        transition: 'top 0.3s ease-in-out',
       }} />
     </div>
   );
