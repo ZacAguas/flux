@@ -4,6 +4,11 @@ import type { NiftiVolume } from '../types/nifti';
 import type { LayoutMode, SliceIndices, WindowLevel } from '../types/layout';
 import type { RaymarchSettings } from '../types/volume';
 
+interface CrosshairSettings {
+  color: string;
+  opacity: number;
+}
+
 interface ViewerStore {
   // State
   layoutMode: LayoutMode;
@@ -12,6 +17,7 @@ interface ViewerStore {
   sliceIndices: SliceIndices;
   windowLevel: WindowLevel;
   showCrosshairs: boolean;
+  crosshairSettings: CrosshairSettings;
   timeStep: number;
   controlPanelOpen: boolean;
   controlPanelPinned: boolean;
@@ -23,6 +29,7 @@ interface ViewerStore {
   setSliceIndex: (orientation: keyof SliceIndices, index: number) => void;
   setWindowLevel: (windowLevel: Partial<WindowLevel>) => void;
   setShowCrosshairs: (show: boolean) => void;
+  setCrosshairSettings: (settings: Partial<CrosshairSettings>) => void;
   setTimeStep: (step: number) => void;
   setControlPanelOpen: (open: boolean) => void;
   setControlPanelPinned: (isPinned: boolean) => void;
@@ -44,6 +51,10 @@ export const useViewerStore = create<ViewerStore>((set, get) => ({
     width: 1,
   },
   showCrosshairs: true,
+  crosshairSettings: {
+    color: '#00FF00',
+    opacity: 0.7,
+  },
   timeStep: 0,
   controlPanelOpen: true,
   controlPanelPinned: true,
@@ -103,6 +114,14 @@ export const useViewerStore = create<ViewerStore>((set, get) => ({
     })),
 
   setShowCrosshairs: (show) => set({ showCrosshairs: show }),
+
+  setCrosshairSettings: (newSettings) =>
+    set((state) => ({
+      crosshairSettings: {
+        ...state.crosshairSettings,
+        ...newSettings,
+      },
+    })),
 
   setTimeStep: (step) => set({ timeStep: step }),
 

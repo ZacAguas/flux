@@ -24,6 +24,7 @@ export function Crosshairs({ layoutMode, canvasWidth, canvasHeight, panelHeight 
   const volume = useViewerStore((state) => state.volume);
   const sliceIndices = useViewerStore((state) => state.sliceIndices);
   const showCrosshairs = useViewerStore((state) => state.showCrosshairs);
+  const crosshairSettings = useViewerStore((state) => state.crosshairSettings);
 
   const [positions, setPositions] = useState<{
     axial: CrosshairPosition | null;
@@ -66,8 +67,8 @@ export function Crosshairs({ layoutMode, canvasWidth, canvasHeight, panelHeight 
   if (!showCrosshairs || !volume) return null;
 
   const lineStyle = {
-    backgroundColor: '#00FF00',
-    opacity: 0.7,
+    backgroundColor: crosshairSettings.color,
+    opacity: crosshairSettings.opacity,
     pointerEvents: 'none' as const,
   };
 
