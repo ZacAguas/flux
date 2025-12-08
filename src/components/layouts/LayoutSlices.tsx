@@ -17,6 +17,7 @@ import { createSliceMaterial, updateSliceMaterial } from '../../shaders/sliceSha
 import { InspectorControls } from '../debug/InspectorControls';
 import { getSliceDimensions } from '../../utils/layout';
 import { Crosshairs } from '../ui/Crosshairs';
+import { SliceInteractionHandler } from '../ui/SliceInteractionHandler';
 
 /**
  * Viewport renderer - handles rendering to 3 slice viewports
@@ -274,6 +275,14 @@ export function LayoutSlices() {
         <ViewportRenderer />
         <InspectorControls />
       </Canvas>
+
+      {/* Slice interaction handler - captures pointer events on slice views */}
+      <SliceInteractionHandler
+        layoutMode="slices"
+        canvasWidth={canvasDimensions.width}
+        canvasHeight={canvasDimensions.height}
+        panelHeight={panelHeight}
+      />
 
       {/* Viewport labels */}
       <div style={{

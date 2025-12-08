@@ -26,11 +26,12 @@ import {
 import { InspectorControls } from '../debug/InspectorControls';
 import { getSliceDimensions, getVolumeDimensions } from '../../utils/layout';
 import { Crosshairs } from '../ui/Crosshairs';
+import { SliceInteractionHandler } from '../ui/SliceInteractionHandler';
 
 /**
  * Viewport renderer - handles rendering to 4 viewports
  */
-function ViewportRenderer() {
+function ViewportRenderer({ volumeViewportRef }: { volumeViewportRef: React.RefObject<HTMLDivElement | null> }) {
   const { gl, size } = useThree();
   const volume = useViewerStore((state) => state.volume);
   const volumeTexture = useViewerStore((state) => state.volumeTexture);
@@ -303,9 +304,9 @@ function ViewportRenderer() {
 
   // Store controls ref from OrbitControls (placed in volumeScene context)
   useEffect(() => {
-    if (volumeCameraRef.current) {
-      // Create OrbitControls for volume camera
-      const controls = new OrbitControls(volumeCameraRef.current, gl.domElement);
+    if (volumeCameraRef.current && volumeViewportRef.current) {
+      // Create OrbitControls for volume camera, attached to volume viewport div
+      const controls = new OrbitControls(volumeCameraRef.current, volumeViewportRef.current);
       controls.enableDamping = true;
       controls.dampingFactor = 0.05;
       controlsRef.current = controls;
@@ -314,7 +315,7 @@ function ViewportRenderer() {
         controls.dispose();
       };
     }
-  }, [gl]);
+  }, [volumeViewportRef]);
 
   return null;
 }
@@ -328,6 +329,7 @@ export function LayoutQuad() {
   const labelOffset = controlPanelOpen ? 204 : 0; // Shift labels even when panel is unpinned
 
   const [canvasDimensions, setCanvasDimensions] = useState({ width: 0, height: 0 });
+  const volumeViewportRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const updateDimensions = () => {
@@ -370,9 +372,32 @@ export function LayoutQuad() {
           return renderer;
         }}
       >
-        <ViewportRenderer />
+        <ViewportRenderer volumeViewportRef={volumeViewportRef} />
         <InspectorControls />
       </Canvas>
+
+      {/* Volume viewport div - OrbitControls attach to this */}
+      <div
+        ref={volumeViewportRef}
+        style={{
+          position: 'absolute',
+          left: '50%',
+          top: `calc(50% + ${panelHeight / 2}px)`,
+          width: '50%',
+          height: '50%',
+          pointerEvents: 'auto',
+          zIndex: 1,
+          transition: 'top 0.3s ease-in-out',
+        }}
+      />
+
+      {/* Slice interaction handler - captures pointer events on slice views */}
+      <SliceInteractionHandler
+        layoutMode="quad"
+        canvasWidth={canvasDimensions.width}
+        canvasHeight={canvasDimensions.height}
+        panelHeight={panelHeight}
+      />
 
       {/* Viewport labels */}
       <div style={{
