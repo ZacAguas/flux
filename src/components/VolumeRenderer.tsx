@@ -12,22 +12,14 @@ import {
   createVolumeRaymarchMaterial,
   updateRaymarchCameraUniforms,
   updateRaymarchMeshUniforms,
+  updateRaymarchUniforms,
 } from '../shaders/volumeRaymarch';
 import { useViewerStore } from '../store/viewerStore';
 
-interface VolumeRendererProps {
-  stepSize?: number;
-  opacity?: number;
-  threshold?: number;
-}
-
-export function VolumeRenderer({
-  stepSize = 0.01,
-  opacity = 1.0,
-  threshold = 0.1,
-}: VolumeRendererProps) {
+export function VolumeRenderer() {
   const volume = useViewerStore((state) => state.volume);
   const volumeTexture = useViewerStore((state) => state.volumeTexture);
+  const raymarchSettings = useViewerStore((state) => state.raymarchSettings);
   const meshRef = useRef<THREE.Mesh>(null);
   const [material, setMaterial] = useState<THREE.MeshBasicNodeMaterial | null>(
     null
@@ -39,9 +31,9 @@ export function VolumeRenderer({
 
     // Create raymarching material
     const raymarchMaterial = createVolumeRaymarchMaterial(volumeTexture, {
-      stepSize,
-      opacity,
-      threshold,
+      stepSize: raymarchSettings.stepSize,
+      opacity: raymarchSettings.opacity,
+      threshold: raymarchSettings.threshold,
     });
     setMaterial(raymarchMaterial);
 
@@ -49,7 +41,18 @@ export function VolumeRenderer({
     return () => {
       raymarchMaterial.dispose();
     };
-  }, [volumeTexture, stepSize, opacity, threshold]);
+  }, [volumeTexture, raymarchSettings]);
+
+  // Update raymarching uniforms when settings change (without recreating material)
+  useEffect(() => {
+    if (!material) return;
+
+    updateRaymarchUniforms(material, {
+      stepSize: raymarchSettings.stepSize,
+      opacity: raymarchSettings.opacity,
+      threshold: raymarchSettings.threshold,
+    });
+  }, [material, raymarchSettings.stepSize, raymarchSettings.opacity, raymarchSettings.threshold]);
 
   // Update material and mesh uniforms when created or volume changes
   useEffect(() => {

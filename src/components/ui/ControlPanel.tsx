@@ -11,6 +11,7 @@ import { LayoutModeButtons } from './LayoutModeButtons';
 import { SliceControls } from './SliceControls';
 import { WindowLevelControls } from './WindowLevelControls';
 import { ViewOptionsControls } from './ViewOptionsControls';
+import { RenderingControls } from './RenderingControls';
 import { useViewerStore } from '../../store/viewerStore';
 import { useState } from 'react';
 
@@ -101,6 +102,17 @@ export function ControlPanel() {
               Options
             </span>
             <ViewOptionsControls />
+          </div>
+
+          {/* Vertical Divider */}
+          <div className="w-px bg-white/10" />
+
+          {/* 3D Controls */}
+          <div className="flex flex-col gap-2 min-w-[180px]">
+            <span className="text-xs font-semibold text-white/70 uppercase tracking-wide">
+              3D
+            </span>
+            <RenderingControls />
           </div>
         </div>
       </div>

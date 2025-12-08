@@ -2,6 +2,7 @@ import { create } from 'zustand';
 import type * as THREE from 'three';
 import type { NiftiVolume } from '../types/nifti';
 import type { LayoutMode, SliceIndices, WindowLevel } from '../types/layout';
+import type { RaymarchSettings } from '../types/volume';
 
 interface ViewerStore {
   // State
@@ -14,6 +15,7 @@ interface ViewerStore {
   timeStep: number;
   controlPanelOpen: boolean;
   controlPanelPinned: boolean;
+  raymarchSettings: RaymarchSettings;
 
   // Actions
   setLayoutMode: (mode: LayoutMode) => void;
@@ -24,6 +26,7 @@ interface ViewerStore {
   setTimeStep: (step: number) => void;
   setControlPanelOpen: (open: boolean) => void;
   setControlPanelPinned: (isPinned: boolean) => void;
+  setRaymarchSettings: (settings: Partial<RaymarchSettings>) => void;
 }
 
 export const useViewerStore = create<ViewerStore>((set, get) => ({
@@ -44,6 +47,12 @@ export const useViewerStore = create<ViewerStore>((set, get) => ({
   timeStep: 0,
   controlPanelOpen: true,
   controlPanelPinned: true,
+  raymarchSettings: {
+    stepSize: 0.01,
+    opacity: 1.0,
+    threshold: 0.1,
+    qualityPreset: 'standard',
+  },
 
   // Actions
   setLayoutMode: (mode) => set({ layoutMode: mode }),
@@ -100,4 +109,12 @@ export const useViewerStore = create<ViewerStore>((set, get) => ({
   setControlPanelOpen: (open) => set({ controlPanelOpen: open }),
 
   setControlPanelPinned: (isPinned) => set({ controlPanelPinned: isPinned }),
+
+  setRaymarchSettings: (newSettings) =>
+    set((state) => ({
+      raymarchSettings: {
+        ...state.raymarchSettings,
+        ...newSettings,
+      },
+    })),
 }));
