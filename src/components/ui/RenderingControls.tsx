@@ -11,9 +11,9 @@ import type { RenderQualityPreset } from '../../types/volume';
 
 // Quality preset configurations
 const QUALITY_PRESETS = {
-  draft: { stepSize: 0.02, opacity: 1.0, threshold: 0.1 },
-  standard: { stepSize: 0.01, opacity: 1.0, threshold: 0.1 },
-  high: { stepSize: 0.005, opacity: 1.0, threshold: 0.1 },
+  draft: { stepSize: 0.02 },
+  standard: { stepSize: 0.01 },
+  high: { stepSize: 0.005 },
 } as const;
 
 export function RenderingControls() {
@@ -34,7 +34,7 @@ export function RenderingControls() {
   };
 
   // Handle manual slider changes - switch to custom preset
-  const handleManualChange = (key: keyof typeof QUALITY_PRESETS.standard, value: number) => {
+  const handleManualChange = (key: 'stepSize' | 'opacity' | 'threshold', value: number) => {
     setRaymarchSettings({
       [key]: value,
       qualityPreset: 'custom',
