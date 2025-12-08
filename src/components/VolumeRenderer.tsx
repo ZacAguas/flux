@@ -6,8 +6,13 @@
  */
 
 import { useEffect, useRef, useState } from 'react';
+import { useFrame } from '@react-three/fiber';
 import * as THREE from 'three/webgpu';
-import { createVolumeRaymarchMaterial } from '../shaders/volumeRaymarch';
+import {
+  createVolumeRaymarchMaterial,
+  updateRaymarchCameraUniforms,
+  updateRaymarchMeshUniforms,
+} from '../shaders/volumeRaymarch';
 import { useViewerStore } from '../store/viewerStore';
 
 interface VolumeRendererProps {
@@ -46,14 +51,21 @@ export function VolumeRenderer({
     };
   }, [volumeTexture, stepSize, opacity, threshold]);
 
-  // Update material when it's created
+  // Update material and mesh uniforms when created or volume changes
   useEffect(() => {
     if (meshRef.current && material) {
       meshRef.current.material = material;
+      // Update mesh-related uniforms (inverseModelMatrix) once since mesh is static
+      updateRaymarchMeshUniforms(material, meshRef.current);
     }
-  }, [material]);
+  }, [material, volume]);
 
-  // FIXME: rotating mesh/camera results in weird clipping artifacts along volume edges
+  // Update camera uniforms every frame
+  useFrame(({ camera }) => {
+    if (material) {
+      updateRaymarchCameraUniforms(material, camera);
+    }
+  });
 
   if (!volume || !material) {
     return null;
