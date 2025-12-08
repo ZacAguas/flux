@@ -17,7 +17,11 @@ import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import * as THREE from 'three/webgpu';
 import { useViewerStore } from '../../store/viewerStore';
 import { createSliceMaterial, updateSliceMaterial } from '../../shaders/sliceShader';
-import { createVolumeRaymarchMaterial } from '../../shaders/volumeRaymarch';
+import {
+  createVolumeRaymarchMaterial,
+  updateRaymarchCameraUniforms,
+  updateRaymarchMeshUniforms,
+} from '../../shaders/volumeRaymarch';
 import { InspectorControls } from '../debug/InspectorControls';
 import { getSliceDimensions, getVolumeDimensions } from '../../utils/layout';
 
@@ -46,6 +50,9 @@ function ViewportRenderer() {
   // Controls for 3D volume view
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const controlsRef = useRef<any>(undefined);
+
+  // Volume Mesh
+  const volumeMeshRef = useRef<THREE.Mesh | undefined>(undefined);
 
   // Materials
   const axialMaterialRef = useRef<THREE.MeshBasicNodeMaterial | undefined>(undefined);
@@ -137,6 +144,10 @@ function ViewportRenderer() {
     const volumeMesh = new THREE.Mesh(volumeGeometry, volumeMaterialRef.current);
     volumeMesh.scale.set(volDims.width, volDims.height, volDims.depth);
     volumeSceneRef.current.add(volumeMesh);
+    volumeMeshRef.current = volumeMesh; // Store mesh ref
+
+    // Update mesh related uniforms once per setup
+    updateRaymarchMeshUniforms(volumeMaterialRef.current, volumeMesh);
 
     // Cleanup
     return () => {
@@ -240,6 +251,11 @@ function ViewportRenderer() {
     // Update volume camera from controls if available
     if (controlsRef.current) {
       controlsRef.current.update();
+    }
+
+    // Update volume uniforms
+    if (volumeMaterialRef.current && volumeSceneRef.current && volumeCameraRef.current) {
+      updateRaymarchCameraUniforms(volumeMaterialRef.current, volumeCameraRef.current);
     }
 
     // Clear once for the whole canvas

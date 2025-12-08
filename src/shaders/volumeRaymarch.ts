@@ -7,8 +7,6 @@
  * See docs/raymarching.md for algorithm details.
  */
 
-import type MathNode from 'three/src/nodes/math/MathNode.js';
-import type OperatorNode from 'three/src/nodes/math/OperatorNode.js';
 import {
   Fn,
   texture3D,
@@ -32,7 +30,7 @@ import * as THREE from 'three/webgpu';
  * Ray-box intersection function (inline)
  * Returns entry (tNear) and exit (tFar) distances along ray
  */
-const intersectBox = (rayOrigin: OperatorNode, rayDir: MathNode) => {
+const intersectBox = (rayOrigin: THREE.VarNode, rayDir: THREE.VarNode) => {
   // Box bounds in texture space [0, 1]
   const boxMin = vec3(0.0, 0.0, 0.0);
   const boxMax = vec3(1.0, 1.0, 1.0);
@@ -89,18 +87,53 @@ export function createVolumeRaymarchMaterial(
   const stepSizeUniform = uniform(stepSize);
   const opacityUniform = uniform(opacity);
   const thresholdUniform = uniform(threshold);
+  // Inverse of the mesh's world matrix. Transforms world coordinates to local object space
+  // Important for positioning rays correctly relative to the possibly scaled/rotated volume
+  const inverseModelMatrixUniform = uniform(new THREE.Matrix4());
+  // Flag to indicate if the current camera is orthographic (1.0) or perspective (0.0)
+  const isOrthoUniform = uniform(0.0); // 0 = Perspective, 1 = Ortho
+  // Stores the camera's world direction, used for orthographic ray generation as rays are parallel
+  const cameraDirUniform = uniform(new THREE.Vector3(0, 0, -1));
 
   // Create texture node
   const volumeTextureNode = texture3D(volumeTexture);
 
-  // Main raymarching function
+  /**
+   * Main raymarching function
+   * - Supports both perspective and orthographic cameras
+   * @summary Performs raymarching through the volume and accumulates color
+   * @returns RGBA color after raymarching
+   */
   const raymarchVolume = Fn(() => {
-    // Ray direction from camera to fragment
-    const rayDir = normalize(positionWorld.sub(cameraPosition));
+    // Transform positions to local space
+    // Assumes object is a unit cube centered at origin in local space (-0.5 to 0.5)
+    const localCameraPos = inverseModelMatrixUniform.mul(vec4(cameraPosition, 1.0)).xyz;
+    const localPos = inverseModelMatrixUniform.mul(vec4(positionWorld, 1.0)).xyz;
 
-    // Transform ray to texture space [0, 1]
-    // Assuming cube centered at origin with size 1
-    const rayOrigin = cameraPosition.add(0.5);
+    // Initialize variables
+    const rayDir = vec3(0.0, 0.0, 0.0).toVar();
+    const rayOrigin = vec3(0.0, 0.0, 0.0).toVar();
+
+    // Conditional ray generation based on camera type
+    // This prevents clipping artifacts and distortion when using an orthographic camera
+    If(isOrthoUniform.greaterThan(0.5), () => {
+      // For orthographic projection, rays are parallel
+      // Transform the world-space camera direction into local object space (rotation only)
+      rayDir.assign(normalize(inverseModelMatrixUniform.mul(vec4(cameraDirUniform, 0.0)).xyz));
+
+      // Virtual origin: to find entry point, backtrack from fragment's position
+      // localPos is exit point (on back face of volume due to side: THREE.BackSide)
+      // Extend the ray backwards by a safe distance (eg. 3.0, greater than cube diagonal sqrt(3))
+      // and then shift to texture space [0,1] for intersectBox
+      rayOrigin.assign(localPos.sub(rayDir.mul(3.0)).add(0.5));
+    }).Else(() => {
+      // For perspective projection, rays originate from the camera position
+      // Ray direction is from camera to fragment, both in local space
+      rayDir.assign(normalize(localPos.sub(localCameraPos)));
+
+      // Ray origin is the camera position, shifted to texture space [0, 1] for intersectBox
+      rayOrigin.assign(localCameraPos.add(0.5));
+    });
 
     // Intersect ray with bounding box
     const intersection = intersectBox(rayOrigin, rayDir);
@@ -172,13 +205,16 @@ export function createVolumeRaymarchMaterial(
     stepSize: stepSizeUniform,
     opacity: opacityUniform,
     threshold: thresholdUniform,
+    inverseModelMatrix: inverseModelMatrixUniform,
+    isOrtho: isOrthoUniform,
+    cameraWorldDirection: cameraDirUniform,
   };
 
   return material;
 }
 
 /**
- * Update raymarching parameters
+ * Update raymarching parameters (call when parameters change)
  */
 export function updateRaymarchUniforms(
   material: THREE.MeshBasicNodeMaterial,
@@ -199,5 +235,54 @@ export function updateRaymarchUniforms(
   }
   if (params.threshold !== undefined) {
     uniforms.threshold.value = params.threshold;
+  }
+}
+
+/**
+ * Update camera-related uniforms (isOrtho, cameraWorldDirection)
+ * Should be called every frame from the render loop
+ * @param material The raymarching material
+ * @param camera The current Three.js camera
+ */
+export function updateRaymarchCameraUniforms(
+  material: THREE.MeshBasicNodeMaterial,
+  camera: THREE.Camera
+) {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const uniforms = (material as any).uniforms;
+  if (!uniforms) return;
+
+  if (uniforms.isOrtho) {
+    // Set isOrtho uniform based on the camera type
+    // Drives the conditional ray generation in the shader
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    uniforms.isOrtho.value = (camera as any).isOrthographicCamera ? 1.0 : 0.0;
+  }
+  if (uniforms.cameraWorldDirection) {
+    // Update the camera's world direction vector for orthographic ray calculation
+    camera.getWorldDirection(uniforms.cameraWorldDirection.value);
+  }
+}
+
+/**
+ * Update mesh-related uniforms (inverseModelMatrix)
+ * Should be called when the mesh's position, rotation, or scale changes
+ * For static meshes, can be called once on initialization
+ * @param material The raymarching material
+ * @param mesh The Three.js mesh representing the volume
+ */
+export function updateRaymarchMeshUniforms(
+  material: THREE.MeshBasicNodeMaterial,
+  mesh: THREE.Mesh
+) {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const uniforms = (material as any).uniforms;
+  if (!uniforms) return;
+
+  if (uniforms.inverseModelMatrix) {
+    // Ensure the mesh's world matrix is up to date, then calculate and pass its inverse
+    // Transforms world coordinates into mesh's local space.
+    mesh.updateMatrixWorld();
+    uniforms.inverseModelMatrix.value.copy(mesh.matrixWorld).invert();
   }
 }
