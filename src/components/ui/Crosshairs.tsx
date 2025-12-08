@@ -6,12 +6,10 @@
 
 import { useEffect, useState } from 'react';
 import { useViewerStore } from '../../store/viewerStore';
-import { calculateCrosshairPositions } from '../../utils/crosshairCalculations';
-
-interface CrosshairPosition {
-  horizontal: number;
-  vertical: number;
-}
+import {
+  calculateCrosshairPositions,
+  type CrosshairPosition,
+} from '../../utils/sliceInteraction';
 
 interface CrosshairsProps {
   layoutMode: 'quad' | 'slices';
