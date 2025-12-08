@@ -11,7 +11,7 @@
  * Based on webgpu_multiple_elements.html example pattern.
  */
 
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Canvas, useFrame, useThree } from '@react-three/fiber';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import * as THREE from 'three/webgpu';
@@ -25,6 +25,7 @@ import {
 } from '../../shaders/volumeRaymarch';
 import { InspectorControls } from '../debug/InspectorControls';
 import { getSliceDimensions, getVolumeDimensions } from '../../utils/layout';
+import { Crosshairs } from '../ui/Crosshairs';
 
 /**
  * Viewport renderer - handles rendering to 4 viewports
@@ -326,6 +327,20 @@ export function LayoutQuad() {
   const panelHeight = controlPanelOpen && controlPanelPinned ? 204 : 0;
   const labelOffset = controlPanelOpen ? 204 : 0; // Shift labels even when panel is unpinned
 
+  const [canvasDimensions, setCanvasDimensions] = useState({ width: 0, height: 0 });
+
+  useEffect(() => {
+    const updateDimensions = () => {
+      const height = window.innerHeight - panelHeight;
+      const width = window.innerWidth;
+      setCanvasDimensions({ width, height });
+    };
+
+    updateDimensions();
+    window.addEventListener('resize', updateDimensions);
+    return () => window.removeEventListener('resize', updateDimensions);
+  }, [panelHeight]);
+
   return (
     <div style={{
       width: '100vw',
@@ -432,6 +447,14 @@ export function LayoutQuad() {
         pointerEvents: 'none',
         transition: 'top 0.3s ease-in-out',
       }} />
+
+      {/* Crosshairs */}
+      <Crosshairs
+        layoutMode="quad"
+        canvasWidth={canvasDimensions.width}
+        canvasHeight={canvasDimensions.height}
+        panelHeight={panelHeight}
+      />
     </div>
   );
 }
