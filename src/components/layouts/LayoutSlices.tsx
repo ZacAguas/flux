@@ -9,13 +9,14 @@
  * Uses ONE Canvas with viewport/scissor rendering to 3 sections.
  */
 
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Canvas, useFrame, useThree } from '@react-three/fiber';
 import * as THREE from 'three/webgpu';
 import { useViewerStore } from '../../store/viewerStore';
 import { createSliceMaterial, updateSliceMaterial } from '../../shaders/sliceShader';
 import { InspectorControls } from '../debug/InspectorControls';
 import { getSliceDimensions } from '../../utils/layout';
+import { Crosshairs } from '../ui/Crosshairs';
 
 /**
  * Viewport renderer - handles rendering to 3 slice viewports
@@ -227,6 +228,20 @@ export function LayoutSlices() {
   const panelHeight = controlPanelOpen && controlPanelPinned ? 204 : 0;
   const labelOffset = controlPanelOpen ? 204 : 0; // Shift labels even when panel is unpinned
 
+  const [canvasDimensions, setCanvasDimensions] = useState({ width: 0, height: 0 });
+
+  useEffect(() => {
+    const updateDimensions = () => {
+      const height = window.innerHeight - panelHeight;
+      const width = window.innerWidth;
+      setCanvasDimensions({ width, height });
+    };
+
+    updateDimensions();
+    window.addEventListener('resize', updateDimensions);
+    return () => window.removeEventListener('resize', updateDimensions);
+  }, [panelHeight]);
+
   return (
     <div style={{
       width: '100vw',
@@ -321,6 +336,14 @@ export function LayoutSlices() {
         pointerEvents: 'none',
         transition: 'top 0.3s ease-in-out',
       }} />
+
+      {/* Crosshairs */}
+      <Crosshairs
+        layoutMode="slices"
+        canvasWidth={canvasDimensions.width}
+        canvasHeight={canvasDimensions.height}
+        panelHeight={panelHeight}
+      />
     </div>
   );
 }
