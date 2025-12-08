@@ -21,6 +21,7 @@ import {
   createVolumeRaymarchMaterial,
   updateRaymarchCameraUniforms,
   updateRaymarchMeshUniforms,
+  updateRaymarchUniforms,
 } from '../../shaders/volumeRaymarch';
 import { InspectorControls } from '../debug/InspectorControls';
 import { getSliceDimensions, getVolumeDimensions } from '../../utils/layout';
@@ -34,6 +35,7 @@ function ViewportRenderer() {
   const volumeTexture = useViewerStore((state) => state.volumeTexture);
   const sliceIndices = useViewerStore((state) => state.sliceIndices);
   const windowLevel = useViewerStore((state) => state.windowLevel);
+  const raymarchSettings = useViewerStore((state) => state.raymarchSettings);
 
   // Scenes for each viewport
   const axialSceneRef = useRef<THREE.Scene | undefined>(undefined);
@@ -120,9 +122,9 @@ function ViewportRenderer() {
 
     // Create volume material
     volumeMaterialRef.current = createVolumeRaymarchMaterial(volumeTexture, {
-      stepSize: 0.01,
-      opacity: 1.0,
-      threshold: 0.1,
+      stepSize: raymarchSettings.stepSize,
+      opacity: raymarchSettings.opacity,
+      threshold: raymarchSettings.threshold,
     });
 
     // Create slice meshes
@@ -188,6 +190,17 @@ function ViewportRenderer() {
       windowWidth: normalizedWidth,
     });
   }, [sliceIndices, windowLevel, volume]);
+
+  // Update volume raymarching uniforms when settings change
+  useEffect(() => {
+    if (!volumeMaterialRef.current) return;
+
+    updateRaymarchUniforms(volumeMaterialRef.current, {
+      stepSize: raymarchSettings.stepSize,
+      opacity: raymarchSettings.opacity,
+      threshold: raymarchSettings.threshold,
+    });
+  }, [raymarchSettings.stepSize, raymarchSettings.opacity, raymarchSettings.threshold]);
 
   // Update camera aspect ratios when viewport size changes
   useEffect(() => {

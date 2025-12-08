@@ -76,6 +76,21 @@ export interface RenderQuality {
 }
 
 /**
+ * Raymarching quality presets
+ */
+export type RenderQualityPreset = 'draft' | 'standard' | 'high' | 'custom';
+
+/**
+ * Raymarching rendering parameters
+ */
+export interface RaymarchSettings {
+  stepSize: number; // Distance between samples (0.001-0.1)
+  opacity: number; // Global opacity multiplier (0-1)
+  threshold: number; // Minimum intensity to render (0-1)
+  qualityPreset: RenderQualityPreset; // Current quality preset
+}
+
+/**
  * Volume rendering state
  */
 export interface VolumeRenderState {
