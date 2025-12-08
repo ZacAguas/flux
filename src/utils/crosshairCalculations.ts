@@ -62,10 +62,6 @@ export function calculateCrosshairPositions(
   const pixelX = viewport.x + (ndcX + 1) / 2 * viewport.width;
   const pixelY = viewport.y + (1 - ndcY) / 2 * viewport.height;
 
-  if (orientation === 'sagittal') {
-    console.log('bottom/top:', viewport.y, viewport.y + viewport.height);
-    console.log('pixel positions:', pixelX, pixelY);
-  }
   return {
     vertical: pixelX,
     horizontal: pixelY
