@@ -1,53 +1,24 @@
-import { Canvas } from '@react-three/fiber';
+/**
+ * Single Layout Component
+ *
+ * Displays a single large 3D volume view.
+ * Uses BaseLayout and VolumeRenderer.
+ */
+
 import { OrbitControls } from '@react-three/drei';
-import * as THREE from 'three/webgpu';
-import { useViewerStore } from '../../store/viewerStore';
-import { VolumeRenderer } from '../../components/VolumeRenderer';
-import { InspectorControls } from '../debug/InspectorControls';
+import { BaseLayout } from './BaseLayout';
+import { VolumeRenderer } from '../VolumeRenderer';
+import { useLayoutDimensions } from '../../hooks/useLayoutDimensions';
 
+/**
+ * Layout showing only the 3D volume with orbit controls.
+ */
 export function LayoutSingle() {
-  const controlPanelOpen = useViewerStore((state) => state.controlPanelOpen);
-  const controlPanelPinned = useViewerStore((state) => state.controlPanelPinned);
-
-  // HACK: This shouldn't be hardcoded here, but derived from ControlPanel height
-  const panelHeight = controlPanelOpen && controlPanelPinned ? 204 : 0;
-  const labelOffset = controlPanelOpen ? 204 : 0; // Shift labels even when panel is unpinned
+  const { panelHeight, controlPanelOpen } = useLayoutDimensions();
+  const labelOffset = controlPanelOpen ? 204 : 0;
 
   return (
-    <div style={{
-      width: '100vw',
-      height: '100vh',
-      position: 'relative',
-    }}>
-      <Canvas
-        orthographic
-        camera={{ zoom: 100, position: [0, 0, 5] }}
-        style={{
-          position: 'absolute',
-          top: `${panelHeight}px`,
-          left: 0,
-          width: '100%',
-          height: `calc(100% - ${panelHeight}px)`,
-          transition: 'top 0.3s ease-in-out, height 0.3s ease-in-out',
-        }}
-        gl={async (props) => {
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          const renderer = new THREE.WebGPURenderer(props as any);
-
-          if (import.meta.env.DEV) {
-            renderer.inspector = new (await import('three/examples/jsm/inspector/Inspector.js')).Inspector();
-          }
-
-          await renderer.init();
-          return renderer;
-        }}
-      >
-        <VolumeRenderer />
-        <OrbitControls makeDefault enableDamping dampingFactor={0.05} minDistance={2} maxDistance={10} />
-        <InspectorControls />
-      </Canvas>
-
-      {/* View label */}
+    <BaseLayout panelHeight={panelHeight} overlays={
       <div style={{
         position: 'absolute',
         top: `${labelOffset + 10}px`,
@@ -60,6 +31,9 @@ export function LayoutSingle() {
       }}>
         3D Volume
       </div>
-    </div>
+    }>
+      <VolumeRenderer />
+      <OrbitControls makeDefault enableDamping dampingFactor={0.05} minDistance={2} maxDistance={10} />
+    </BaseLayout>
   );
 }
