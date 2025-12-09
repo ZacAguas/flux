@@ -132,8 +132,8 @@ function QuadRenderer({ volumeViewportRef }: { volumeViewportRef: React.RefObjec
  * Layout showing a 2x2 grid of views.
  */
 export function LayoutQuad() {
-  const { dimensions, panelHeight, controlPanelOpen } = useLayoutDimensions();
-  const labelOffset = controlPanelOpen ? 204 : 0;
+  const { dimensions, panelHeight, controlPanelContentHeight, controlPanelOpen } = useLayoutDimensions();
+  const labelOffset = controlPanelOpen ? controlPanelContentHeight : 0;
   const volumeViewportRef = useRef<HTMLDivElement>(null);
 
   return (
@@ -150,7 +150,7 @@ export function LayoutQuad() {
             height: '50%',
             pointerEvents: 'auto',
             zIndex: 1,
-            transition: 'top 0.3s ease-in-out',
+            transition: 'top 300ms cubic-bezier(0.4, 0, 0.2, 1)',
           }}
         />
 
@@ -163,14 +163,14 @@ export function LayoutQuad() {
         />
 
         {/* Labels */}
-        <div style={{ position: 'absolute', top: `${labelOffset + 10}px`, left: '10px', color: 'white', fontSize: '14px', fontWeight: 'bold', pointerEvents: 'none', transition: 'top 0.3s ease-in-out' }}>Axial</div>
-        <div style={{ position: 'absolute', top: `${labelOffset + 10}px`, right: '10px', color: 'white', fontSize: '14px', fontWeight: 'bold', pointerEvents: 'none', transition: 'top 0.3s ease-in-out' }}>Coronal</div>
-        <div style={{ position: 'absolute', top: `calc(50% + ${panelHeight / 2}px)`, left: '10px', marginTop: '10px', color: 'white', fontSize: '14px', fontWeight: 'bold', pointerEvents: 'none', transition: 'top 0.3s ease-in-out' }}>Sagittal</div>
-        <div style={{ position: 'absolute', top: `calc(50% + ${panelHeight / 2}px)`, right: '10px', marginTop: '10px', color: 'white', fontSize: '14px', fontWeight: 'bold', pointerEvents: 'none', transition: 'top 0.3s ease-in-out' }}>3D Volume</div>
+        <div style={{ position: 'absolute', top: `${labelOffset + 10}px`, left: '10px', color: 'white', fontSize: '14px', fontWeight: 'bold', pointerEvents: 'none', transition: 'top 300ms cubic-bezier(0.4, 0, 0.2, 1)' }}>Axial</div>
+        <div style={{ position: 'absolute', top: `${labelOffset + 10}px`, right: '10px', color: 'white', fontSize: '14px', fontWeight: 'bold', pointerEvents: 'none', transition: 'top 300ms cubic-bezier(0.4, 0, 0.2, 1)' }}>Coronal</div>
+        <div style={{ position: 'absolute', top: `calc(50% + ${panelHeight / 2}px)`, left: '10px', marginTop: '10px', color: 'white', fontSize: '14px', fontWeight: 'bold', pointerEvents: 'none', transition: 'top 300ms cubic-bezier(0.4, 0, 0.2, 1)' }}>Sagittal</div>
+        <div style={{ position: 'absolute', top: `calc(50% + ${panelHeight / 2}px)`, right: '10px', marginTop: '10px', color: 'white', fontSize: '14px', fontWeight: 'bold', pointerEvents: 'none', transition: 'top 300ms cubic-bezier(0.4, 0, 0.2, 1)' }}>3D Volume</div>
 
         {/* Grid Lines */}
-        <div style={{ position: 'absolute', top: `calc(50% + ${panelHeight / 2}px)`, left: 0, right: 0, height: '2px', backgroundColor: '#333', pointerEvents: 'none', transition: 'top 0.3s ease-in-out' }} />
-        <div style={{ position: 'absolute', top: `${panelHeight}px`, bottom: 0, left: '50%', width: '2px', backgroundColor: '#333', pointerEvents: 'none', transition: 'top 0.3s ease-in-out' }} />
+        <div style={{ position: 'absolute', top: `calc(50% + ${panelHeight / 2}px)`, left: 0, right: 0, height: '2px', backgroundColor: '#333', pointerEvents: 'none', transition: 'top 300ms cubic-bezier(0.4, 0, 0.2, 1)' }} />
+        <div style={{ position: 'absolute', top: `${panelHeight}px`, bottom: 0, left: '50%', width: '2px', backgroundColor: '#333', pointerEvents: 'none', transition: 'top 300ms cubic-bezier(0.4, 0, 0.2, 1)' }} />
 
         {/* Crosshairs */}
         <Crosshairs

@@ -39,7 +39,7 @@ export function BaseLayout({ children, overlays, panelHeight }: BaseLayoutProps)
           left: 0,
           width: '100%',
           height: `calc(100% - ${panelHeight}px)`,
-          transition: 'top 0.3s ease-in-out, height 0.3s ease-in-out',
+          transition: 'top 300ms cubic-bezier(0.4, 0, 0.2, 1), height 300ms cubic-bezier(0.4, 0, 0.2, 1)',
         }}
         gl={async (props) => {
           // eslint-disable-next-line @typescript-eslint/no-explicit-any

@@ -13,13 +13,17 @@ import { useViewerStore } from '../store/viewerStore';
 /**
  * Custom hook to get the current available dimensions for the viewer canvas.
  *
- * @returns Object containing current dimensions, panel height, and panel open state.
+ * @returns Object containing current dimensions, panel height (layout offset), and raw panel state.
  */
 export function useLayoutDimensions() {
   const controlPanelOpen = useViewerStore((state) => state.controlPanelOpen);
   const controlPanelPinned = useViewerStore((state) => state.controlPanelPinned);
+  const controlPanelContentHeight = useViewerStore((state) => state.controlPanelContentHeight);
 
-  const panelHeight = controlPanelOpen && controlPanelPinned ? 204 : 0;
+  // panelHeight is the effective layout offset for the Canvas.
+  // It is 0 if the panel is unpinned (floating) or closed.
+  const panelHeight = controlPanelOpen && controlPanelPinned ? controlPanelContentHeight : 0;
+
   const [dimensions, setDimensions] = useState({
     width: window.innerWidth,
     height: window.innerHeight - panelHeight
@@ -37,5 +41,10 @@ export function useLayoutDimensions() {
     return () => window.removeEventListener('resize', updateDimensions);
   }, [panelHeight]);
 
-  return { dimensions, panelHeight, controlPanelOpen };
+  return {
+    dimensions,
+    panelHeight,
+    controlPanelContentHeight,
+    controlPanelOpen
+  };
 }
