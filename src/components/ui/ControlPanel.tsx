@@ -13,14 +13,30 @@ import { WindowLevelControls } from './WindowLevelControls';
 import { ViewOptionsControls } from './ViewOptionsControls';
 import { RenderingControls } from './RenderingControls';
 import { useViewerStore } from '../../store/viewerStore';
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 
 export function ControlPanel() {
   const controlPanelOpen = useViewerStore((state) => state.controlPanelOpen);
   const setControlPanelOpen = useViewerStore((state) => state.setControlPanelOpen);
   const controlPanelPinned = useViewerStore((state) => state.controlPanelPinned);
   const setControlPanelPinned = useViewerStore((state) => state.setControlPanelPinned);
+  const setControlPanelContentHeight = useViewerStore((state) => state.setControlPanelContentHeight);
   const [isHoveringButton, setIsHoveringButton] = useState(false);
+  const panelRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!panelRef.current) return;
+
+    const resizeObserver = new ResizeObserver((entries) => {
+      for (const entry of entries) {
+        setControlPanelContentHeight(entry.contentRect.height);
+      }
+    });
+
+    resizeObserver.observe(panelRef.current);
+
+    return () => resizeObserver.disconnect();
+  }, [setControlPanelContentHeight]);
 
   const getButtonLabel = () => {
     if (controlPanelOpen) {
@@ -61,7 +77,10 @@ export function ControlPanel() {
       onMouseLeave={handleMouseLeave}
     >
       {/* Main panel content */}
-      <div className="bg-black/20 backdrop-blur-sm border-b border-white/10">
+      <div
+        ref={panelRef}
+        className="bg-black/20 backdrop-blur-sm border-b border-white/10"
+      >
         <div className="flex items-stretch gap-6 px-4 py-3 max-w-full overflow-x-auto">
           {/* Layout Mode Selection */}
           <div className="flex flex-col gap-2 min-w-fit">

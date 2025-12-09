@@ -14,8 +14,8 @@ import { useLayoutDimensions } from '../../hooks/useLayoutDimensions';
  * Layout showing only the 3D volume with orbit controls.
  */
 export function LayoutSingle() {
-  const { panelHeight, controlPanelOpen } = useLayoutDimensions();
-  const labelOffset = controlPanelOpen ? 204 : 0;
+  const { panelHeight, controlPanelContentHeight, controlPanelOpen } = useLayoutDimensions();
+  const labelOffset = controlPanelOpen ? controlPanelContentHeight : 0;
 
   return (
     <BaseLayout panelHeight={panelHeight} overlays={
@@ -27,7 +27,7 @@ export function LayoutSingle() {
         fontSize: '14px',
         fontWeight: 'bold',
         pointerEvents: 'none',
-        transition: 'top 0.3s ease-in-out',
+        transition: 'top 300ms cubic-bezier(0.4, 0, 0.2, 1)',
       }}>
         3D Volume
       </div>

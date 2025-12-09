@@ -38,6 +38,7 @@ interface ViewerStore {
   timeStep: number;
   controlPanelOpen: boolean;
   controlPanelPinned: boolean;
+  controlPanelContentHeight: number;
   raymarchSettings: RaymarchSettings;
 
   // Actions
@@ -52,6 +53,7 @@ interface ViewerStore {
   setTimeStep: (step: number) => void;
   setControlPanelOpen: (open: boolean) => void;
   setControlPanelPinned: (isPinned: boolean) => void;
+  setControlPanelContentHeight: (height: number) => void;
   setRaymarchSettings: (settings: Partial<RaymarchSettings>) => void;
 }
 
@@ -92,6 +94,7 @@ export const useViewerStore = create<ViewerStore>((set, get) => ({
   timeStep: 0,
   controlPanelOpen: true,
   controlPanelPinned: true,
+  controlPanelContentHeight: 0,
   raymarchSettings: {
     stepSize: 0.01,
     opacity: 1.0,
@@ -180,6 +183,8 @@ export const useViewerStore = create<ViewerStore>((set, get) => ({
   setControlPanelOpen: (open) => set({ controlPanelOpen: open }),
 
   setControlPanelPinned: (isPinned) => set({ controlPanelPinned: isPinned }),
+
+  setControlPanelContentHeight: (height) => set({ controlPanelContentHeight: height }),
 
   setRaymarchSettings: (newSettings) =>
     set((state) => ({
