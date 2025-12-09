@@ -6,7 +6,9 @@
       "WebFetch(domain:discourse.threejs.org)",
       "WebFetch(domain:github.com)",
       "Bash(pnpm build:*)",
-      "Bash(find:*)"
+      "Bash(find:*)",
+      "WebFetch(domain:v3.heroui.com)",
+      "Bash(/bin/ls:*)"
     ],
     "deny": [],
     "ask": []
