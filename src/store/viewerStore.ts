@@ -9,6 +9,21 @@ interface CrosshairSettings {
   opacity: number;
 }
 
+interface SlicePlaneSettings {
+  opacity: number;
+  mode: 'textured' | 'colored'; // Textured (actual slices) or colored (solid RGB)
+  visibility: {
+    axial: boolean;
+    coronal: boolean;
+    sagittal: boolean;
+  };
+  colors: {
+    axial: string;
+    coronal: string;
+    sagittal: string;
+  };
+}
+
 interface ViewerStore {
   // State
   layoutMode: LayoutMode;
@@ -18,6 +33,8 @@ interface ViewerStore {
   windowLevel: WindowLevel;
   showCrosshairs: boolean;
   crosshairSettings: CrosshairSettings;
+  showSlicePlanes: boolean;
+  slicePlaneSettings: SlicePlaneSettings;
   timeStep: number;
   controlPanelOpen: boolean;
   controlPanelPinned: boolean;
@@ -30,6 +47,8 @@ interface ViewerStore {
   setWindowLevel: (windowLevel: Partial<WindowLevel>) => void;
   setShowCrosshairs: (show: boolean) => void;
   setCrosshairSettings: (settings: Partial<CrosshairSettings>) => void;
+  setShowSlicePlanes: (show: boolean) => void;
+  setSlicePlaneSettings: (settings: Partial<SlicePlaneSettings>) => void;
   setTimeStep: (step: number) => void;
   setControlPanelOpen: (open: boolean) => void;
   setControlPanelPinned: (isPinned: boolean) => void;
@@ -54,6 +73,21 @@ export const useViewerStore = create<ViewerStore>((set, get) => ({
   crosshairSettings: {
     color: '#00FF00',
     opacity: 0.7,
+  },
+  showSlicePlanes: true,
+  slicePlaneSettings: {
+    opacity: 0.35,
+    mode: 'textured',
+    visibility: {
+      axial: true,
+      coronal: true,
+      sagittal: true,
+    },
+    colors: {
+      axial: '#0080FF',
+      coronal: '#00FF00',
+      sagittal: '#FF0000',
+    },
   },
   timeStep: 0,
   controlPanelOpen: true,
@@ -120,6 +154,24 @@ export const useViewerStore = create<ViewerStore>((set, get) => ({
       crosshairSettings: {
         ...state.crosshairSettings,
         ...newSettings,
+      },
+    })),
+
+  setShowSlicePlanes: (show) => set({ showSlicePlanes: show }),
+
+  setSlicePlaneSettings: (newSettings) =>
+    set((state) => ({
+      slicePlaneSettings: {
+        ...state.slicePlaneSettings,
+        ...newSettings,
+        visibility: {
+          ...state.slicePlaneSettings.visibility,
+          ...(newSettings.visibility || {}),
+        },
+        colors: {
+          ...state.slicePlaneSettings.colors,
+          ...(newSettings.colors || {}),
+        },
       },
     })),
 
