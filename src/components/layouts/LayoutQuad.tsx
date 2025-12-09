@@ -27,6 +27,12 @@ import { InspectorControls } from '../debug/InspectorControls';
 import { getSliceDimensions, getVolumeDimensions } from '../../utils/layout';
 import { Crosshairs } from '../ui/Crosshairs';
 import { SliceInteractionHandler } from '../ui/SliceInteractionHandler';
+import {
+  calculateSlicePlanePosition,
+  calculateSlicePlaneScale,
+  createTexturedSlicePlaneMaterial,
+  createColoredSlicePlaneMaterial,
+} from '../../utils/slicePlaneHelpers';
 
 /**
  * Viewport renderer - handles rendering to 4 viewports
@@ -38,6 +44,8 @@ function ViewportRenderer({ volumeViewportRef }: { volumeViewportRef: React.RefO
   const sliceIndices = useViewerStore((state) => state.sliceIndices);
   const windowLevel = useViewerStore((state) => state.windowLevel);
   const raymarchSettings = useViewerStore((state) => state.raymarchSettings);
+  const showSlicePlanes = useViewerStore((state) => state.showSlicePlanes);
+  const slicePlaneSettings = useViewerStore((state) => state.slicePlaneSettings);
 
   // Scenes for each viewport
   const axialSceneRef = useRef<THREE.Scene | undefined>(undefined);
@@ -63,6 +71,16 @@ function ViewportRenderer({ volumeViewportRef }: { volumeViewportRef: React.RefO
   const coronalMaterialRef = useRef<THREE.MeshBasicNodeMaterial | undefined>(undefined);
   const sagittalMaterialRef = useRef<THREE.MeshBasicNodeMaterial | undefined>(undefined);
   const volumeMaterialRef = useRef<THREE.MeshBasicNodeMaterial | undefined>(undefined);
+
+  // Slice plane meshes
+  const axialPlaneMeshRef = useRef<THREE.Mesh | undefined>(undefined);
+  const coronalPlaneMeshRef = useRef<THREE.Mesh | undefined>(undefined);
+  const sagittalPlaneMeshRef = useRef<THREE.Mesh | undefined>(undefined);
+
+  // Slice plane materials
+  const axialPlaneMaterialRef = useRef<THREE.MeshBasicNodeMaterial | undefined>(undefined);
+  const coronalPlaneMaterialRef = useRef<THREE.MeshBasicNodeMaterial | undefined>(undefined);
+  const sagittalPlaneMaterialRef = useRef<THREE.MeshBasicNodeMaterial | undefined>(undefined);
 
   // Initialize scenes, cameras, and meshes
   useEffect(() => {
@@ -153,6 +171,99 @@ function ViewportRenderer({ volumeViewportRef }: { volumeViewportRef: React.RefO
     // Update mesh related uniforms once per setup
     updateRaymarchMeshUniforms(volumeMaterialRef.current, volumeMesh);
 
+    // Create slice plane geometries and materials (textured with actual slice data)
+    const volDimsNormalized = getVolumeDimensions(volume);
+
+    // Axial plane (XY, positioned on Z)
+    const axialPlaneScale = calculateSlicePlaneScale('axial', volDimsNormalized);
+    const axialPlaneGeometry = new THREE.PlaneGeometry(1, 1);
+    axialPlaneMaterialRef.current =
+      slicePlaneSettings.mode === 'textured'
+        ? createTexturedSlicePlaneMaterial(
+            volumeTexture,
+            'axial',
+            sliceIndices.axial,
+            volume.dimensions,
+            normalizedCenter,
+            normalizedWidth,
+            slicePlaneSettings.opacity
+          )
+        : createColoredSlicePlaneMaterial(
+            slicePlaneSettings.colors.axial,
+            slicePlaneSettings.opacity
+          );
+    const axialPlaneMesh = new THREE.Mesh(axialPlaneGeometry, axialPlaneMaterialRef.current);
+    axialPlaneMesh.scale.set(axialPlaneScale.width, axialPlaneScale.height, 1);
+    axialPlaneMesh.rotation.set(0, 0, 0); // XY orientation
+    axialPlaneMesh.visible = showSlicePlanes && slicePlaneSettings.visibility.axial;
+    volumeSceneRef.current.add(axialPlaneMesh);
+    axialPlaneMeshRef.current = axialPlaneMesh;
+
+    // Coronal plane (XZ, positioned on Y)
+    const coronalPlaneScale = calculateSlicePlaneScale('coronal', volDimsNormalized);
+    const coronalPlaneGeometry = new THREE.PlaneGeometry(1, 1);
+    coronalPlaneMaterialRef.current =
+      slicePlaneSettings.mode === 'textured'
+        ? createTexturedSlicePlaneMaterial(
+            volumeTexture,
+            'coronal',
+            sliceIndices.coronal,
+            volume.dimensions,
+            normalizedCenter,
+            normalizedWidth,
+            slicePlaneSettings.opacity
+          )
+        : createColoredSlicePlaneMaterial(
+            slicePlaneSettings.colors.coronal,
+            slicePlaneSettings.opacity
+          );
+    const coronalPlaneMesh = new THREE.Mesh(coronalPlaneGeometry, coronalPlaneMaterialRef.current);
+    coronalPlaneMesh.scale.set(coronalPlaneScale.width, coronalPlaneScale.height, 1);
+    coronalPlaneMesh.rotation.set(Math.PI / 2, 0, 0); // Rotate to XZ
+    coronalPlaneMesh.visible = showSlicePlanes && slicePlaneSettings.visibility.coronal;
+    volumeSceneRef.current.add(coronalPlaneMesh);
+    coronalPlaneMeshRef.current = coronalPlaneMesh;
+
+    // Sagittal plane (YZ, positioned on X)
+    const sagittalPlaneScale = calculateSlicePlaneScale('sagittal', volDimsNormalized);
+    const sagittalPlaneGeometry = new THREE.PlaneGeometry(1, 1);
+    sagittalPlaneMaterialRef.current =
+      slicePlaneSettings.mode === 'textured'
+        ? createTexturedSlicePlaneMaterial(
+            volumeTexture,
+            'sagittal',
+            sliceIndices.sagittal,
+            volume.dimensions,
+            normalizedCenter,
+            normalizedWidth,
+            slicePlaneSettings.opacity
+          )
+        : createColoredSlicePlaneMaterial(
+            slicePlaneSettings.colors.sagittal,
+            slicePlaneSettings.opacity
+          );
+    const sagittalPlaneMesh = new THREE.Mesh(sagittalPlaneGeometry, sagittalPlaneMaterialRef.current);
+    sagittalPlaneMesh.scale.set(sagittalPlaneScale.width, sagittalPlaneScale.height, 1);
+    sagittalPlaneMesh.rotation.set(0, Math.PI / 2, +Math.PI / 2); // Rotate to YZ with correct UV orientation
+    sagittalPlaneMesh.visible = showSlicePlanes && slicePlaneSettings.visibility.sagittal;
+    volumeSceneRef.current.add(sagittalPlaneMesh);
+    sagittalPlaneMeshRef.current = sagittalPlaneMesh;
+
+    // Calculate and set initial positions
+    const axialPos = calculateSlicePlanePosition(sliceIndices.axial, 'axial', volume);
+    const coronalPos = calculateSlicePlanePosition(sliceIndices.coronal, 'coronal', volume);
+    const sagittalPos = calculateSlicePlanePosition(sliceIndices.sagittal, 'sagittal', volume);
+
+    const maxDim = Math.max(
+      volume.dimensions.x * volume.spacing.x,
+      volume.dimensions.y * volume.spacing.y,
+      volume.dimensions.z * volume.spacing.z
+    );
+
+    axialPlaneMesh.position.set(0, 0, axialPos / maxDim);
+    coronalPlaneMesh.position.set(0, coronalPos / maxDim, 0);
+    sagittalPlaneMesh.position.set(sagittalPos / maxDim, 0, 0);
+
     // Cleanup
     return () => {
       axialGeometry.dispose();
@@ -163,6 +274,12 @@ function ViewportRenderer({ volumeViewportRef }: { volumeViewportRef: React.RefO
       coronalMaterialRef.current?.dispose();
       sagittalMaterialRef.current?.dispose();
       volumeMaterialRef.current?.dispose();
+      axialPlaneGeometry.dispose();
+      coronalPlaneGeometry.dispose();
+      sagittalPlaneGeometry.dispose();
+      axialPlaneMaterialRef.current?.dispose();
+      coronalPlaneMaterialRef.current?.dispose();
+      sagittalPlaneMaterialRef.current?.dispose();
     };
     // NOTE: We don't want to recreate everything on every slice/window change
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -192,6 +309,145 @@ function ViewportRenderer({ volumeViewportRef }: { volumeViewportRef: React.RefO
       windowWidth: normalizedWidth,
     });
   }, [sliceIndices, windowLevel, volume]);
+
+  // Update slice plane positions and textures when slice indices change
+  useEffect(() => {
+    if (!volume || !axialPlaneMeshRef.current ||
+      !coronalPlaneMeshRef.current || !sagittalPlaneMeshRef.current) return;
+    if (!axialPlaneMaterialRef.current || !coronalPlaneMaterialRef.current ||
+      !sagittalPlaneMaterialRef.current) return;
+
+    // Update positions
+    const axialPos = calculateSlicePlanePosition(sliceIndices.axial, 'axial', volume);
+    const coronalPos = calculateSlicePlanePosition(sliceIndices.coronal, 'coronal', volume);
+    const sagittalPos = calculateSlicePlanePosition(sliceIndices.sagittal, 'sagittal', volume);
+
+    const maxDim = Math.max(
+      volume.dimensions.x * volume.spacing.x,
+      volume.dimensions.y * volume.spacing.y,
+      volume.dimensions.z * volume.spacing.z
+    );
+
+    axialPlaneMeshRef.current.position.z = axialPos / maxDim;
+    coronalPlaneMeshRef.current.position.y = coronalPos / maxDim;
+    sagittalPlaneMeshRef.current.position.x = sagittalPos / maxDim;
+
+    // Update slice textures
+    updateSliceMaterial(axialPlaneMaterialRef.current, { sliceIndex: sliceIndices.axial });
+    updateSliceMaterial(coronalPlaneMaterialRef.current, { sliceIndex: sliceIndices.coronal });
+    updateSliceMaterial(sagittalPlaneMaterialRef.current, { sliceIndex: sliceIndices.sagittal });
+  }, [sliceIndices, volume]);
+
+  // Update slice plane materials when window/level changes
+  useEffect(() => {
+    if (!volume || !axialPlaneMaterialRef.current ||
+      !coronalPlaneMaterialRef.current || !sagittalPlaneMaterialRef.current) return;
+
+    const range = volume.dataRange.max - volume.dataRange.min;
+    const normalizedCenter = (windowLevel.center - volume.dataRange.min) / range;
+    const normalizedWidth = windowLevel.width / range;
+
+    updateSliceMaterial(axialPlaneMaterialRef.current, {
+      windowCenter: normalizedCenter,
+      windowWidth: normalizedWidth,
+    });
+    updateSliceMaterial(coronalPlaneMaterialRef.current, {
+      windowCenter: normalizedCenter,
+      windowWidth: normalizedWidth,
+    });
+    updateSliceMaterial(sagittalPlaneMaterialRef.current, {
+      windowCenter: normalizedCenter,
+      windowWidth: normalizedWidth,
+    });
+  }, [windowLevel, volume]);
+
+  // Update slice plane visibility
+  useEffect(() => {
+    if (!axialPlaneMeshRef.current || !coronalPlaneMeshRef.current ||
+      !sagittalPlaneMeshRef.current) return;
+
+    axialPlaneMeshRef.current.visible = showSlicePlanes && slicePlaneSettings.visibility.axial;
+    coronalPlaneMeshRef.current.visible = showSlicePlanes && slicePlaneSettings.visibility.coronal;
+    sagittalPlaneMeshRef.current.visible = showSlicePlanes && slicePlaneSettings.visibility.sagittal;
+  }, [showSlicePlanes, slicePlaneSettings.visibility]);
+
+  // Update slice plane opacity when settings change
+  useEffect(() => {
+    if (!axialPlaneMaterialRef.current || !coronalPlaneMaterialRef.current ||
+      !sagittalPlaneMaterialRef.current) return;
+
+    // Update opacity (materials now show actual slice textures, not solid colors)
+    axialPlaneMaterialRef.current.opacity = slicePlaneSettings.opacity;
+    coronalPlaneMaterialRef.current.opacity = slicePlaneSettings.opacity;
+    sagittalPlaneMaterialRef.current.opacity = slicePlaneSettings.opacity;
+  }, [slicePlaneSettings.opacity]);
+
+  // Handle mode switching between textured and colored
+  useEffect(() => {
+    if (!volume || !volumeTexture || !axialPlaneMeshRef.current ||
+        !coronalPlaneMeshRef.current || !sagittalPlaneMeshRef.current) return;
+    if (!axialPlaneMaterialRef.current || !coronalPlaneMaterialRef.current ||
+        !sagittalPlaneMaterialRef.current) return;
+
+    // Calculate normalized window/level
+    const range = volume.dataRange.max - volume.dataRange.min;
+    const normalizedCenter = (windowLevel.center - volume.dataRange.min) / range;
+    const normalizedWidth = windowLevel.width / range;
+
+    // Dispose old materials
+    axialPlaneMaterialRef.current.dispose();
+    coronalPlaneMaterialRef.current.dispose();
+    sagittalPlaneMaterialRef.current.dispose();
+
+    // Create new materials based on mode
+    if (slicePlaneSettings.mode === 'textured') {
+      axialPlaneMaterialRef.current = createTexturedSlicePlaneMaterial(
+        volumeTexture,
+        'axial',
+        sliceIndices.axial,
+        volume.dimensions,
+        normalizedCenter,
+        normalizedWidth,
+        slicePlaneSettings.opacity
+      );
+      coronalPlaneMaterialRef.current = createTexturedSlicePlaneMaterial(
+        volumeTexture,
+        'coronal',
+        sliceIndices.coronal,
+        volume.dimensions,
+        normalizedCenter,
+        normalizedWidth,
+        slicePlaneSettings.opacity
+      );
+      sagittalPlaneMaterialRef.current = createTexturedSlicePlaneMaterial(
+        volumeTexture,
+        'sagittal',
+        sliceIndices.sagittal,
+        volume.dimensions,
+        normalizedCenter,
+        normalizedWidth,
+        slicePlaneSettings.opacity
+      );
+    } else {
+      axialPlaneMaterialRef.current = createColoredSlicePlaneMaterial(
+        slicePlaneSettings.colors.axial,
+        slicePlaneSettings.opacity
+      );
+      coronalPlaneMaterialRef.current = createColoredSlicePlaneMaterial(
+        slicePlaneSettings.colors.coronal,
+        slicePlaneSettings.opacity
+      );
+      sagittalPlaneMaterialRef.current = createColoredSlicePlaneMaterial(
+        slicePlaneSettings.colors.sagittal,
+        slicePlaneSettings.opacity
+      );
+    }
+
+    // Update meshes with new materials
+    axialPlaneMeshRef.current.material = axialPlaneMaterialRef.current;
+    coronalPlaneMeshRef.current.material = coronalPlaneMaterialRef.current;
+    sagittalPlaneMeshRef.current.material = sagittalPlaneMaterialRef.current;
+  }, [slicePlaneSettings.mode, volume, volumeTexture, sliceIndices, windowLevel, slicePlaneSettings.colors, slicePlaneSettings.opacity]);
 
   // Update volume raymarching uniforms when settings change
   useEffect(() => {
