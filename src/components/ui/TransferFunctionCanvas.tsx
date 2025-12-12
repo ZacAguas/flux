@@ -1,0 +1,200 @@
+/**
+ * Transfer Function Canvas Component
+ *
+ * Interactive SVG-based visualization using visx for rendering the transfer
+ * function curve, control points, and color gradient. Supports dragging control
+ * points to modify opacity and intensity values.
+ */
+
+import { scaleLinear } from '@visx/scale';
+import { LinePath } from '@visx/shape';
+import { LinearGradient } from '@visx/gradient';
+import { AxisBottom } from '@visx/axis';
+import { useViewerStore } from '../../store/viewerStore';
+import { rgbToRgbaString } from '../../utils/colorConversion';
+import { useState, useRef } from 'react';
+
+interface TransferFunctionCanvasProps {
+  selectedPointIndex: number | null;
+  onSelectPoint: (index: number | null) => void;
+}
+
+const CANVAS_WIDTH = 320;
+const CANVAS_HEIGHT = 180;
+const MARGIN = { top: 10, right: 10, bottom: 30, left: 10 };
+const GRADIENT_HEIGHT = 20;
+
+export function TransferFunctionCanvas({
+  selectedPointIndex,
+  onSelectPoint,
+}: TransferFunctionCanvasProps) {
+  const transferFunction = useViewerStore((state) => state.transferFunction);
+  const updatePoint = useViewerStore((state) => state.updateTransferFunctionPoint);
+
+  const [draggedPointIndex, setDraggedPointIndex] = useState<number | null>(null);
+  const svgRef = useRef<SVGSVGElement>(null);
+
+  // Calculate inner dimensions
+  const innerWidth = CANVAS_WIDTH - MARGIN.left - MARGIN.right;
+
+  // Scales
+  const xScale = scaleLinear({
+    domain: [0, 1],
+    range: [MARGIN.left, CANVAS_WIDTH - MARGIN.right],
+  });
+
+  const yScale = scaleLinear({
+    domain: [0, 1],
+    range: [CANVAS_HEIGHT - MARGIN.bottom - GRADIENT_HEIGHT, MARGIN.top],
+  });
+
+  // Mouse event handlers for dragging
+  const handleMouseDown = (index: number) => (e: React.MouseEvent) => {
+    e.preventDefault();
+    setDraggedPointIndex(index);
+    onSelectPoint(index);
+  };
+
+  const handleMouseMove = (e: React.MouseEvent) => {
+    if (draggedPointIndex === null || !svgRef.current) return;
+
+    const svgRect = svgRef.current.getBoundingClientRect();
+    const x = e.clientX - svgRect.left;
+    const y = e.clientY - svgRect.top;
+
+    // Convert screen coordinates to data values
+    let newValue = xScale.invert(x);
+    let newOpacity = yScale.invert(y);
+
+    // Clamp to valid ranges
+    newValue = Math.max(0, Math.min(1, newValue));
+    newOpacity = Math.max(0, Math.min(1, newOpacity));
+
+    // Update the point
+    updatePoint(draggedPointIndex, {
+      value: newValue,
+      opacity: newOpacity,
+    });
+  };
+
+  const handleMouseUp = () => {
+    setDraggedPointIndex(null);
+  };
+
+  // Sort points by value for rendering
+  const sortedPoints = [...transferFunction.points].sort((a, b) => a.value - b.value);
+
+  return (
+    <div className="flex flex-col gap-2">
+      <svg
+        ref={svgRef}
+        width={CANVAS_WIDTH}
+        height={CANVAS_HEIGHT}
+        className="bg-white/5 rounded border border-white/20"
+        onMouseMove={handleMouseMove}
+        onMouseUp={handleMouseUp}
+        onMouseLeave={handleMouseUp}
+      >
+        {/* Define linear gradient for color strip */}
+        <defs>
+          <LinearGradient id="transfer-function-gradient" from="#000" to="#fff">
+            {sortedPoints.map((point, i) => (
+              <stop
+                key={i}
+                offset={`${point.value * 100}%`}
+                stopColor={`rgb(${point.color.r}, ${point.color.g}, ${point.color.b})`}
+              />
+            ))}
+          </LinearGradient>
+        </defs>
+
+        {/* Opacity curve */}
+        <LinePath
+          data={sortedPoints}
+          x={(d) => xScale(d.value)}
+          y={(d) => yScale(d.opacity)}
+          stroke="white"
+          strokeWidth={2}
+          strokeOpacity={0.8}
+        />
+
+        {/* Control points */}
+        {transferFunction.points.map((point, index) => {
+          const isSelected = index === selectedPointIndex;
+          const isDragging = index === draggedPointIndex;
+
+          return (
+            <g key={index}>
+              {/* Point circle */}
+              <circle
+                cx={xScale(point.value)}
+                cy={yScale(point.opacity)}
+                r={isSelected || isDragging ? 6 : 4}
+                fill={rgbToRgbaString(point.color, point.opacity)}
+                stroke={isSelected || isDragging ? '#ffffff' : 'rgba(255,255,255,0.5)'}
+                strokeWidth={2}
+                // Disable transitions on points when dragging to avoid lagging behind line
+                className={`cursor-move ${isDragging ? '' : 'transition-all'}`}
+                onMouseDown={handleMouseDown(index)}
+                onClick={() => onSelectPoint(index)}
+              />
+            </g>
+          );
+        })}
+
+        {/* Color gradient strip */}
+        <rect
+          x={MARGIN.left}
+          y={CANVAS_HEIGHT - MARGIN.bottom - GRADIENT_HEIGHT + 5}
+          width={innerWidth}
+          height={GRADIENT_HEIGHT - 5}
+          fill="url(#transfer-function-gradient)"
+          stroke="white"
+          strokeWidth={1}
+          strokeOpacity={0.3}
+          rx={2}
+        />
+
+        {/* Axis */}
+        <AxisBottom
+          top={CANVAS_HEIGHT - MARGIN.bottom}
+          scale={xScale}
+          numTicks={5}
+          stroke="rgba(255, 255, 255, 0.2)"
+          tickStroke="rgba(255, 255, 255, 0.2)"
+          tickLabelProps={() => ({
+            fill: 'rgba(255, 255, 255, 0.5)',
+            fontSize: 10,
+            textAnchor: 'middle',
+          })}
+        />
+
+        {/* Y-axis label */}
+        <text
+          x={MARGIN.left + 5}
+          y={MARGIN.top + 10}
+          fill="rgba(255, 255, 255, 0.5)"
+          fontSize={10}
+        >
+          Opacity
+        </text>
+        <text
+          x={MARGIN.left + 5}
+          y={CANVAS_HEIGHT - MARGIN.bottom - 5}
+          fill="rgba(255, 255, 255, 0.5)"
+          fontSize={10}
+        >
+          0.0
+        </text>
+        <text
+          x={MARGIN.left + 5}
+          y={MARGIN.top + 25}
+          fill="rgba(255, 255, 255, 0.5)"
+          fontSize={10}
+        >
+          1.0
+        </text>
+      </svg>
+    </div>
+  );
+}

@@ -16,8 +16,10 @@ import {
   updateRaymarchCameraUniforms,
   updateRaymarchMeshUniforms,
   updateRaymarchUniforms,
+  updateTransferFunctionTexture,
 } from '../shaders/volumeRaymarch';
 import { getVolumeDimensions } from '../utils/layout';
+import { generateTransferFunctionTexture } from '../utils/transferFunctionTexture';
 
 /**
  * Custom hook to setup and manage the volume raymarching mesh and material.
@@ -28,6 +30,8 @@ export function useVolumeSetup() {
   const volume = useViewerStore((state) => state.volume);
   const volumeTexture = useViewerStore((state) => state.volumeTexture);
   const raymarchSettings = useViewerStore((state) => state.raymarchSettings);
+  const transferFunction = useViewerStore((state) => state.transferFunction);
+  const setTransferFunctionTexture = useViewerStore((state) => state.setTransferFunctionTexture);
 
   const materialRef = useRef<THREE.MeshBasicNodeMaterial | undefined>(undefined);
   const [mesh, setMesh] = useState<THREE.Mesh | null>(null);
@@ -39,12 +43,19 @@ export function useVolumeSetup() {
   useEffect(() => {
     if (!volumeTexture || !volume) return;
 
-    // Create material
-    materialRef.current = createVolumeRaymarchMaterial(volumeTexture, {
-      stepSize: raymarchSettings.stepSize,
-      opacity: raymarchSettings.opacity,
-      threshold: raymarchSettings.threshold,
-    });
+    // Generate transfer function texture
+    const tfTexture = generateTransferFunctionTexture(transferFunction);
+    setTransferFunctionTexture(tfTexture);
+
+    // Create material with transfer function texture
+    materialRef.current = createVolumeRaymarchMaterial(
+      volumeTexture,
+      tfTexture,
+      {
+        stepSize: raymarchSettings.stepSize,
+        threshold: raymarchSettings.threshold,
+      }
+    );
 
     // Create mesh
     const geometry = new THREE.BoxGeometry(1, 1, 1);
@@ -64,14 +75,22 @@ export function useVolumeSetup() {
       materialRef.current?.dispose();
       setMesh(null);
     };
-  }, [volumeTexture, volume, raymarchSettings.stepSize, raymarchSettings.opacity, raymarchSettings.threshold]);
+  }, [volumeTexture, volume, transferFunction, raymarchSettings.stepSize, raymarchSettings.threshold, setTransferFunctionTexture]);
+
+  // Update transfer function texture when it changes
+  useEffect(() => {
+    if (!materialRef.current) return;
+
+    const tfTexture = generateTransferFunctionTexture(transferFunction);
+    updateTransferFunctionTexture(materialRef.current, tfTexture);
+    setTransferFunctionTexture(tfTexture);
+  }, [transferFunction, setTransferFunctionTexture]);
 
   // Update uniforms when settings change
   useEffect(() => {
     if (!materialRef.current) return;
     updateRaymarchUniforms(materialRef.current, {
       stepSize: raymarchSettings.stepSize,
-      opacity: raymarchSettings.opacity,
       threshold: raymarchSettings.threshold,
     });
   }, [raymarchSettings]);

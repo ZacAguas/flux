@@ -10,6 +10,8 @@
 import {
   Fn,
   texture3D,
+  texture,
+  vec2,
   vec3,
   vec4,
   float,
@@ -49,43 +51,42 @@ const intersectBox = (rayOrigin: THREE.VarNode, rayDir: THREE.VarNode) => {
 };
 
 /**
- * Simple transfer function (inline)
- * Maps intensity [0, 1] to RGBA with linear opacity
+ * Transfer function using 1D texture lookup
+ * Maps intensity [0, 1] to RGBA using pre-generated lookup texture
  */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-const transferFunction = (intensity: any, opacityScale: any) => {
-  // Simple linear opacity mapping
-  const opacity = intensity.mul(opacityScale);
-
-  // Grayscale color
-  const color = vec3(intensity, intensity, intensity);
-
-  return vec4(color, opacity);
+const createTransferFunction = (transferFunctionTextureNode: any) => {
+  return (intensity: any) => {
+    // Sample 1D lookup texture
+    // Y coordinate is 0.5 (middle of 1px height texture)
+    const uvCoord = vec2(intensity, float(0.5));
+    const sample = transferFunctionTextureNode.sample(uvCoord);
+    return sample; // RGBA from texture
+  };
 };
 
 /**
  * Create volume raymarching material
  *
  * @param volumeTexture - 3D texture containing volume data
+ * @param transferFunctionTexture - 1D texture for transfer function lookup
  * @param options - Raymarching parameters
  */
 export function createVolumeRaymarchMaterial(
   volumeTexture: THREE.Data3DTexture,
+  transferFunctionTexture: THREE.DataTexture,
   options: {
     stepSize?: number;
-    opacity?: number;
     threshold?: number;
   } = {}
 ) {
   const {
     stepSize = 0.01,
-    opacity = 1.0,
     threshold = 0.1,
   } = options;
 
   // Create uniforms
   const stepSizeUniform = uniform(stepSize);
-  const opacityUniform = uniform(opacity);
   const thresholdUniform = uniform(threshold);
   // Inverse of the mesh's world matrix. Transforms world coordinates to local object space
   // Important for positioning rays correctly relative to the possibly scaled/rotated volume
@@ -95,8 +96,12 @@ export function createVolumeRaymarchMaterial(
   // Stores the camera's world direction, used for orthographic ray generation as rays are parallel
   const cameraDirUniform = uniform(new THREE.Vector3(0, 0, -1));
 
-  // Create texture node
+  // Create texture nodes
   const volumeTextureNode = texture3D(volumeTexture);
+  const transferFunctionTextureNode = texture(transferFunctionTexture);
+
+  // Create transfer function with texture node
+  const transferFunction = createTransferFunction(transferFunctionTextureNode);
 
   /**
    * Main raymarching function
@@ -173,8 +178,8 @@ export function createVolumeRaymarchMaterial(
 
           // Apply threshold
           If(intensity.greaterThanEqual(thresholdUniform), () => {
-            // Apply transfer function
-            const sample = transferFunction(intensity, opacityUniform);
+            // Apply transfer function (texture lookup)
+            const sample = transferFunction(intensity);
 
             // Front-to-back compositing
             const alpha = sample.a.mul(float(1.0).sub(accumulatedAlpha));
@@ -203,8 +208,8 @@ export function createVolumeRaymarchMaterial(
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   (material as any).uniforms = {
     stepSize: stepSizeUniform,
-    opacity: opacityUniform,
     threshold: thresholdUniform,
+    transferFunctionTexture: transferFunctionTextureNode,
     inverseModelMatrix: inverseModelMatrixUniform,
     isOrtho: isOrthoUniform,
     cameraWorldDirection: cameraDirUniform,
@@ -220,7 +225,6 @@ export function updateRaymarchUniforms(
   material: THREE.MeshBasicNodeMaterial,
   params: {
     stepSize?: number;
-    opacity?: number;
     threshold?: number;
   }
 ) {
@@ -230,11 +234,23 @@ export function updateRaymarchUniforms(
   if (params.stepSize !== undefined) {
     uniforms.stepSize.value = params.stepSize;
   }
-  if (params.opacity !== undefined) {
-    uniforms.opacity.value = params.opacity;
-  }
   if (params.threshold !== undefined) {
     uniforms.threshold.value = params.threshold;
+  }
+}
+
+/**
+ * Update transfer function texture (call when transfer function changes)
+ */
+export function updateTransferFunctionTexture(
+  material: THREE.MeshBasicNodeMaterial,
+  texture: THREE.DataTexture
+) {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const uniforms = (material as any).uniforms;
+
+  if (uniforms.transferFunctionTexture) {
+    uniforms.transferFunctionTexture.value = texture;
   }
 }
 
