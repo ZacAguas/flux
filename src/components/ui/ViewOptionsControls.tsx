@@ -106,7 +106,7 @@ export function ViewOptionsControls() {
                 <Checkbox.Indicator />
               </Checkbox.Control>
               <Checkbox.Content>
-                <Label className="text-white/50 text-xs font-medium">All Slice Planes (3D)</Label>
+                <Label className="text-white/50 text-xs font-medium">Slice Planes</Label>
               </Checkbox.Content>
             </Checkbox>
 
