@@ -2,7 +2,8 @@ import { create } from 'zustand';
 import type * as THREE from 'three';
 import type { NiftiVolume } from '../types/nifti';
 import type { LayoutMode, SliceIndices, WindowLevel } from '../types/layout';
-import type { RaymarchSettings } from '../types/volume';
+import type { RaymarchSettings, TransferFunction, TransferFunctionPoint } from '../types/volume';
+import { getPresetByName } from '../data/transferFunctionPresets';
 
 interface CrosshairSettings {
   color: string;
@@ -28,6 +29,7 @@ interface ControlPanelSections {
   viewSettings: boolean;
   viewOptions: boolean;
   rendering3D: boolean;
+  transferFunction: boolean;
   measurementsTools: boolean;
   presetsSettings: boolean;
 }
@@ -49,6 +51,9 @@ interface ViewerStore {
   controlPanelContentHeight: number;
   controlPanelSections: ControlPanelSections;
   raymarchSettings: RaymarchSettings;
+  transferFunction: TransferFunction;
+  transferFunctionTexture: THREE.DataTexture | null;
+  activeTransferFunctionPreset: string;
 
   // Actions
   setLayoutMode: (mode: LayoutMode) => void;
@@ -66,6 +71,12 @@ interface ViewerStore {
   setControlPanelSectionExpanded: (sectionId: string, expanded: boolean) => void;
   toggleAllSections: (expanded: boolean) => void;
   setRaymarchSettings: (settings: Partial<RaymarchSettings>) => void;
+  setTransferFunction: (tf: TransferFunction) => void;
+  updateTransferFunctionPoint: (index: number, point: Partial<TransferFunctionPoint>) => void;
+  addTransferFunctionPoint: (point: TransferFunctionPoint) => void;
+  removeTransferFunctionPoint: (index: number) => void;
+  applyTransferFunctionPreset: (presetName: string) => void;
+  setTransferFunctionTexture: (texture: THREE.DataTexture | null) => void;
 }
 
 export const useViewerStore = create<ViewerStore>((set, get) => ({
@@ -110,6 +121,7 @@ export const useViewerStore = create<ViewerStore>((set, get) => ({
     viewSettings: true,
     viewOptions: false,
     rendering3D: true,
+    transferFunction: false,
     measurementsTools: false,
     presetsSettings: false,
   },
@@ -119,6 +131,15 @@ export const useViewerStore = create<ViewerStore>((set, get) => ({
     threshold: 0.1,
     qualityPreset: 'standard',
   },
+  transferFunction: {
+    points: [
+      { value: 0.0, color: { r: 0, g: 0, b: 0 }, opacity: 0.0 },
+      { value: 1.0, color: { r: 255, g: 255, b: 255 }, opacity: 1.0 },
+    ],
+    range: { min: 0, max: 1 },
+  },
+  transferFunctionTexture: null,
+  activeTransferFunctionPreset: 'default',
 
   // Actions
   setLayoutMode: (mode) => {
@@ -272,4 +293,58 @@ export const useViewerStore = create<ViewerStore>((set, get) => ({
         ...newSettings,
       },
     })),
+
+  setTransferFunction: (tf) => set({ transferFunction: tf, activeTransferFunctionPreset: 'custom' }),
+
+  updateTransferFunctionPoint: (index, pointUpdate) =>
+    set((state) => {
+      const newPoints = [...state.transferFunction.points];
+      newPoints[index] = { ...newPoints[index], ...pointUpdate };
+      return {
+        transferFunction: { ...state.transferFunction, points: newPoints },
+        activeTransferFunctionPreset: 'custom',
+      };
+    }),
+
+  addTransferFunctionPoint: (point) =>
+    set((state) => {
+      const newPoints = [...state.transferFunction.points, point].sort(
+        (a, b) => a.value - b.value
+      );
+      return {
+        transferFunction: { ...state.transferFunction, points: newPoints },
+        activeTransferFunctionPreset: 'custom',
+      };
+    }),
+
+  removeTransferFunctionPoint: (index) =>
+    set((state) => {
+      const newPoints = state.transferFunction.points.filter((_, i) => i !== index);
+      return {
+        transferFunction: { ...state.transferFunction, points: newPoints },
+        activeTransferFunctionPreset: 'custom',
+      };
+    }),
+
+  applyTransferFunctionPreset: (presetName) => {
+    const preset = getPresetByName(presetName);
+    if (preset) {
+      set({
+        transferFunction: {
+          points: preset.points,
+          range: { min: 0, max: 1 },
+        },
+        activeTransferFunctionPreset: presetName,
+      });
+    }
+  },
+
+  setTransferFunctionTexture: (texture) => {
+    // Dispose old texture if it exists
+    const oldTexture = get().transferFunctionTexture;
+    if (oldTexture) {
+      oldTexture.dispose();
+    }
+    set({ transferFunctionTexture: texture });
+  },
 }));

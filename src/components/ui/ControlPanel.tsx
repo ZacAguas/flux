@@ -12,6 +12,7 @@ import { SliceControls } from './SliceControls';
 import { WindowLevelControls } from './WindowLevelControls';
 import { ViewOptionsControls } from './ViewOptionsControls';
 import { RenderingControls } from './RenderingControls';
+import { TransferFunctionEditor } from './TransferFunctionEditor';
 import { CollapsibleSection } from './CollapsibleSection';
 import { useViewerStore } from '../../store/viewerStore';
 import { useState, useRef, useEffect } from 'react';
@@ -135,9 +136,17 @@ export function ControlPanel() {
               {/* Advanced rendering features placeholder */}
               <hr className="border-t border-white/10" />
               <div className="text-[10px] text-white/40 italic">
-                Coming soon: transfer function editor, lighting controls, clipping planes
+                Coming soon: lighting controls, clipping planes
               </div>
             </div>
+          </CollapsibleSection>
+
+          {/* Transfer Function Section */}
+          <CollapsibleSection
+            id="transferFunction"
+            title="Transfer Function"
+          >
+            <TransferFunctionEditor />
           </CollapsibleSection>
 
           {/* Measurements & Tools Section - Placeholder for future */}

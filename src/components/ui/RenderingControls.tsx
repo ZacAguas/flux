@@ -1,7 +1,8 @@
 /**
- * 3D Controls Component
+ * 3D Rendering Controls Component
  *
- * Quality preset dropdown and sliders for controlling volume rendering parameters.
+ * Quality preset tabs and sliders for controlling volume rendering parameters.
+ * Opacity is now controlled via the Transfer Function Editor.
  * Connected to Zustand store for state management.
  */
 
@@ -34,7 +35,7 @@ export function RenderingControls() {
   };
 
   // Handle manual slider changes - switch to custom preset
-  const handleManualChange = (key: 'stepSize' | 'opacity' | 'threshold', value: number) => {
+  const handleManualChange = (key: 'stepSize' | 'threshold', value: number) => {
     setRaymarchSettings({
       [key]: value,
       qualityPreset: 'custom',
@@ -89,26 +90,6 @@ export function RenderingControls() {
         <Label className="text-white/50 text-xs font-medium">Step Size</Label>
         <Slider.Output className="text-xs">
           {({ state }) => Number(state.getThumbValueLabel(0)).toFixed(3)}
-        </Slider.Output>
-        <Slider.Track className="bg-white/15 backdrop-blur-sm rounded-md">
-          <Slider.Fill />
-          <Slider.Thumb />
-        </Slider.Track>
-      </Slider>
-
-      {/* Opacity Slider */}
-      <Slider
-        value={raymarchSettings.opacity}
-        isDisabled={isDisabled}
-        onChange={(value) => handleManualChange('opacity', value as number)}
-        minValue={0}
-        maxValue={1}
-        step={0.01}
-        className="w-full"
-      >
-        <Label className="text-white/50 text-xs font-medium">Opacity</Label>
-        <Slider.Output className="text-xs">
-          {({ state }) => Number(state.getThumbValueLabel(0)).toFixed(2)}
         </Slider.Output>
         <Slider.Track className="bg-white/15 backdrop-blur-sm rounded-md">
           <Slider.Fill />
