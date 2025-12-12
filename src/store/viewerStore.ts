@@ -50,6 +50,7 @@ interface ViewerStore {
   controlPanelPinned: boolean;
   controlPanelContentHeight: number;
   controlPanelSections: ControlPanelSections;
+  popoverOpen: boolean;
   raymarchSettings: RaymarchSettings;
   transferFunction: TransferFunction;
   transferFunctionTexture: THREE.DataTexture | null;
@@ -69,6 +70,7 @@ interface ViewerStore {
   setControlPanelPinned: (isPinned: boolean) => void;
   setControlPanelContentHeight: (height: number) => void;
   setControlPanelSectionExpanded: (sectionId: string, expanded: boolean) => void;
+  setPopoverOpen: (open: boolean) => void;
   toggleAllSections: (expanded: boolean) => void;
   setRaymarchSettings: (settings: Partial<RaymarchSettings>) => void;
   setTransferFunction: (tf: TransferFunction) => void;
@@ -125,6 +127,7 @@ export const useViewerStore = create<ViewerStore>((set, get) => ({
     measurementsTools: false,
     presetsSettings: false,
   },
+  popoverOpen: false,
   raymarchSettings: {
     stepSize: 0.01,
     opacity: 1.0,
@@ -275,6 +278,8 @@ export const useViewerStore = create<ViewerStore>((set, get) => ({
         [sectionId]: expanded,
       },
     })),
+
+  setPopoverOpen: (open) => set({ popoverOpen: open }),
 
   toggleAllSections: (expanded) =>
     set((state) => ({
