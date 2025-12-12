@@ -23,7 +23,12 @@ export function ControlPanel() {
   const controlPanelPinned = useViewerStore((state) => state.controlPanelPinned);
   const setControlPanelPinned = useViewerStore((state) => state.setControlPanelPinned);
   const setControlPanelContentHeight = useViewerStore((state) => state.setControlPanelContentHeight);
+  const popoverOpen = useViewerStore((state) => state.popoverOpen);
   const [isHoveringButton, setIsHoveringButton] = useState(false);
+  const [isMouseOverPanel, setIsMouseOverPanel] = useState(false);
+  // Prevents panel from opening due to hover after unpinning (until mouse leaves)
+  // Unpinning while hovering should close panel, not keep it open
+  const [suppressHoverOpen, setSuppressHoverOpen] = useState(false);
   const panelRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -40,6 +45,18 @@ export function ControlPanel() {
     return () => resizeObserver.disconnect();
   }, [setControlPanelContentHeight]);
 
+  // Panel state logic: single source of truth for open/closed
+  useEffect(() => {
+    if (controlPanelPinned) {
+      setControlPanelOpen(true);
+    } else if (suppressHoverOpen) {
+      setControlPanelOpen(false);
+    } else {
+      const shouldBeOpen = isMouseOverPanel || popoverOpen;
+      setControlPanelOpen(shouldBeOpen);
+    }
+  }, [isMouseOverPanel, popoverOpen, controlPanelPinned, suppressHoverOpen, setControlPanelOpen]);
+
   const getButtonLabel = () => {
     if (controlPanelOpen) {
       if (isHoveringButton) {
@@ -51,21 +68,22 @@ export function ControlPanel() {
   };
 
   const handleMouseEnter = () => {
-    if (!controlPanelPinned) {
-      setControlPanelOpen(true);
-    }
+    setIsMouseOverPanel(true);
   };
 
   const handleMouseLeave = () => {
-    if (!controlPanelPinned) {
-      setControlPanelOpen(false);
-    }
+    setIsMouseOverPanel(false);
+    setSuppressHoverOpen(false);
   };
 
   const handleToggleClick = () => {
-    const newPinnedState = !controlPanelPinned;
-    setControlPanelPinned(newPinnedState);
-    setControlPanelOpen(newPinnedState);
+    const newPinned = !controlPanelPinned;
+    setControlPanelPinned(newPinned);
+
+    // When unpinning, suppress hover open until mouse leaves
+    if (!newPinned) {
+      setSuppressHoverOpen(true);
+    }
   };
 
   return (

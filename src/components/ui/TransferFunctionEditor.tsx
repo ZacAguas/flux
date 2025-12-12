@@ -15,6 +15,7 @@ import { useState } from 'react';
 export function TransferFunctionEditor() {
   const activePreset = useViewerStore((state) => state.activeTransferFunctionPreset);
   const applyPreset = useViewerStore((state) => state.applyTransferFunctionPreset);
+  const setPopoverOpen = useViewerStore((state) => state.setPopoverOpen);
   const [selectedPointIndex, setSelectedPointIndex] = useState<number | null>(null);
 
   return (
@@ -30,6 +31,7 @@ export function TransferFunctionEditor() {
               setSelectedPointIndex(null); // Clear selection when changing presets
             }
           }}
+          onOpenChange={setPopoverOpen}
         >
           <Label className="text-white/50 text-xs font-medium">Preset</Label>
           <Select.Trigger className="bg-white/10 border-white/20 text-white text-xs">
