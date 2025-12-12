@@ -12,6 +12,7 @@ import { SliceControls } from './SliceControls';
 import { WindowLevelControls } from './WindowLevelControls';
 import { ViewOptionsControls } from './ViewOptionsControls';
 import { RenderingControls } from './RenderingControls';
+import { CollapsibleSection } from './CollapsibleSection';
 import { useViewerStore } from '../../store/viewerStore';
 import { useState, useRef, useEffect } from 'react';
 
@@ -81,8 +82,8 @@ export function ControlPanel() {
         ref={panelRef}
         className="bg-black/20 backdrop-blur-sm border-b border-white/10"
       >
-        <div className="flex items-stretch gap-6 px-4 py-3 max-w-full overflow-x-auto">
-          {/* Layout Mode Selection */}
+        <div className="flex items-start gap-6 px-4 py-3 max-w-full overflow-x-auto flex-wrap">
+          {/* Layout Mode Selection - Always visible, not collapsible */}
           <div className="flex flex-col gap-2 min-w-fit">
             <span className="text-xs font-semibold text-white/70 uppercase tracking-wide">
               Layout
@@ -90,49 +91,88 @@ export function ControlPanel() {
             <LayoutModeButtons />
           </div>
 
-          {/* Vertical Divider */}
-          <div className="w-px bg-white/10" />
+          {/* View Settings Section */}
+          <CollapsibleSection
+            id="viewSettings"
+            title="View Settings"
+          >
+            <div className="flex flex-col gap-3">
+              <SliceControls />
+              <WindowLevelControls />
 
-          {/* Slice Controls */}
-          <div className="flex flex-col gap-2 min-w-[180px]">
-            <span className="text-xs font-semibold text-white/70 uppercase tracking-wide">
-              Slices
-            </span>
-            <SliceControls />
-          </div>
+              {/* Time slider placeholder */}
+              <hr className="border-t border-white/10" />
+              <div className="text-[10px] text-white/40 italic">
+                Coming soon: 4D time navigation slider
+              </div>
+            </div>
+          </CollapsibleSection>
 
-          {/* Vertical Divider */}
-          <div className="w-px bg-white/10" />
+          {/* View Options Section */}
+          <CollapsibleSection
+            id="viewOptions"
+            title="View Options"
+          >
+            <div className="flex flex-col gap-3">
+              <ViewOptionsControls />
 
-          {/* Window/Level Controls */}
-          <div className="flex flex-col gap-2 min-w-[180px]">
-            <span className="text-xs font-semibold text-white/70 uppercase tracking-wide">
-              Window/Level
-            </span>
-            <WindowLevelControls />
-          </div>
+              {/* Additional view options placeholder */}
+              <hr className="border-t border-white/10" />
+              <div className="text-[10px] text-white/40 italic">
+                Coming soon: orientation markers, scale bar
+              </div>
+            </div>
+          </CollapsibleSection>
 
-          {/* Vertical Divider */}
-          <div className="w-px bg-white/10" />
+          {/* 3D Rendering Section */}
+          <CollapsibleSection
+            id="rendering3D"
+            title="3D Rendering"
+          >
+            <div className="flex flex-col gap-3">
+              <RenderingControls />
 
-          {/* View Options */}
-          <div className="flex flex-col gap-2 min-w-fit">
-            <span className="text-xs font-semibold text-white/70 uppercase tracking-wide">
-              Options
-            </span>
-            <ViewOptionsControls />
-          </div>
+              {/* Advanced rendering features placeholder */}
+              <hr className="border-t border-white/10" />
+              <div className="text-[10px] text-white/40 italic">
+                Coming soon: transfer function editor, lighting controls, clipping planes
+              </div>
+            </div>
+          </CollapsibleSection>
 
-          {/* Vertical Divider */}
-          <div className="w-px bg-white/10" />
+          {/* Measurements & Tools Section - Placeholder for future */}
+          <CollapsibleSection
+            id="measurementsTools"
+            title="Measurements & Tools"
+          >
+            <div className="flex flex-col gap-2 text-xs text-white/50">
+              <div className="font-medium text-white/60">Coming Soon:</div>
+              <ul className="list-disc list-inside space-y-1 pl-2">
+                <li>Distance measurements between points</li>
+                <li>Angle measurements</li>
+                <li>Volume ROI calculations</li>
+                <li>Annotations and labels</li>
+                <li>Segmentation tools</li>
+              </ul>
+            </div>
+          </CollapsibleSection>
 
-          {/* 3D Controls */}
-          <div className="flex flex-col gap-2 min-w-[180px]">
-            <span className="text-xs font-semibold text-white/70 uppercase tracking-wide">
-              3D
-            </span>
-            <RenderingControls />
-          </div>
+          {/* Presets & Settings Section - Placeholder for future */}
+          <CollapsibleSection
+            id="presetsSettings"
+            title="Presets & Settings"
+          >
+            <div className="flex flex-col gap-2 text-xs text-white/50">
+              <div className="font-medium text-white/60">Coming Soon:</div>
+              <ul className="list-disc list-inside space-y-1 pl-2">
+                <li>Save/load viewer configurations</li>
+                <li>Camera position presets</li>
+                <li>Transfer function presets</li>
+                <li>Multi-volume comparison</li>
+                <li>Export settings</li>
+              </ul>
+            </div>
+          </CollapsibleSection>
         </div>
       </div>
 

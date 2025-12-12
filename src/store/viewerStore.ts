@@ -24,6 +24,14 @@ interface SlicePlaneSettings {
   };
 }
 
+interface ControlPanelSections {
+  viewSettings: boolean;
+  viewOptions: boolean;
+  rendering3D: boolean;
+  measurementsTools: boolean;
+  presetsSettings: boolean;
+}
+
 interface ViewerStore {
   // State
   layoutMode: LayoutMode;
@@ -39,6 +47,7 @@ interface ViewerStore {
   controlPanelOpen: boolean;
   controlPanelPinned: boolean;
   controlPanelContentHeight: number;
+  controlPanelSections: ControlPanelSections;
   raymarchSettings: RaymarchSettings;
 
   // Actions
@@ -54,6 +63,8 @@ interface ViewerStore {
   setControlPanelOpen: (open: boolean) => void;
   setControlPanelPinned: (isPinned: boolean) => void;
   setControlPanelContentHeight: (height: number) => void;
+  setControlPanelSectionExpanded: (sectionId: string, expanded: boolean) => void;
+  toggleAllSections: (expanded: boolean) => void;
   setRaymarchSettings: (settings: Partial<RaymarchSettings>) => void;
 }
 
@@ -95,6 +106,13 @@ export const useViewerStore = create<ViewerStore>((set, get) => ({
   controlPanelOpen: true,
   controlPanelPinned: true,
   controlPanelContentHeight: 0,
+  controlPanelSections: {
+    viewSettings: true,
+    viewOptions: false,
+    rendering3D: true,
+    measurementsTools: false,
+    presetsSettings: false,
+  },
   raymarchSettings: {
     stepSize: 0.01,
     opacity: 1.0,
@@ -103,7 +121,50 @@ export const useViewerStore = create<ViewerStore>((set, get) => ({
   },
 
   // Actions
-  setLayoutMode: (mode) => set({ layoutMode: mode }),
+  setLayoutMode: (mode) => {
+    const currentMode = get().layoutMode;
+
+    // Auto collapse/expand sections based on layout mode
+    if (mode !== currentMode) {
+      const sections = get().controlPanelSections;
+
+      if (mode === 'single') {
+        // Single mode: collapse view settings (slices disabled), expand 3D rendering
+        set({
+          layoutMode: mode,
+          controlPanelSections: {
+            ...sections,
+            viewSettings: false,
+            rendering3D: true,
+          },
+        });
+      } else if (mode === 'slices') {
+        // Slices mode: expand view settings, collapse 3D rendering
+        set({
+          layoutMode: mode,
+          controlPanelSections: {
+            ...sections,
+            viewSettings: true,
+            rendering3D: false,
+          },
+        });
+      } else if (mode === 'quad') {
+        // Quad mode: expand both view settings and 3D rendering
+        set({
+          layoutMode: mode,
+          controlPanelSections: {
+            ...sections,
+            viewSettings: true,
+            rendering3D: true,
+          },
+        });
+      } else {
+        set({ layoutMode: mode });
+      }
+    } else {
+      set({ layoutMode: mode });
+    }
+  },
 
   setVolume: (volume, texture) => {
     // Dispose old texture if it exists
@@ -185,6 +246,24 @@ export const useViewerStore = create<ViewerStore>((set, get) => ({
   setControlPanelPinned: (isPinned) => set({ controlPanelPinned: isPinned }),
 
   setControlPanelContentHeight: (height) => set({ controlPanelContentHeight: height }),
+
+  setControlPanelSectionExpanded: (sectionId, expanded) =>
+    set((state) => ({
+      controlPanelSections: {
+        ...state.controlPanelSections,
+        [sectionId]: expanded,
+      },
+    })),
+
+  toggleAllSections: (expanded) =>
+    set((state) => ({
+      controlPanelSections: {
+        ...Object.keys(state.controlPanelSections).reduce(
+          (acc, key) => ({ ...acc, [key]: expanded }),
+          {} as ControlPanelSections
+        ),
+      },
+    })),
 
   setRaymarchSettings: (newSettings) =>
     set((state) => ({
