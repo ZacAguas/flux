@@ -30,6 +30,8 @@ export function TransferFunctionCanvas({
 }: TransferFunctionCanvasProps) {
   const transferFunction = useViewerStore((state) => state.transferFunction);
   const updatePoint = useViewerStore((state) => state.updateTransferFunctionPoint);
+  const addPoint = useViewerStore((state) => state.addTransferFunctionPoint);
+  const removePoint = useViewerStore((state) => state.removeTransferFunctionPoint);
 
   const [draggedPointIndex, setDraggedPointIndex] = useState<number | null>(null);
   const svgRef = useRef<SVGSVGElement>(null);
@@ -81,6 +83,66 @@ export function TransferFunctionCanvas({
     setDraggedPointIndex(null);
   };
 
+  const handleDoubleClick = (e: React.MouseEvent) => {
+    if (!svgRef.current) return;
+
+    const svgRect = svgRef.current.getBoundingClientRect();
+    const x = e.clientX - svgRect.left;
+
+    // Convert screen coordinates to data values
+    const clickValue = Math.max(0, Math.min(1, xScale.invert(x)));
+
+    // Sort points by value to find adjacent points
+    const sorted = [...transferFunction.points].sort((a, b) => a.value - b.value);
+
+    // Find the two points that bracket the clicked value
+    let leftPoint = sorted[0];
+    let rightPoint = sorted[sorted.length - 1];
+
+    for (let i = 0; i < sorted.length - 1; i++) {
+      if (sorted[i].value <= clickValue && sorted[i + 1].value >= clickValue) {
+        leftPoint = sorted[i];
+        rightPoint = sorted[i + 1];
+        break;
+      }
+    }
+
+    // Interpolate opacity and color between the two points
+    const t = (clickValue - leftPoint.value) / (rightPoint.value - leftPoint.value) || 0;
+    // NOTE:We interpolate the opacity instead of using the opacity value where we click, so the new point
+    // is created along the existing curve, instead of immediately reshaping the curve (likely unintended)
+    const interpolatedOpacity = leftPoint.opacity + (rightPoint.opacity - leftPoint.opacity) * t;
+    const interpolatedColor = {
+      r: Math.round(leftPoint.color.r + (rightPoint.color.r - leftPoint.color.r) * t),
+      g: Math.round(leftPoint.color.g + (rightPoint.color.g - leftPoint.color.g) * t),
+      b: Math.round(leftPoint.color.b + (rightPoint.color.b - leftPoint.color.b) * t),
+    };
+
+    const newPoint = {
+      value: clickValue,
+      opacity: interpolatedOpacity,
+      color: interpolatedColor,
+    };
+
+    // Add the new point
+    addPoint(newPoint);
+
+    // Find and select the newly added point
+    // The store sorts points after adding, so find where it ended up
+    const updatedPoints = useViewerStore.getState().transferFunction.points;
+    const newPointIndex = updatedPoints.findIndex(
+      (p) => p.value === newPoint.value &&
+        p.opacity === newPoint.opacity &&
+        p.color.r === newPoint.color.r &&
+        p.color.g === newPoint.color.g &&
+        p.color.b === newPoint.color.b
+    );
+
+    if (newPointIndex !== -1) {
+      onSelectPoint(newPointIndex);
+    }
+  };
+
   // Sort points by value for rendering
   const sortedPoints = [...transferFunction.points].sort((a, b) => a.value - b.value);
 
@@ -94,6 +156,7 @@ export function TransferFunctionCanvas({
         onMouseMove={handleMouseMove}
         onMouseUp={handleMouseUp}
         onMouseLeave={handleMouseUp}
+        onDoubleClick={handleDoubleClick}
       >
         {/* Define linear gradient for color strip */}
         <defs>
@@ -136,7 +199,15 @@ export function TransferFunctionCanvas({
                 // Disable transitions on points when dragging to avoid lagging behind line
                 className={`cursor-move ${isDragging ? '' : 'transition-all'}`}
                 onMouseDown={handleMouseDown(index)}
-                onClick={() => onSelectPoint(index)}
+                onClick={(e) => {
+                  // Alt/Option + click to delete point (minimum 2 points required)
+                  if (e.altKey && transferFunction.points.length > 2) {
+                    removePoint(index);
+                    onSelectPoint(null);
+                  } else {
+                    onSelectPoint(index);
+                  }
+                }}
               />
             </g>
           );
