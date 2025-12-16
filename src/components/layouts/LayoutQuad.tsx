@@ -21,6 +21,7 @@ import { useLayoutDimensions } from '../../hooks/useLayoutDimensions';
 import { useSlicePlanesInVolume } from '../../hooks/useSlicePlanesInVolume';
 import { SliceInteractionHandler } from '../ui/SliceInteractionHandler';
 import { Crosshairs } from '../ui/Crosshairs';
+import { MetricOverlays } from '../ui/MetricOverlays';
 
 /**
  * Internal component to handle the WebGL/WebGPU scissor rendering for the quad view
@@ -174,6 +175,14 @@ export function LayoutQuad() {
 
         {/* Crosshairs */}
         <Crosshairs
+          layoutMode="quad"
+          canvasWidth={dimensions.width}
+          canvasHeight={dimensions.height}
+          panelHeight={panelHeight}
+        />
+
+        {/* Metric Overlays */}
+        <MetricOverlays
           layoutMode="quad"
           canvasWidth={dimensions.width}
           canvasHeight={dimensions.height}

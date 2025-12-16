@@ -45,6 +45,8 @@ interface ViewerStore {
   crosshairSettings: CrosshairSettings;
   showSlicePlanes: boolean;
   slicePlaneSettings: SlicePlaneSettings;
+  showMetricOverlays: boolean;
+  volumeFileName: string | null;
   timeStep: number;
   controlPanelOpen: boolean;
   controlPanelPinned: boolean;
@@ -58,13 +60,14 @@ interface ViewerStore {
 
   // Actions
   setLayoutMode: (mode: LayoutMode) => void;
-  setVolume: (volume: NiftiVolume, texture: THREE.Data3DTexture) => void;
+  setVolume: (volume: NiftiVolume, texture: THREE.Data3DTexture, fileName?: string) => void;
   setSliceIndex: (orientation: keyof SliceIndices, index: number) => void;
   setWindowLevel: (windowLevel: Partial<WindowLevel>) => void;
   setShowCrosshairs: (show: boolean) => void;
   setCrosshairSettings: (settings: Partial<CrosshairSettings>) => void;
   setShowSlicePlanes: (show: boolean) => void;
   setSlicePlaneSettings: (settings: Partial<SlicePlaneSettings>) => void;
+  setShowMetricOverlays: (show: boolean) => void;
   setTimeStep: (step: number) => void;
   setControlPanelOpen: (open: boolean) => void;
   setControlPanelPinned: (isPinned: boolean) => void;
@@ -115,6 +118,8 @@ export const useViewerStore = create<ViewerStore>((set, get) => ({
       sagittal: '#FF0000',
     },
   },
+  showMetricOverlays: true,
+  volumeFileName: null,
   timeStep: 0,
   controlPanelOpen: true,
   controlPanelPinned: true,
@@ -190,7 +195,7 @@ export const useViewerStore = create<ViewerStore>((set, get) => ({
     }
   },
 
-  setVolume: (volume, texture) => {
+  setVolume: (volume, texture, fileName) => {
     // Dispose old texture if it exists
     const oldTexture = get().volumeTexture;
     if (oldTexture) {
@@ -216,6 +221,7 @@ export const useViewerStore = create<ViewerStore>((set, get) => ({
       sliceIndices,
       windowLevel,
       timeStep: 0,
+      volumeFileName: fileName || null,
     });
   },
 
@@ -262,6 +268,8 @@ export const useViewerStore = create<ViewerStore>((set, get) => ({
         },
       },
     })),
+
+  setShowMetricOverlays: (show) => set({ showMetricOverlays: show }),
 
   setTimeStep: (step) => set({ timeStep: step }),
 

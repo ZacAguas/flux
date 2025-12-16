@@ -12,6 +12,7 @@ import { useSliceViews } from '../../hooks/useSliceViews';
 import { useLayoutDimensions } from '../../hooks/useLayoutDimensions';
 import { SliceInteractionHandler } from '../ui/SliceInteractionHandler';
 import { Crosshairs } from '../ui/Crosshairs';
+import { MetricOverlays } from '../ui/MetricOverlays';
 
 /**
  * Internal component to handle the WebGL/WebGPU scissor rendering for slices.
@@ -86,6 +87,14 @@ export function LayoutSlices() {
 
         {/* Crosshairs */}
         <Crosshairs
+          layoutMode="slices"
+          canvasWidth={dimensions.width}
+          canvasHeight={dimensions.height}
+          panelHeight={panelHeight}
+        />
+
+        {/* Metric Overlays */}
+        <MetricOverlays
           layoutMode="slices"
           canvasWidth={dimensions.width}
           canvasHeight={dimensions.height}
