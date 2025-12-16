@@ -18,6 +18,8 @@ export function ViewOptionsControls() {
   const setShowSlicePlanes = useViewerStore((state) => state.setShowSlicePlanes);
   const slicePlaneSettings = useViewerStore((state) => state.slicePlaneSettings);
   const setSlicePlaneSettings = useViewerStore((state) => state.setSlicePlaneSettings);
+  const showMetricOverlays = useViewerStore((state) => state.showMetricOverlays);
+  const setShowMetricOverlays = useViewerStore((state) => state.setShowMetricOverlays);
 
   return (
     <div className="flex flex-col gap-3">
@@ -78,6 +80,23 @@ export function ViewOptionsControls() {
           </Slider.Track>
         </Slider>
       )}
+
+      {/* Metric Overlays Toggle */}
+      <Switch
+        isSelected={showMetricOverlays}
+        onChange={setShowMetricOverlays}
+      >
+        {({ isSelected }) => (
+          <>
+            <Switch.Control
+              className={`backdrop-blur-sm rounded-full ${isSelected ? '' : 'bg-white/15'}`}
+            >
+              <Switch.Thumb />
+            </Switch.Control>
+            <Label className="text-white/50 text-xs font-medium">Metric Overlays</Label>
+          </>
+        )}
+      </Switch>
 
       {/* Slice Planes Checkboxes */}
       {layoutMode === 'quad' && (() => {

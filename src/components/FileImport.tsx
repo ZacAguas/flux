@@ -26,7 +26,7 @@ export function FileImport() {
     try {
       const volume = await parseNifti(file);
       const texture = createVolumeTexture(volume, 0);
-      setVolume(volume, texture);
+      setVolume(volume, texture, file.name);
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Failed to load file';
       setError(message);
