@@ -13,6 +13,7 @@ import { useLayoutDimensions } from '../../hooks/useLayoutDimensions';
 import { SliceInteractionHandler } from '../ui/SliceInteractionHandler';
 import { Crosshairs } from '../ui/Crosshairs';
 import { MetricOverlays } from '../ui/MetricOverlays';
+import { useSliceViewKeyboardShortcuts } from '../../hooks/useSliceViewKeyboardShortcuts';
 
 /**
  * Internal component to handle the WebGL/WebGPU scissor rendering for slices.
@@ -64,6 +65,9 @@ function SlicesRenderer() {
 export function LayoutSlices() {
   const { dimensions, panelHeight, controlPanelContentHeight, controlPanelOpen } = useLayoutDimensions();
   const labelOffset = controlPanelOpen ? controlPanelContentHeight : 0;
+
+  // Enable keyboard shortcuts for slice view controls
+  useSliceViewKeyboardShortcuts();
 
   return (
     <BaseLayout panelHeight={panelHeight} overlays={

@@ -1,7 +1,7 @@
 import { create } from 'zustand';
 import type * as THREE from 'three';
 import type { NiftiVolume } from '../types/nifti';
-import type { LayoutMode, SliceIndices, WindowLevel } from '../types/layout';
+import type { LayoutMode, SliceIndices, SliceCamera, SliceCameraState, WindowLevel } from '../types/layout';
 import type { RaymarchSettings, TransferFunction, TransferFunctionPoint } from '../types/volume';
 import { getPresetByName } from '../data/transferFunctionPresets';
 
@@ -40,6 +40,7 @@ interface ViewerStore {
   volume: NiftiVolume | null;
   volumeTexture: THREE.Data3DTexture | null;
   sliceIndices: SliceIndices;
+  sliceCameraState: SliceCameraState;
   windowLevel: WindowLevel;
   showCrosshairs: boolean;
   crosshairSettings: CrosshairSettings;
@@ -62,6 +63,9 @@ interface ViewerStore {
   setLayoutMode: (mode: LayoutMode) => void;
   setVolume: (volume: NiftiVolume, texture: THREE.Data3DTexture, fileName?: string) => void;
   setSliceIndex: (orientation: keyof SliceIndices, index: number) => void;
+  setSliceCamera: (orientation: keyof SliceCameraState, camera: Partial<SliceCamera>) => void;
+  resetSliceCamera: (orientation: keyof SliceCameraState) => void;
+  resetAllSliceCameras: () => void;
   setWindowLevel: (windowLevel: Partial<WindowLevel>) => void;
   setShowCrosshairs: (show: boolean) => void;
   setCrosshairSettings: (settings: Partial<CrosshairSettings>) => void;
@@ -84,6 +88,12 @@ interface ViewerStore {
   setTransferFunctionTexture: (texture: THREE.DataTexture | null) => void;
 }
 
+const defaultSliceCamera: SliceCamera = {
+  zoom: 1.0,
+  panX: 0,
+  panY: 0,
+};
+
 export const useViewerStore = create<ViewerStore>((set, get) => ({
   // Initial state
   layoutMode: 'single',
@@ -93,6 +103,11 @@ export const useViewerStore = create<ViewerStore>((set, get) => ({
     axial: 0,
     coronal: 0,
     sagittal: 0,
+  },
+  sliceCameraState: {
+    axial: { ...defaultSliceCamera },
+    coronal: { ...defaultSliceCamera },
+    sagittal: { ...defaultSliceCamera },
   },
   windowLevel: {
     center: 0,
@@ -219,6 +234,11 @@ export const useViewerStore = create<ViewerStore>((set, get) => ({
       volume,
       volumeTexture: texture,
       sliceIndices,
+      sliceCameraState: {
+        axial: { ...defaultSliceCamera },
+        coronal: { ...defaultSliceCamera },
+        sagittal: { ...defaultSliceCamera },
+      },
       windowLevel,
       timeStep: 0,
       volumeFileName: fileName || null,
@@ -232,6 +252,34 @@ export const useViewerStore = create<ViewerStore>((set, get) => ({
         [orientation]: index,
       },
     })),
+
+  setSliceCamera: (orientation, camera) =>
+    set((state) => ({
+      sliceCameraState: {
+        ...state.sliceCameraState,
+        [orientation]: {
+          ...state.sliceCameraState[orientation],
+          ...camera,
+        },
+      },
+    })),
+
+  resetSliceCamera: (orientation) =>
+    set((state) => ({
+      sliceCameraState: {
+        ...state.sliceCameraState,
+        [orientation]: { ...defaultSliceCamera },
+      },
+    })),
+
+  resetAllSliceCameras: () =>
+    set({
+      sliceCameraState: {
+        axial: { ...defaultSliceCamera },
+        coronal: { ...defaultSliceCamera },
+        sagittal: { ...defaultSliceCamera },
+      },
+    }),
 
   setWindowLevel: (newWindowLevel) =>
     set((state) => ({

@@ -1,16 +1,24 @@
 /**
  * SliceInteractionHandler Component
  *
- * Handles click and drag interactions on 2D slice views to update crosshair positions.
+ * Handles multi-modal interactions on 2D slice views:
+ * - Left-click drag: Update crosshair positions
+ * - Middle-click or Ctrl+left-click drag: Pan view
+ * - Right-click drag: Adjust window/level
+ * - Mouse wheel: Zoom in/out
  * Renders invisible overlay divs over each slice viewport to capture pointer events.
  */
 
-import { useRef, useState } from 'react';
+import { useRef, useState, useEffect } from 'react';
 import { useViewerStore } from '../../store/viewerStore';
 import {
   pixelToVoxelIndices,
   getViewportBounds,
 } from '../../utils/sliceInteraction';
+import { getSliceDimensions } from '../../utils/layout';
+import type { SliceOrientation } from '../../types/layout';
+
+type InteractionMode = 'crosshair' | 'pan' | 'windowLevel';
 
 interface SliceInteractionHandlerProps {
   layoutMode: 'quad' | 'slices';
@@ -26,15 +34,45 @@ export function SliceInteractionHandler({
   panelHeight,
 }: SliceInteractionHandlerProps) {
   const volume = useViewerStore((state) => state.volume);
+  const sliceCameraState = useViewerStore((state) => state.sliceCameraState);
+  const windowLevel = useViewerStore((state) => state.windowLevel);
   const setSliceIndex = useViewerStore((state) => state.setSliceIndex);
+  const setSliceCamera = useViewerStore((state) => state.setSliceCamera);
+  const setWindowLevel = useViewerStore((state) => state.setWindowLevel);
 
   const [isDragging, setIsDragging] = useState(false);
-  const [activeOrientation, setActiveOrientation] = useState<
-    'axial' | 'coronal' | 'sagittal' | null
-  >(null);
+  const [interactionMode, setInteractionMode] = useState<InteractionMode>('crosshair');
+  const [activeOrientation, setActiveOrientation] = useState<SliceOrientation | null>(null);
+  const [dragStartPosition, setDragStartPosition] = useState<{ x: number; y: number } | null>(null);
+  const [dragStartCameraState, setDragStartCameraState] = useState<{ panX: number; panY: number; zoom: number } | null>(null);
+  const [dragStartWindowLevel, setDragStartWindowLevel] = useState<{ center: number; width: number } | null>(null);
+  const [isCtrlPressed, setIsCtrlPressed] = useState(false);
 
   // Container ref to get bounding rect for coordinate conversion
   const containerRef = useRef<HTMLDivElement>(null);
+
+  // Track Ctrl key for pan mode indication
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Control') {
+        setIsCtrlPressed(true);
+      }
+    };
+
+    const handleKeyUp = (e: KeyboardEvent) => {
+      if (e.key === 'Control') {
+        setIsCtrlPressed(false);
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    window.addEventListener('keyup', handleKeyUp);
+
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+      window.removeEventListener('keyup', handleKeyUp);
+    };
+  }, []);
 
   /**
    * Convert pointer event coordinates to slice indices and update store
@@ -58,7 +96,8 @@ export function SliceInteractionHandler({
       panelHeight
     );
 
-    const result = pixelToVoxelIndices(pixelX, pixelY, orientation, volume, viewport);
+    const cameraState = sliceCameraState[orientation];
+    const result = pixelToVoxelIndices(pixelX, pixelY, orientation, volume, viewport, cameraState);
 
     // Update the two orthogonal slice indices
     setSliceIndex(result.orientation1, result.index1);
@@ -66,28 +105,122 @@ export function SliceInteractionHandler({
   };
 
   /**
-   * Handle pointer down - start interaction
+   * Handle pointer down - start interaction and determine mode
    */
   const handlePointerDown = (
     e: React.PointerEvent<HTMLDivElement>,
-    orientation: 'axial' | 'coronal' | 'sagittal'
+    orientation: SliceOrientation
   ) => {
     if (!volume) return;
 
     e.currentTarget.setPointerCapture(e.pointerId);
-    setIsDragging(true);
     setActiveOrientation(orientation);
+    setDragStartPosition({ x: e.clientX, y: e.clientY });
 
-    updateSliceIndicesFromPointer(e.clientX, e.clientY, orientation);
+    // Determine interaction mode based on mouse button and modifiers
+    let mode: InteractionMode = 'crosshair';
+
+    if (e.button === 1 || (e.button === 0 && e.ctrlKey)) {
+      // Middle button or Ctrl+left button = pan
+      mode = 'pan';
+      const cameraState = sliceCameraState[orientation];
+      setDragStartCameraState({
+        panX: cameraState.panX,
+        panY: cameraState.panY,
+        zoom: cameraState.zoom,
+      });
+    } else if (e.button === 2) {
+      // Right button = window/level
+      mode = 'windowLevel';
+      setDragStartWindowLevel({
+        center: windowLevel.center,
+        width: windowLevel.width,
+      });
+      e.preventDefault(); // Prevent context menu
+    } else if (e.button === 0) {
+      // Left button only = crosshair
+      mode = 'crosshair';
+      updateSliceIndicesFromPointer(e.clientX, e.clientY, orientation);
+    }
+
+    setInteractionMode(mode);
+    setIsDragging(true);
   };
 
   /**
-   * Handle pointer move - update during drag
+   * Handle pan drag - translate camera view
+   */
+  const handlePanDrag = (e: React.PointerEvent<HTMLDivElement>) => {
+    if (!activeOrientation || !dragStartPosition || !dragStartCameraState) return;
+
+    const viewport = getViewportBounds(
+      layoutMode,
+      activeOrientation,
+      canvasWidth,
+      canvasHeight,
+      panelHeight
+    );
+
+    // Calculate pixel delta
+    const deltaX = e.clientX - dragStartPosition.x;
+    const deltaY = e.clientY - dragStartPosition.y;
+
+    // Convert pixel delta to world space delta (accounting for zoom)
+    const cameraState = sliceCameraState[activeOrientation];
+    const viewportAspect = viewport.width / viewport.height;
+    const sliceDims = getSliceDimensions(volume!, activeOrientation);
+    const sliceAspect = sliceDims.width / sliceDims.height;
+    const isHorizontal = sliceAspect > viewportAspect;
+    const baseZoomFactor = isHorizontal ? sliceDims.width / 2 : sliceDims.height / 2 * viewportAspect;
+    const zoomFactor = baseZoomFactor / cameraState.zoom;
+
+    // World space units per pixel
+    const worldPerPixelX = (2 * zoomFactor) / viewport.width;
+    const worldPerPixelY = (2 * zoomFactor / viewportAspect) / viewport.height;
+
+    // Update pan (negative delta because we're moving the view opposite to drag direction)
+    setSliceCamera(activeOrientation, {
+      panX: dragStartCameraState.panX - deltaX * worldPerPixelX,
+      panY: dragStartCameraState.panY + deltaY * worldPerPixelY,
+    });
+  };
+
+  /**
+   * Handle window/level drag - adjust brightness/contrast
+   */
+  const handleWindowLevelDrag = (e: React.PointerEvent<HTMLDivElement>) => {
+    if (!dragStartPosition || !dragStartWindowLevel || !volume) return;
+
+    const deltaX = e.clientX - dragStartPosition.x;
+    const deltaY = e.clientY - dragStartPosition.y;
+
+    // Sensitivity factors (adjust these for desired responsiveness)
+    const widthSensitivity = (volume.dataRange.max - volume.dataRange.min) / 500;
+    const centerSensitivity = (volume.dataRange.max - volume.dataRange.min) / 500;
+
+    // Horizontal drag adjusts width, vertical drag adjusts center
+    const newWidth = Math.max(1, dragStartWindowLevel.width + deltaX * widthSensitivity);
+    const newCenter = dragStartWindowLevel.center - deltaY * centerSensitivity;
+
+    setWindowLevel({
+      width: newWidth,
+      center: newCenter,
+    });
+  };
+
+  /**
+   * Handle pointer move - dispatch to appropriate handler based on mode
    */
   const handlePointerMove = (e: React.PointerEvent<HTMLDivElement>) => {
     if (!isDragging || !activeOrientation || !volume) return;
 
-    updateSliceIndicesFromPointer(e.clientX, e.clientY, activeOrientation);
+    if (interactionMode === 'crosshair') {
+      updateSliceIndicesFromPointer(e.clientX, e.clientY, activeOrientation);
+    } else if (interactionMode === 'pan') {
+      handlePanDrag(e);
+    } else if (interactionMode === 'windowLevel') {
+      handleWindowLevelDrag(e);
+    }
   };
 
   /**
@@ -98,7 +231,71 @@ export function SliceInteractionHandler({
 
     e.currentTarget.releasePointerCapture(e.pointerId);
     setIsDragging(false);
+    setInteractionMode('crosshair');
     setActiveOrientation(null);
+    setDragStartPosition(null);
+    setDragStartCameraState(null);
+    setDragStartWindowLevel(null);
+  };
+
+  /**
+   * Handle mouse wheel - zoom in/out
+   */
+  const handleWheel = (
+    e: React.WheelEvent<HTMLDivElement>,
+    orientation: SliceOrientation
+  ) => {
+    if (!volume || !containerRef.current) return;
+
+    e.preventDefault();
+
+    const cameraState = sliceCameraState[orientation];
+    const rect = containerRef.current.getBoundingClientRect();
+    const pixelX = e.clientX - rect.left;
+    const pixelY = e.clientY - rect.top;
+
+    const viewport = getViewportBounds(
+      layoutMode,
+      orientation,
+      canvasWidth,
+      canvasHeight,
+      panelHeight
+    );
+
+    // Calculate zoom delta (exponential zoom feels more natural)
+    const zoomDelta = Math.pow(1.1, -e.deltaY / 100);
+    const newZoom = Math.max(0.1, Math.min(20, cameraState.zoom * zoomDelta));
+
+    // Convert mouse position to world space coordinates before zoom
+    const viewportAspect = viewport.width / viewport.height;
+    const sliceDims = getSliceDimensions(volume, orientation);
+    const sliceAspect = sliceDims.width / sliceDims.height;
+    const isHorizontal = sliceAspect > viewportAspect;
+    const baseZoomFactor = isHorizontal ? sliceDims.width / 2 : sliceDims.height / 2 * viewportAspect;
+    const zoomFactor = baseZoomFactor / cameraState.zoom;
+
+    // Mouse position in viewport coordinates (0 to 1)
+    const viewportMouseX = (pixelX - viewport.x) / viewport.width;
+    const viewportMouseY = (pixelY - viewport.y) / viewport.height;
+
+    // Mouse position in NDC (-1 to 1)
+    const ndcX = viewportMouseX * 2 - 1;
+    const ndcY = -(viewportMouseY * 2 - 1);
+
+    // Mouse position in world space
+    const worldX = ndcX * zoomFactor + cameraState.panX;
+    const worldY = ndcY * (zoomFactor / viewportAspect) + cameraState.panY;
+
+    // Calculate new pan to keep mouse position stationary
+    const zoomRatio = newZoom / cameraState.zoom;
+    const newPanX = worldX - (worldX - cameraState.panX) / zoomRatio;
+    const newPanY = worldY - (worldY - cameraState.panY) / zoomRatio;
+
+    setSliceCamera(orientation, {
+      zoom: newZoom,
+      panX: newPanX,
+      panY: newPanY,
+    });
   };
 
   if (!volume) return null;
@@ -126,9 +323,21 @@ export function SliceInteractionHandler({
     panelHeight
   );
 
+  // Determine cursor based on current mode and modifiers
+  const getCursor = (): string => {
+    if (isDragging) {
+      if (interactionMode === 'pan') return 'grabbing';
+      if (interactionMode === 'windowLevel') return 'ns-resize';
+      return 'grabbing';
+    }
+    // Show cursor preview based on Ctrl key
+    if (isCtrlPressed) return 'grab';
+    return 'crosshair';
+  };
+
   const overlayStyle: React.CSSProperties = {
     position: 'absolute',
-    cursor: isDragging ? 'grabbing' : 'crosshair',
+    cursor: getCursor(),
     pointerEvents: 'auto',
     zIndex: 2, // Above volume viewport div, below UI labels
   };
@@ -158,6 +367,8 @@ export function SliceInteractionHandler({
         onPointerMove={handlePointerMove}
         onPointerUp={handlePointerUp}
         onPointerCancel={handlePointerUp}
+        onWheel={(e) => handleWheel(e, 'axial')}
+        onContextMenu={(e) => e.preventDefault()}
       />
 
       {/* Coronal slice overlay */}
@@ -173,6 +384,8 @@ export function SliceInteractionHandler({
         onPointerMove={handlePointerMove}
         onPointerUp={handlePointerUp}
         onPointerCancel={handlePointerUp}
+        onWheel={(e) => handleWheel(e, 'coronal')}
+        onContextMenu={(e) => e.preventDefault()}
       />
 
       {/* Sagittal slice overlay */}
@@ -188,6 +401,8 @@ export function SliceInteractionHandler({
         onPointerMove={handlePointerMove}
         onPointerUp={handlePointerUp}
         onPointerCancel={handlePointerUp}
+        onWheel={(e) => handleWheel(e, 'sagittal')}
+        onContextMenu={(e) => e.preventDefault()}
       />
     </div>
   );

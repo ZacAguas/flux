@@ -23,6 +23,7 @@ export function useSliceViews() {
   const volume = useViewerStore((state) => state.volume);
   const volumeTexture = useViewerStore((state) => state.volumeTexture);
   const sliceIndices = useViewerStore((state) => state.sliceIndices);
+  const sliceCameraState = useViewerStore((state) => state.sliceCameraState);
   const windowLevel = useViewerStore((state) => state.windowLevel);
 
   // Scenes
@@ -39,6 +40,9 @@ export function useSliceViews() {
   const axialMaterialRef = useRef<THREE.MeshBasicNodeMaterial | undefined>(undefined);
   const coronalMaterialRef = useRef<THREE.MeshBasicNodeMaterial | undefined>(undefined);
   const sagittalMaterialRef = useRef<THREE.MeshBasicNodeMaterial | undefined>(undefined);
+
+  // Track last viewport dimensions for camera updates
+  const lastViewportDimsRef = useRef<{ width: number; height: number } | null>(null);
 
   // Initialize
   useEffect(() => {
@@ -148,25 +152,41 @@ export function useSliceViews() {
   const resizeCameras = (viewportWidth: number, viewportHeight: number) => {
     if (!volume || !axialCameraRef.current || !coronalCameraRef.current || !sagittalCameraRef.current) return;
 
+    // Store viewport dimensions for camera state updates
+    lastViewportDimsRef.current = { width: viewportWidth, height: viewportHeight };
+
     const viewportAspect = viewportWidth / viewportHeight;
     const cameras = [
-      { cam: axialCameraRef.current, dims: getSliceDimensions(volume, 'axial') },
-      { cam: coronalCameraRef.current, dims: getSliceDimensions(volume, 'coronal') },
-      { cam: sagittalCameraRef.current, dims: getSliceDimensions(volume, 'sagittal') },
+      { cam: axialCameraRef.current, dims: getSliceDimensions(volume, 'axial'), cameraState: sliceCameraState.axial },
+      { cam: coronalCameraRef.current, dims: getSliceDimensions(volume, 'coronal'), cameraState: sliceCameraState.coronal },
+      { cam: sagittalCameraRef.current, dims: getSliceDimensions(volume, 'sagittal'), cameraState: sliceCameraState.sagittal },
     ];
 
-    cameras.forEach(({ cam, dims }) => {
+    cameras.forEach(({ cam, dims, cameraState }) => {
       const sliceAspect = dims.width / dims.height;
       const isHorizontal = sliceAspect > viewportAspect;
-      const zoomFactor = isHorizontal ? dims.width / 2 : dims.height / 2 * viewportAspect;
+      const baseZoomFactor = isHorizontal ? dims.width / 2 : dims.height / 2 * viewportAspect;
 
-      cam.left = -zoomFactor;
-      cam.right = zoomFactor;
-      cam.top = zoomFactor / viewportAspect;
-      cam.bottom = -zoomFactor / viewportAspect;
+      // Apply user zoom (smaller frustum = zoomed in)
+      const zoomFactor = baseZoomFactor / cameraState.zoom;
+
+      // Apply pan offset to frustum
+      cam.left = -zoomFactor + cameraState.panX;
+      cam.right = zoomFactor + cameraState.panX;
+      cam.top = zoomFactor / viewportAspect + cameraState.panY;
+      cam.bottom = -zoomFactor / viewportAspect + cameraState.panY;
       cam.updateProjectionMatrix();
     });
   };
+
+  // Update cameras when camera state changes
+  useEffect(() => {
+    if (lastViewportDimsRef.current) {
+      resizeCameras(lastViewportDimsRef.current.width, lastViewportDimsRef.current.height);
+    }
+    // NOTE: resizeCameras is excluded as it's recreated on each render (React Compiler handles memoization)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [sliceCameraState]);
 
   return {
     axialScene: axialSceneRef.current,
