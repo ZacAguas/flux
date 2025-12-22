@@ -8,7 +8,7 @@
  */
 
 import type { NiftiVolume } from '../types/nifti';
-import type { SliceIndices } from '../types/layout';
+import type { SliceIndices, SliceCamera } from '../types/layout';
 import { getSliceDimensions } from './layout';
 
 export interface ViewportBounds {
@@ -40,28 +40,42 @@ interface VoxelIndices {
 /**
  * Calculate camera frustum bounds for orthographic camera
  * Used by both forward and reverse coordinate transformations
+ *
+ * @param volume - Volume data with dimensions and spacing
+ * @param orientation - Which slice view
+ * @param viewport - Viewport bounds for the slice view
+ * @param zoom - Camera zoom multiplier (1.0 = fit-to-viewport, >1.0 = zoomed in)
+ * @param panX - Camera pan offset in world space X
+ * @param panY - Camera pan offset in world space Y
  */
 function calculateCameraFrustum(
   volume: NiftiVolume,
   orientation: 'axial' | 'coronal' | 'sagittal',
-  viewport: ViewportBounds
+  viewport: ViewportBounds,
+  zoom: number = 1.0,
+  panX: number = 0,
+  panY: number = 0
 ): CameraFrustum {
   const sliceDims = getSliceDimensions(volume, orientation);
 
-  // Calculate camera frustum (matching LayoutQuad camera setup logic)
+  // Calculate camera frustum (matching useSliceViews camera setup logic)
   const viewportAspect = viewport.width / viewport.height;
   const sliceAspect = sliceDims.width / sliceDims.height;
   const isHorizontal = sliceAspect > viewportAspect;
 
-  const zoomFactor = isHorizontal
+  const baseZoomFactor = isHorizontal
     ? sliceDims.width / 2
     : (sliceDims.height / 2) * viewportAspect;
 
+  // Apply user zoom (smaller frustum = zoomed in)
+  const zoomFactor = baseZoomFactor / zoom;
+
+  // Apply pan offset to frustum
   return {
-    left: -zoomFactor,
-    right: zoomFactor,
-    top: zoomFactor / viewportAspect,
-    bottom: -zoomFactor / viewportAspect,
+    left: -zoomFactor + panX,
+    right: zoomFactor + panX,
+    top: zoomFactor / viewportAspect + panY,
+    bottom: -zoomFactor / viewportAspect + panY,
   };
 }
 
@@ -73,16 +87,25 @@ function calculateCameraFrustum(
  * @param sliceIndices - Current slice indices for all three orientations
  * @param volume - Volume data with dimensions and spacing
  * @param viewport - Viewport bounds for the slice view
+ * @param cameraState - Optional camera state (zoom, pan) for the view
  * @returns Pixel positions for horizontal and vertical crosshair lines
  */
 export function calculateCrosshairPositions(
   orientation: 'axial' | 'coronal' | 'sagittal',
   sliceIndices: SliceIndices,
   volume: NiftiVolume,
-  viewport: ViewportBounds
+  viewport: ViewportBounds,
+  cameraState?: SliceCamera
 ): CrosshairPosition {
   const { dimensions, spacing } = volume;
-  const frustum = calculateCameraFrustum(volume, orientation, viewport);
+  const frustum = calculateCameraFrustum(
+    volume,
+    orientation,
+    viewport,
+    cameraState?.zoom,
+    cameraState?.panX,
+    cameraState?.panY
+  );
 
   // Calculate world positions based on orientation
   let worldX: number, worldY: number;
@@ -124,6 +147,7 @@ export function calculateCrosshairPositions(
  * @param orientation - Which slice view was clicked
  * @param volume - Volume data with dimensions and spacing
  * @param viewport - Viewport bounds for the clicked slice view
+ * @param cameraState - Optional camera state (zoom, pan) for the view
  * @returns Voxel indices for the two orthogonal dimensions
  */
 export function pixelToVoxelIndices(
@@ -131,10 +155,18 @@ export function pixelToVoxelIndices(
   pixelY: number,
   orientation: 'axial' | 'coronal' | 'sagittal',
   volume: NiftiVolume,
-  viewport: ViewportBounds
+  viewport: ViewportBounds,
+  cameraState?: SliceCamera
 ): VoxelIndices {
   const { dimensions, spacing } = volume;
-  const frustum = calculateCameraFrustum(volume, orientation, viewport);
+  const frustum = calculateCameraFrustum(
+    volume,
+    orientation,
+    viewport,
+    cameraState?.zoom,
+    cameraState?.panX,
+    cameraState?.panY
+  );
 
   // Step 1: Pixel to NDC (-1 to 1)
   const ndcX = ((pixelX - viewport.x) / viewport.width) * 2 - 1;

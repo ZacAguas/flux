@@ -22,6 +22,7 @@ import { useSlicePlanesInVolume } from '../../hooks/useSlicePlanesInVolume';
 import { SliceInteractionHandler } from '../ui/SliceInteractionHandler';
 import { Crosshairs } from '../ui/Crosshairs';
 import { MetricOverlays } from '../ui/MetricOverlays';
+import { useSliceViewKeyboardShortcuts } from '../../hooks/useSliceViewKeyboardShortcuts';
 
 /**
  * Internal component to handle the WebGL/WebGPU scissor rendering for the quad view
@@ -136,6 +137,9 @@ export function LayoutQuad() {
   const { dimensions, panelHeight, controlPanelContentHeight, controlPanelOpen } = useLayoutDimensions();
   const labelOffset = controlPanelOpen ? controlPanelContentHeight : 0;
   const volumeViewportRef = useRef<HTMLDivElement>(null);
+
+  // Enable keyboard shortcuts for slice view controls
+  useSliceViewKeyboardShortcuts();
 
   return (
     <BaseLayout panelHeight={panelHeight} overlays={
