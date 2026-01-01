@@ -41,16 +41,40 @@ export function useVolumeSetup() {
   // Helper to get volume dimensions for scaling
   const volumeDimensions = volume ? getVolumeDimensions(volume) : null;
 
-  // Create material and mesh
+  // Create mesh once when volume loads
   useEffect(() => {
     if (!volumeTexture || !volume) return;
+
+    const geometry = new THREE.BoxGeometry(1, 1, 1);
+    const newMesh = new THREE.Mesh(geometry);
+
+    // Scale mesh
+    const dims = getVolumeDimensions(volume);
+    newMesh.scale.set(dims.width, dims.height, dims.depth);
+
+    setMesh(newMesh);
+
+    return () => {
+      geometry.dispose();
+      setMesh(null);
+    };
+  }, [volumeTexture, volume]);
+
+  // Create/update material separately
+  useEffect(() => {
+    if (!volumeTexture || !volume || !mesh) return;
+
+    // Dispose old material
+    if (materialRef.current) {
+      materialRef.current.dispose();
+    }
 
     // Generate transfer function texture
     const tfTexture = generateTransferFunctionTexture(transferFunction);
     setTransferFunctionTexture(tfTexture);
 
     // Create material with transfer function texture
-    materialRef.current = createVolumeRaymarchMaterial(
+    const newMaterial = createVolumeRaymarchMaterial(
       volumeTexture,
       tfTexture,
       {
@@ -59,25 +83,36 @@ export function useVolumeSetup() {
       }
     );
 
-    // Create mesh
-    const geometry = new THREE.BoxGeometry(1, 1, 1);
-    const newMesh = new THREE.Mesh(geometry, materialRef.current);
+    // Initialize clipping plane uniforms on material creation
+    updateClippingPlaneUniforms(newMaterial, {
+      axial: {
+        enabled: clippingPlanes.axial.enabled,
+        position: clippingPlanes.axial.position,
+        inverted: clippingPlanes.axial.inverted,
+      },
+      coronal: {
+        enabled: clippingPlanes.coronal.enabled,
+        position: clippingPlanes.coronal.position,
+        inverted: clippingPlanes.coronal.inverted,
+      },
+      sagittal: {
+        enabled: clippingPlanes.sagittal.enabled,
+        position: clippingPlanes.sagittal.position,
+        inverted: clippingPlanes.sagittal.inverted,
+      },
+    });
 
-    // Scale mesh
-    const dims = getVolumeDimensions(volume);
-    newMesh.scale.set(dims.width, dims.height, dims.depth);
+    // Update mesh uniforms
+    updateRaymarchMeshUniforms(newMaterial, mesh);
 
-    // Initial uniform update
-    updateRaymarchMeshUniforms(materialRef.current, newMesh);
-
-    setMesh(newMesh);
+    // Assign material to mesh
+    mesh.material = newMaterial;
+    materialRef.current = newMaterial;
 
     return () => {
-      geometry.dispose();
       materialRef.current?.dispose();
-      setMesh(null);
     };
-  }, [volumeTexture, volume, transferFunction, raymarchSettings.stepSize, raymarchSettings.threshold, setTransferFunctionTexture]);
+  }, [volumeTexture, volume, mesh, transferFunction, raymarchSettings.stepSize, raymarchSettings.threshold, setTransferFunctionTexture, clippingPlanes]);
 
   // Update transfer function texture when it changes
   useEffect(() => {
