@@ -12,6 +12,7 @@ import { SliceControls } from './SliceControls';
 import { WindowLevelControls } from './WindowLevelControls';
 import { ViewOptionsControls } from './ViewOptionsControls';
 import { RenderingControls } from './RenderingControls';
+import { ClippingPlaneControls } from './ClippingPlaneControls';
 import { TransferFunctionEditor } from './TransferFunctionEditor';
 import { CollapsibleSection } from './CollapsibleSection';
 import { useViewerStore } from '../../store/viewerStore';
@@ -151,10 +152,15 @@ export function ControlPanel() {
             <div className="flex flex-col gap-3">
               <RenderingControls />
 
+              {/* Clipping Planes */}
+              <hr className="border-t border-white/10" />
+              <div className="text-xs font-medium text-white/60">Clipping Planes</div>
+              <ClippingPlaneControls />
+
               {/* Advanced rendering features placeholder */}
               <hr className="border-t border-white/10" />
               <div className="text-[10px] text-white/40 italic">
-                Coming soon: lighting controls, clipping planes
+                Coming soon: lighting controls
               </div>
             </div>
           </CollapsibleSection>

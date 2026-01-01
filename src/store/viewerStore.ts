@@ -3,6 +3,7 @@ import type * as THREE from 'three';
 import type { NiftiVolume } from '../types/nifti';
 import type { LayoutMode, SliceIndices, SliceCamera, SliceCameraState, WindowLevel } from '../types/layout';
 import type { RaymarchSettings, TransferFunction, TransferFunctionPoint } from '../types/volume';
+import type { ClippingPlanes, ClippingPlaneVisualization, ClippingPlane } from '../types/clipping';
 import { getPresetByName } from '../data/transferFunctionPresets';
 
 interface CrosshairSettings {
@@ -58,6 +59,8 @@ interface ViewerStore {
   transferFunction: TransferFunction;
   transferFunctionTexture: THREE.DataTexture | null;
   activeTransferFunctionPreset: string;
+  clippingPlanes: ClippingPlanes;
+  clippingPlaneVisualization: ClippingPlaneVisualization;
 
   // Actions
   setLayoutMode: (mode: LayoutMode) => void;
@@ -86,6 +89,9 @@ interface ViewerStore {
   removeTransferFunctionPoint: (index: number) => void;
   applyTransferFunctionPreset: (presetName: string) => void;
   setTransferFunctionTexture: (texture: THREE.DataTexture | null) => void;
+  setClippingPlane: (orientation: keyof ClippingPlanes, plane: Partial<ClippingPlane>) => void;
+  setClippingPlaneVisualization: (settings: Partial<ClippingPlaneVisualization>) => void;
+  resetClippingPlanes: () => void;
 }
 
 const defaultSliceCamera: SliceCamera = {
@@ -163,6 +169,20 @@ export const useViewerStore = create<ViewerStore>((set, get) => ({
   },
   transferFunctionTexture: null,
   activeTransferFunctionPreset: 'default',
+  clippingPlanes: {
+    axial: { enabled: false, position: 0.5, inverted: false },
+    coronal: { enabled: false, position: 0.5, inverted: false },
+    sagittal: { enabled: false, position: 0.5, inverted: false },
+  },
+  clippingPlaneVisualization: {
+    showPlanes: true,
+    opacity: 0.3,
+    colors: {
+      axial: '#0080FF',
+      coronal: '#00FF00',
+      sagittal: '#FF0000',
+    },
+  },
 
   // Actions
   setLayoutMode: (mode) => {
@@ -408,4 +428,36 @@ export const useViewerStore = create<ViewerStore>((set, get) => ({
     }
     set({ transferFunctionTexture: texture });
   },
+
+  setClippingPlane: (orientation, planeUpdate) =>
+    set((state) => ({
+      clippingPlanes: {
+        ...state.clippingPlanes,
+        [orientation]: {
+          ...state.clippingPlanes[orientation],
+          ...planeUpdate,
+        },
+      },
+    })),
+
+  setClippingPlaneVisualization: (newSettings) =>
+    set((state) => ({
+      clippingPlaneVisualization: {
+        ...state.clippingPlaneVisualization,
+        ...newSettings,
+        colors: {
+          ...state.clippingPlaneVisualization.colors,
+          ...(newSettings.colors || {}),
+        },
+      },
+    })),
+
+  resetClippingPlanes: () =>
+    set({
+      clippingPlanes: {
+        axial: { enabled: false, position: 0.5, inverted: false },
+        coronal: { enabled: false, position: 0.5, inverted: false },
+        sagittal: { enabled: false, position: 0.5, inverted: false },
+      },
+    }),
 }));

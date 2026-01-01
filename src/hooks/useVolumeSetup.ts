@@ -17,6 +17,7 @@ import {
   updateRaymarchMeshUniforms,
   updateRaymarchUniforms,
   updateTransferFunctionTexture,
+  updateClippingPlaneUniforms,
 } from '../shaders/volumeRaymarch';
 import { getVolumeDimensions } from '../utils/layout';
 import { generateTransferFunctionTexture } from '../utils/transferFunctionTexture';
@@ -31,6 +32,7 @@ export function useVolumeSetup() {
   const volumeTexture = useViewerStore((state) => state.volumeTexture);
   const raymarchSettings = useViewerStore((state) => state.raymarchSettings);
   const transferFunction = useViewerStore((state) => state.transferFunction);
+  const clippingPlanes = useViewerStore((state) => state.clippingPlanes);
   const setTransferFunctionTexture = useViewerStore((state) => state.setTransferFunctionTexture);
 
   const materialRef = useRef<THREE.MeshBasicNodeMaterial | undefined>(undefined);
@@ -94,6 +96,28 @@ export function useVolumeSetup() {
       threshold: raymarchSettings.threshold,
     });
   }, [raymarchSettings]);
+
+  // Update clipping plane uniforms when clipping planes change
+  useEffect(() => {
+    if (!materialRef.current) return;
+    updateClippingPlaneUniforms(materialRef.current, {
+      axial: {
+        enabled: clippingPlanes.axial.enabled,
+        position: clippingPlanes.axial.position,
+        inverted: clippingPlanes.axial.inverted,
+      },
+      coronal: {
+        enabled: clippingPlanes.coronal.enabled,
+        position: clippingPlanes.coronal.position,
+        inverted: clippingPlanes.coronal.inverted,
+      },
+      sagittal: {
+        enabled: clippingPlanes.sagittal.enabled,
+        position: clippingPlanes.sagittal.position,
+        inverted: clippingPlanes.sagittal.inverted,
+      },
+    });
+  }, [clippingPlanes]);
 
   // Helper to update camera uniforms (call in useFrame)
   const updateCameraUniforms = (camera: THREE.Camera) => {
