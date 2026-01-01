@@ -39,6 +39,10 @@ export function ClippingPlaneGizmos({ axialMesh, coronalMesh, sagittalMesh }: Cl
     const normalizedZ = (axialMesh.position.z / volDims.depth) + 0.5;
     const clampedZ = Math.max(0, Math.min(1, normalizedZ));
 
+    // Clamp the mesh position directly to prevent jumping when dragging outside valid range
+    const clampedWorldZ = (clampedZ - 0.5) * volDims.depth;
+    axialMesh.position.z = clampedWorldZ;
+
     setClippingPlane('axial', { position: clampedZ });
   };
 
@@ -49,6 +53,10 @@ export function ClippingPlaneGizmos({ axialMesh, coronalMesh, sagittalMesh }: Cl
     const normalizedY = (coronalMesh.position.y / volDims.height) + 0.5;
     const clampedY = Math.max(0, Math.min(1, normalizedY));
 
+    // Clamp the mesh position directly to prevent jumping when dragging outside valid range
+    const clampedWorldY = (clampedY - 0.5) * volDims.height;
+    coronalMesh.position.y = clampedWorldY;
+
     setClippingPlane('coronal', { position: clampedY });
   };
 
@@ -58,6 +66,10 @@ export function ClippingPlaneGizmos({ axialMesh, coronalMesh, sagittalMesh }: Cl
 
     const normalizedX = (sagittalMesh.position.x / volDims.width) + 0.5;
     const clampedX = Math.max(0, Math.min(1, normalizedX));
+
+    // Clamp the mesh position directly to prevent jumping when dragging outside valid range
+    const clampedWorldX = (clampedX - 0.5) * volDims.width;
+    sagittalMesh.position.x = clampedWorldX;
 
     setClippingPlane('sagittal', { position: clampedX });
   };
