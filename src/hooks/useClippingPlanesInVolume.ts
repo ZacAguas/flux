@@ -91,7 +91,8 @@ export function useClippingPlanesInVolume(scene: THREE.Scene | undefined) {
       coronalMat.dispose();
       sagittalMat.dispose();
     };
-  }, [scene, volume, visualization.colors, visualization.opacity, visualization.showPlanes, clippingPlanes]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [scene, volume]);
 
   // Update positions based on clipping plane state
   useEffect(() => {
