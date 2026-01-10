@@ -13,13 +13,16 @@ import type { NiftiVolume, TypedArray } from '../types';
  *
  * @param data - Raw voxel data from NIfTI file
  * @param dataRange - Min and max values in the dataset
+ * @param targetBuffer - Optional pre-allocated buffer to normalize into (for buffer pooling)
  * @returns Normalized Float32Array with values in [0, 1] range
  */
 function normalizeVolumeData(
   data: TypedArray,
-  dataRange: { min: number; max: number }
+  dataRange: { min: number; max: number },
+  targetBuffer?: Float32Array
 ): Float32Array {
-  const normalized = new Float32Array(data.length);
+  // Use provided buffer or allocate new one
+  const normalized = targetBuffer || new Float32Array(data.length);
   const range = dataRange.max - dataRange.min;
 
   // Handle edge case of constant data
@@ -74,11 +77,13 @@ function extractTimeStep(
  *
  * @param volume - NIfTI volume with voxel data and metadata
  * @param timeStep - Time step to extract for 4D volumes (default: 0)
+ * @param bufferPool - Optional pre-allocated buffer for zero-allocation normalization
  * @returns Configured Data3DTexture ready for GPU upload
  */
 export function createVolumeTexture(
   volume: NiftiVolume,
-  timeStep = 0
+  timeStep = 0,
+  bufferPool?: Float32Array
 ): THREE.Data3DTexture {
   const { dimensions, dataRange } = volume;
   let { data } = volume;
@@ -88,8 +93,8 @@ export function createVolumeTexture(
     data = extractTimeStep(data, dimensions, timeStep);
   }
 
-  // Normalize data to 0-1 range
-  const normalizedData = normalizeVolumeData(data, dataRange);
+  // Normalize data to 0-1 range (reusing buffer pool if provided)
+  const normalizedData = normalizeVolumeData(data, dataRange, bufferPool);
 
   // Create 3D texture
   const texture = new THREE.Data3DTexture(

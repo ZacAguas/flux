@@ -16,6 +16,7 @@ import {
   updateRaymarchCameraUniforms,
   updateRaymarchMeshUniforms,
   updateRaymarchUniforms,
+  updateVolumeTexture,
   updateTransferFunctionTexture,
   updateClippingPlaneUniforms,
 } from '../shaders/volumeRaymarch';
@@ -43,13 +44,15 @@ export function useVolumeSetup() {
 
   const materialRef = useRef<THREE.MeshBasicNodeMaterial | undefined>(undefined);
   const [mesh, setMesh] = useState<THREE.Mesh | null>(null);
+  const isGeneratingRef = useRef<boolean>(false);
+  const bufferPoolRef = useRef<Float32Array | null>(null);
 
   // Helper to get volume dimensions for scaling
   const volumeDimensions = volume ? getVolumeDimensions(volume) : null;
 
-  // Create mesh once when volume loads
+  // Create mesh and buffer pool once when volume loads
   useEffect(() => {
-    if (!volumeTexture || !volume) return;
+    if (!volume) return;
 
     const geometry = new THREE.BoxGeometry(1, 1, 1);
     const newMesh = new THREE.Mesh(geometry);
@@ -60,11 +63,19 @@ export function useVolumeSetup() {
 
     setMesh(newMesh);
 
+    // Create buffer pool for zero-allocation texture generation
+    // Size: single 3D volume (x * y * z voxels)
+    // Only created once per volume, reused for all time step navigations
+    const volumeSize = volume.dimensions.x * volume.dimensions.y * volume.dimensions.z;
+    bufferPoolRef.current = new Float32Array(volumeSize);
+    console.log(`Buffer pool created: ${(volumeSize * 4 / (1024 * 1024)).toFixed(1)} MB`);
+
     return () => {
       geometry.dispose();
       setMesh(null);
+      bufferPoolRef.current = null; // Release buffer
     };
-  }, [volumeTexture, volume]);
+  }, [volume]); // Only depend on volume, not volumeTexture (buffer persists across time steps)
 
   // Create/update material separately
   useEffect(() => {
@@ -118,69 +129,72 @@ export function useVolumeSetup() {
     return () => {
       materialRef.current?.dispose();
     };
-  }, [volumeTexture, volume, mesh, transferFunction, raymarchSettings.stepSize, raymarchSettings.threshold, setTransferFunctionTexture, clippingPlanes]);
+
+    // NOTE: volumeTexture removed from deps - we update it separately below
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [volume, mesh, transferFunction, raymarchSettings.stepSize, raymarchSettings.threshold, setTransferFunctionTexture, clippingPlanes]);
+
+  // Update volume texture uniform when volumeTexture changes (4D time step navigation)
+  // This avoids recreating the entire material, preventing memory leaks during playback
+  useEffect(() => {
+    if (!materialRef.current || !volumeTexture) return;
+
+    updateVolumeTexture(materialRef.current, volumeTexture);
+  }, [volumeTexture]);
 
   // Regenerate volume texture when time step changes (with caching)
   useEffect(() => {
     if (!volume || !volume.dimensions.t || volume.dimensions.t <= 1) return;
 
-    const loadTexture = async () => {
-      try {
-        // Check cache first
-        const cached = textureCache.get(timeStep);
-        if (cached) {
-          console.log(`Time step ${timeStep}: Using cached texture`);
-          setVolumeTexture(cached);
-          return;
-        }
+    // Check cache first
+    const cached = textureCache.get(timeStep);
+    if (cached) {
+      setVolumeTexture(cached);
+      return;
+    }
 
-        setIsLoadingTimeStep(true);
+    // Skip if already generating a texture (prevents concurrent writes to buffer pool)
+    if (isGeneratingRef.current) {
+      console.warn(`Time step ${timeStep}: Skipped (generation in progress)`);
+      return;
+    }
 
-        // Generate new texture for current time step
-        const newTexture = createVolumeTexture(volume, timeStep);
+    isGeneratingRef.current = true;
+    setIsLoadingTimeStep(true);
 
-        // Log memory usage
-        const memoryMB = calculateTextureMemory(newTexture);
-        console.log(`Time step ${timeStep}: Generated texture (${memoryMB.toFixed(1)} MB)`);
+    // Generate texture synchronously using buffer pool
+    try {
+      // Generate new texture for current time step (with buffer pool for zero-allocation)
+      const newTexture = createVolumeTexture(volume, timeStep, bufferPoolRef.current || undefined);
 
-        // Warn if single texture exceeds 512MB
-        if (memoryMB > 512) {
-          console.warn(`Large texture (${memoryMB.toFixed(1)} MB). Window loading disabled for memory safety.`);
-        }
+      const memoryMB = calculateTextureMemory(newTexture);
+      // Log memory usage
+      // console.log(`Time step ${timeStep}: ${memoryMB.toFixed(1)} MB`);
 
-        // Update texture (auto-disposes old texture if not in cache)
-        setVolumeTexture(newTexture);
-
-        // Add to cache if texture is reasonable size (<512MB)
-        if (memoryMB <= 512) {
-          addTextureToCache(timeStep, newTexture);
-
-          // Background preload adjacent time steps
-          const totalSteps = volume.dimensions.t!;
-          const toPreload: number[] = [];
-
-          if (timeStep > 0) toPreload.push(timeStep - 1);
-          if (timeStep < totalSteps - 1) toPreload.push(timeStep + 1);
-
-          // Preload in background (non-blocking)
-          setTimeout(() => {
-            toPreload.forEach(step => {
-              if (!textureCache.has(step)) {
-                const preloadTexture = createVolumeTexture(volume, step);
-                addTextureToCache(step, preloadTexture);
-                console.log(`Preloaded time step ${step}`);
-              }
-            });
-          }, 100); // Small delay to avoid blocking main texture
-        }
-      } catch (error) {
-        console.error('Failed to load texture for time step', timeStep, error);
-      } finally {
-        setIsLoadingTimeStep(false);
+      // Warn if single texture exceeds 512MB
+      if (memoryMB > 512) {
+        console.warn(`Large texture (${memoryMB.toFixed(1)} MB). Window loading disabled for memory safety.`);
       }
-    };
 
-    loadTexture();
+      // Update texture (auto-disposes old texture if not in cache)
+      setVolumeTexture(newTexture);
+
+      // Add to cache if texture is reasonable size (<512MB)
+      if (memoryMB <= 512) {
+        addTextureToCache(timeStep, newTexture);
+
+        // NOTE: Background preloading disabled because buffer pool is singular
+        // We reuse a single Float32Array buffer for zero-allocation generation
+        // Parallel preloading would require multiple buffers or risk data corruption
+        // Cache builds progressively during normal playback (forward navigation caches as you go)
+        // PERF: Web Worker with separate buffer could enable true parallel preloading
+      }
+    } catch (error) {
+      console.error('Failed to load texture for time step', timeStep, error);
+    } finally {
+      isGeneratingRef.current = false;
+      setIsLoadingTimeStep(false);
+    }
   }, [timeStep, volume, textureCache, setVolumeTexture, setIsLoadingTimeStep, addTextureToCache]);
 
   // Update transfer function texture when it changes
