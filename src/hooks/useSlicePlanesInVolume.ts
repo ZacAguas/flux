@@ -80,6 +80,7 @@ export function useSlicePlanesInVolume(scene: THREE.Scene | undefined) {
     const axialGeo = new THREE.PlaneGeometry(1, 1);
     axialMeshRef.current = new THREE.Mesh(axialGeo, axialMatRef.current);
     axialMeshRef.current.scale.set(axialScale.width, axialScale.height, 1);
+    axialMeshRef.current.visible = showSlicePlanes && slicePlaneSettings.visibility.axial;
     // axialMeshRef.current.rotation.set(0, 0, 0); // Default XY
 
     // Create Coronal
@@ -88,6 +89,7 @@ export function useSlicePlanesInVolume(scene: THREE.Scene | undefined) {
     const coronalGeo = new THREE.PlaneGeometry(1, 1);
     coronalMeshRef.current = new THREE.Mesh(coronalGeo, coronalMatRef.current);
     coronalMeshRef.current.scale.set(coronalScale.width, coronalScale.height, 1);
+    coronalMeshRef.current.visible = showSlicePlanes && slicePlaneSettings.visibility.coronal;
     coronalMeshRef.current.rotation.set(Math.PI / 2, 0, 0); // XZ
 
     // Create Sagittal
@@ -96,6 +98,7 @@ export function useSlicePlanesInVolume(scene: THREE.Scene | undefined) {
     const sagittalGeo = new THREE.PlaneGeometry(1, 1);
     sagittalMeshRef.current = new THREE.Mesh(sagittalGeo, sagittalMatRef.current);
     sagittalMeshRef.current.scale.set(sagittalScale.width, sagittalScale.height, 1);
+    sagittalMeshRef.current.visible = showSlicePlanes && slicePlaneSettings.visibility.sagittal;
     sagittalMeshRef.current.rotation.set(0, Math.PI / 2, +Math.PI / 2); // YZ
 
     scene.add(axialMeshRef.current);
@@ -120,8 +123,9 @@ export function useSlicePlanesInVolume(scene: THREE.Scene | undefined) {
     };
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [scene, volume, volumeTexture, slicePlaneSettings.mode]);
+  }, [scene, volume, volumeTexture, slicePlaneSettings.mode, showSlicePlanes, slicePlaneSettings.visibility]);
   // Re-run if mode changes (textured vs colored) or volume changes.
+  // Include visibility states to ensure proper initial visibility when meshes are recreated
 
   // Update positions and textures (Slice Indices change)
   useEffect(() => {

@@ -57,6 +57,7 @@ export function useClippingPlanesInVolume(scene: THREE.Scene | undefined) {
     const axialMat = createMaterial(visualization.colors.axial);
     axialMeshRef.current = new THREE.Mesh(axialGeo, axialMat);
     axialMeshRef.current.scale.set(volDims.width, volDims.height, 1);
+    axialMeshRef.current.visible = visualization.showPlanes && clippingPlanes.axial.enabled;
     // No rotation needed for axial (default XY orientation)
 
     // Create Coronal clipping plane (XZ plane)
@@ -64,6 +65,7 @@ export function useClippingPlanesInVolume(scene: THREE.Scene | undefined) {
     const coronalMat = createMaterial(visualization.colors.coronal);
     coronalMeshRef.current = new THREE.Mesh(coronalGeo, coronalMat);
     coronalMeshRef.current.scale.set(volDims.width, volDims.depth, 1);
+    coronalMeshRef.current.visible = visualization.showPlanes && clippingPlanes.coronal.enabled;
     coronalMeshRef.current.rotation.set(Math.PI / 2, 0, 0);
 
     // Create Sagittal clipping plane (YZ plane)
@@ -71,6 +73,7 @@ export function useClippingPlanesInVolume(scene: THREE.Scene | undefined) {
     const sagittalMat = createMaterial(visualization.colors.sagittal);
     sagittalMeshRef.current = new THREE.Mesh(sagittalGeo, sagittalMat);
     sagittalMeshRef.current.scale.set(volDims.height, volDims.depth, 1);
+    sagittalMeshRef.current.visible = visualization.showPlanes && clippingPlanes.sagittal.enabled;
     sagittalMeshRef.current.rotation.set(0, Math.PI / 2, Math.PI / 2);
 
     scene.add(axialMeshRef.current);
@@ -88,7 +91,7 @@ export function useClippingPlanesInVolume(scene: THREE.Scene | undefined) {
       coronalMat.dispose();
       sagittalMat.dispose();
     };
-  }, [scene, volume, visualization.colors, visualization.opacity]);
+  }, [scene, volume, visualization.colors, visualization.opacity, visualization.showPlanes, clippingPlanes]);
 
   // Update positions based on clipping plane state
   useEffect(() => {
