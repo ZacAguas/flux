@@ -28,6 +28,9 @@ import {
 } from 'three/tsl';
 import * as THREE from 'three/webgpu';
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type TSLNode = any;
+
 /**
  * Ray-box intersection function (inline)
  * Returns entry (tNear) and exit (tFar) distances along ray
@@ -55,12 +58,12 @@ const intersectBox = (rayOrigin: THREE.VarNode, rayDir: THREE.VarNode) => {
  * Returns true if the position should be clipped (discarded)
  */
 const isClipped = (
-  samplePos: any,
-  clippingAxial: any,
-  clippingCoronal: any,
-  clippingSagittal: any,
-  clippingEnabled: any,
-  clippingInverted: any
+  samplePos: TSLNode,
+  clippingAxial: TSLNode,
+  clippingCoronal: TSLNode,
+  clippingSagittal: TSLNode,
+  clippingEnabled: TSLNode,
+  clippingInverted: TSLNode
 ) => {
   // Test each plane: position < planePos means "behind" plane (clipped)
   // If inverted, flip to clip the opposite side (position > planePos)
@@ -84,9 +87,8 @@ const isClipped = (
  * Transfer function using 1D texture lookup
  * Maps intensity [0, 1] to RGBA using pre-generated lookup texture
  */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-const createTransferFunction = (transferFunctionTextureNode: any) => {
-  return (intensity: any) => {
+const createTransferFunction = (transferFunctionTextureNode: TSLNode) => {
+  return (intensity: TSLNode) => {
     // Sample 1D lookup texture
     // Y coordinate is 0.5 (middle of 1px height texture)
     const uvCoord = vec2(intensity, float(0.5));
