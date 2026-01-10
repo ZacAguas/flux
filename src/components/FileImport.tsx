@@ -4,7 +4,7 @@
 
 import { useState } from 'react';
 import { parseNifti } from '../utils/niftiParser';
-import { createVolumeTexture } from '../utils/volumeTextureConverter';
+import { createVolumeTexture, calculateTextureMemory } from '../utils/volumeTextureConverter';
 import { useViewerStore } from '../store/viewerStore';
 
 export function FileImport() {
@@ -27,6 +27,18 @@ export function FileImport() {
       const volume = await parseNifti(file);
       const texture = createVolumeTexture(volume, 0);
       setVolume(volume, texture, file.name);
+
+      // Log 4D dataset info
+      if (volume.dimensions.t && volume.dimensions.t > 1) {
+        const singleTextureMB = calculateTextureMemory(texture);
+        const windowMemoryMB = singleTextureMB * 3; // Window cache size
+
+        console.log(`4D dataset: ${volume.dimensions.t} time steps`);
+        console.log(`Single texture: ${singleTextureMB.toFixed(1)} MB`);
+        console.log(`Window cache (3 textures): ${windowMemoryMB.toFixed(1)} MB`);
+
+        // NOTE: Window loading auto-disabled in useVolumeSetup if texture >512MB
+      }
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Failed to load file';
       setError(message);

@@ -10,6 +10,8 @@ import { Button } from '@heroui/react';
 import { LayoutModeButtons } from './LayoutModeButtons';
 import { SliceControls } from './SliceControls';
 import { WindowLevelControls } from './WindowLevelControls';
+import { TimeStepControls } from './TimeStepControls';
+import { TimePlaybackControls } from './TimePlaybackControls';
 import { ViewOptionsControls } from './ViewOptionsControls';
 import { RenderingControls } from './RenderingControls';
 import { ClippingPlaneControls } from './ClippingPlaneControls';
@@ -120,11 +122,10 @@ export function ControlPanel() {
               <SliceControls />
               <WindowLevelControls />
 
-              {/* Time slider placeholder */}
+              {/* Time navigation controls */}
               <hr className="border-t border-white/10" />
-              <div className="text-[10px] text-white/40 italic">
-                Coming soon: 4D time navigation slider
-              </div>
+              <TimeStepControls />
+              <TimePlaybackControls />
             </div>
           </CollapsibleSection>
 

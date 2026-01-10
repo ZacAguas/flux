@@ -50,6 +50,8 @@ interface ViewerStore {
   showMetricOverlays: boolean;
   volumeFileName: string | null;
   timeStep: number;
+  isLoadingTimeStep: boolean;
+  textureCache: Map<number, THREE.Data3DTexture>;
   controlPanelOpen: boolean;
   controlPanelPinned: boolean;
   controlPanelContentHeight: number;
@@ -65,6 +67,7 @@ interface ViewerStore {
   // Actions
   setLayoutMode: (mode: LayoutMode) => void;
   setVolume: (volume: NiftiVolume, texture: THREE.Data3DTexture, fileName?: string) => void;
+  setVolumeTexture: (texture: THREE.Data3DTexture) => void;
   setSliceIndex: (orientation: keyof SliceIndices, index: number) => void;
   setSliceCamera: (orientation: keyof SliceCameraState, camera: Partial<SliceCamera>) => void;
   resetSliceCamera: (orientation: keyof SliceCameraState) => void;
@@ -76,6 +79,9 @@ interface ViewerStore {
   setSlicePlaneSettings: (settings: Partial<SlicePlaneSettings>) => void;
   setShowMetricOverlays: (show: boolean) => void;
   setTimeStep: (step: number) => void;
+  setIsLoadingTimeStep: (loading: boolean) => void;
+  addTextureToCache: (timeStep: number, texture: THREE.Data3DTexture) => void;
+  clearTextureCache: () => void;
   setControlPanelOpen: (open: boolean) => void;
   setControlPanelPinned: (isPinned: boolean) => void;
   setControlPanelContentHeight: (height: number) => void;
@@ -142,6 +148,8 @@ export const useViewerStore = create<ViewerStore>((set, get) => ({
   showMetricOverlays: true,
   volumeFileName: null,
   timeStep: 0,
+  isLoadingTimeStep: false,
+  textureCache: new Map(),
   controlPanelOpen: true,
   controlPanelPinned: true,
   controlPanelContentHeight: 0,
@@ -237,6 +245,11 @@ export const useViewerStore = create<ViewerStore>((set, get) => ({
       oldTexture.dispose();
     }
 
+    // Clear texture cache when loading new volume
+    const cache = get().textureCache;
+    cache.forEach(tex => tex.dispose());
+    cache.clear();
+
     // Calculate initial slice indices (middle of each dimension)
     const sliceIndices: SliceIndices = {
       axial: Math.floor(volume.dimensions.z / 2),
@@ -261,8 +274,18 @@ export const useViewerStore = create<ViewerStore>((set, get) => ({
       },
       windowLevel,
       timeStep: 0,
+      isLoadingTimeStep: false,
+      textureCache: new Map(),
       volumeFileName: fileName || null,
     });
+  },
+
+  setVolumeTexture: (texture) => {
+    const oldTexture = get().volumeTexture;
+    if (oldTexture) {
+      oldTexture.dispose();
+    }
+    set({ volumeTexture: texture });
   },
 
   setSliceIndex: (orientation, index) =>
@@ -339,7 +362,49 @@ export const useViewerStore = create<ViewerStore>((set, get) => ({
 
   setShowMetricOverlays: (show) => set({ showMetricOverlays: show }),
 
-  setTimeStep: (step) => set({ timeStep: step }),
+  setTimeStep: (step) => {
+    const volume = get().volume;
+    if (!volume?.dimensions.t) return;
+    const clamped = Math.max(0, Math.min(step, volume.dimensions.t - 1));
+    set({ timeStep: clamped });
+  },
+
+  setIsLoadingTimeStep: (loading) => set({ isLoadingTimeStep: loading }),
+
+  addTextureToCache: (timeStep, texture) => {
+    const cache = get().textureCache;
+
+    // Limit cache size to 3 textures
+    if (cache.size >= 3) {
+      // Find oldest entry (furthest from current timeStep)
+      let furthestKey = -1;
+      let maxDistance = -1;
+
+      cache.forEach((_, key) => {
+        const distance = Math.abs(key - get().timeStep);
+        if (distance > maxDistance) {
+          maxDistance = distance;
+          furthestKey = key;
+        }
+      });
+
+      // Evict furthest entry
+      if (furthestKey !== -1) {
+        const oldTexture = cache.get(furthestKey);
+        oldTexture?.dispose();
+        cache.delete(furthestKey);
+      }
+    }
+
+    cache.set(timeStep, texture);
+    set({ textureCache: new Map(cache) });
+  },
+
+  clearTextureCache: () => {
+    const cache = get().textureCache;
+    cache.forEach(texture => texture.dispose());
+    set({ textureCache: new Map() });
+  },
 
   setControlPanelOpen: (open) => set({ controlPanelOpen: open }),
 
