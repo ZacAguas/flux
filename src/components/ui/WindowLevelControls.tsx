@@ -33,7 +33,7 @@ export function WindowLevelControls() {
       >
         <Label className="text-white/50 text-xs font-medium">W Center</Label>
         <Slider.Output className="text-xs">
-          {({ state }) => Math.round(Number(state.getThumbValueLabel(0)))}
+          {({ state }) => Math.round(state.getThumbValue(0))}
         </Slider.Output>
         <Slider.Track className="bg-white/15 backdrop-blur-sm rounded-md">
           <Slider.Fill />
@@ -53,7 +53,7 @@ export function WindowLevelControls() {
       >
         <Label className="text-white/50 text-xs font-medium">W Width</Label>
         <Slider.Output className="text-xs">
-          {({ state }) => Math.round(Number(state.getThumbValueLabel(0)))}
+          {({ state }) => Math.round(state.getThumbValue(0))}
         </Slider.Output>
         <Slider.Track className="bg-white/15 backdrop-blur-sm rounded-md">
           <Slider.Fill />
