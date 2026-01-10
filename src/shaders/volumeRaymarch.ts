@@ -260,6 +260,7 @@ export function createVolumeRaymarchMaterial(
   (material as any).uniforms = {
     stepSize: stepSizeUniform,
     threshold: thresholdUniform,
+    volumeTexture: volumeTextureNode,
     transferFunctionTexture: transferFunctionTextureNode,
     inverseModelMatrix: inverseModelMatrixUniform,
     isOrtho: isOrthoUniform,
