@@ -296,6 +296,22 @@ export function updateRaymarchUniforms(
 }
 
 /**
+ * Update volume texture (call when time step changes in 4D data)
+ * Avoids recreating the entire material for better performance during playback
+ */
+export function updateVolumeTexture(
+  material: THREE.MeshBasicNodeMaterial,
+  texture: THREE.Data3DTexture
+) {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const uniforms = (material as any).uniforms;
+
+  if (uniforms.volumeTexture) {
+    uniforms.volumeTexture.value = texture;
+  }
+}
+
+/**
  * Update transfer function texture (call when transfer function changes)
  */
 export function updateTransferFunctionTexture(
