@@ -20,16 +20,12 @@ export function TimePlaybackControls() {
   const [loop, setLoop] = useState(true);
   const intervalRef = useRef<number | null>(null);
 
-  // Only show for 4D volumes
-  if (!volume?.dimensions.t || volume.dimensions.t <= 1) {
-    return null;
-  }
-
-  const totalTimeSteps = volume.dimensions.t;
+  const is4D = volume?.dimensions.t && volume.dimensions.t > 1;
+  const totalTimeSteps = volume?.dimensions.t || 0;
 
   // Playback logic
   useEffect(() => {
-    if (!isPlaying) {
+    if (!is4D || !isPlaying) {
       if (intervalRef.current !== null) {
         clearInterval(intervalRef.current);
         intervalRef.current = null;
@@ -59,7 +55,7 @@ export function TimePlaybackControls() {
         clearInterval(intervalRef.current);
       }
     };
-  }, [isPlaying, fps, loop, totalTimeSteps, timeStep, setTimeStep]);
+  }, [isPlaying, fps, loop, totalTimeSteps, timeStep, setTimeStep, is4D]);
 
   // Stop playback if loading takes too long (safety)
   useEffect(() => {
@@ -73,6 +69,11 @@ export function TimePlaybackControls() {
       return () => clearTimeout(timeout);
     }
   }, [isLoadingTimeStep, isPlaying]);
+
+  // Only show for 4D volumes
+  if (!is4D) {
+    return null;
+  }
 
   return (
     <div className="flex flex-col gap-2">
