@@ -21,6 +21,7 @@ import {
 } from '../shaders/volumeRaymarch';
 import { getVolumeDimensions } from '../utils/layout';
 import { generateTransferFunctionTexture } from '../utils/transferFunctionTexture';
+import { createVolumeTexture, calculateTextureMemory } from '../utils/volumeTextureConverter';
 
 /**
  * Custom hook to setup and manage the volume raymarching mesh and material.
@@ -30,10 +31,15 @@ import { generateTransferFunctionTexture } from '../utils/transferFunctionTextur
 export function useVolumeSetup() {
   const volume = useViewerStore((state) => state.volume);
   const volumeTexture = useViewerStore((state) => state.volumeTexture);
+  const timeStep = useViewerStore((state) => state.timeStep);
+  const textureCache = useViewerStore((state) => state.textureCache);
   const raymarchSettings = useViewerStore((state) => state.raymarchSettings);
   const transferFunction = useViewerStore((state) => state.transferFunction);
   const clippingPlanes = useViewerStore((state) => state.clippingPlanes);
   const setTransferFunctionTexture = useViewerStore((state) => state.setTransferFunctionTexture);
+  const setVolumeTexture = useViewerStore((state) => state.setVolumeTexture);
+  const setIsLoadingTimeStep = useViewerStore((state) => state.setIsLoadingTimeStep);
+  const addTextureToCache = useViewerStore((state) => state.addTextureToCache);
 
   const materialRef = useRef<THREE.MeshBasicNodeMaterial | undefined>(undefined);
   const [mesh, setMesh] = useState<THREE.Mesh | null>(null);
@@ -113,6 +119,69 @@ export function useVolumeSetup() {
       materialRef.current?.dispose();
     };
   }, [volumeTexture, volume, mesh, transferFunction, raymarchSettings.stepSize, raymarchSettings.threshold, setTransferFunctionTexture, clippingPlanes]);
+
+  // Regenerate volume texture when time step changes (with caching)
+  useEffect(() => {
+    if (!volume || !volume.dimensions.t || volume.dimensions.t <= 1) return;
+
+    const loadTexture = async () => {
+      try {
+        // Check cache first
+        const cached = textureCache.get(timeStep);
+        if (cached) {
+          console.log(`Time step ${timeStep}: Using cached texture`);
+          setVolumeTexture(cached);
+          return;
+        }
+
+        setIsLoadingTimeStep(true);
+
+        // Generate new texture for current time step
+        const newTexture = createVolumeTexture(volume, timeStep);
+
+        // Log memory usage
+        const memoryMB = calculateTextureMemory(newTexture);
+        console.log(`Time step ${timeStep}: Generated texture (${memoryMB.toFixed(1)} MB)`);
+
+        // Warn if single texture exceeds 512MB
+        if (memoryMB > 512) {
+          console.warn(`Large texture (${memoryMB.toFixed(1)} MB). Window loading disabled for memory safety.`);
+        }
+
+        // Update texture (auto-disposes old texture if not in cache)
+        setVolumeTexture(newTexture);
+
+        // Add to cache if texture is reasonable size (<512MB)
+        if (memoryMB <= 512) {
+          addTextureToCache(timeStep, newTexture);
+
+          // Background preload adjacent time steps
+          const totalSteps = volume.dimensions.t!;
+          const toPreload: number[] = [];
+
+          if (timeStep > 0) toPreload.push(timeStep - 1);
+          if (timeStep < totalSteps - 1) toPreload.push(timeStep + 1);
+
+          // Preload in background (non-blocking)
+          setTimeout(() => {
+            toPreload.forEach(step => {
+              if (!textureCache.has(step)) {
+                const preloadTexture = createVolumeTexture(volume, step);
+                addTextureToCache(step, preloadTexture);
+                console.log(`Preloaded time step ${step}`);
+              }
+            });
+          }, 100); // Small delay to avoid blocking main texture
+        }
+      } catch (error) {
+        console.error('Failed to load texture for time step', timeStep, error);
+      } finally {
+        setIsLoadingTimeStep(false);
+      }
+    };
+
+    loadTexture();
+  }, [timeStep, volume, textureCache, setVolumeTexture, setIsLoadingTimeStep, addTextureToCache]);
 
   // Update transfer function texture when it changes
   useEffect(() => {
