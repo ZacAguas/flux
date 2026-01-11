@@ -51,6 +51,11 @@ export function SliceInteractionHandler({
   // Container ref to get bounding rect for coordinate conversion
   const containerRef = useRef<HTMLDivElement>(null);
 
+  // Refs for individual slice overlays to attach non-passive event listeners
+  const axialRef = useRef<HTMLDivElement>(null);
+  const coronalRef = useRef<HTMLDivElement>(null);
+  const sagittalRef = useRef<HTMLDivElement>(null);
+
   // Track Ctrl key for pan mode indication
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -242,7 +247,7 @@ export function SliceInteractionHandler({
    * Handle mouse wheel - zoom in/out
    */
   const handleWheel = (
-    e: React.WheelEvent<HTMLDivElement>,
+    e: WheelEvent,
     orientation: SliceOrientation
   ) => {
     if (!volume || !containerRef.current) return;
@@ -297,6 +302,38 @@ export function SliceInteractionHandler({
       panY: newPanY,
     });
   };
+
+  // Use a ref to keep the latest handleWheel callback available for the effect
+  const handleWheelRef = useRef(handleWheel);
+  handleWheelRef.current = handleWheel;
+
+  /**
+   * HACK: Manually attach wheel event listeners with { passive: false }.
+   * React's onWheel prop uses passive listeners by default in most browsers,
+   * which prevents e.preventDefault() from stopping page scroll during zoom.
+   * See: https://github.com/facebook/react/issues/22794
+   */
+  useEffect(() => {
+    const options = { passive: false };
+
+    const onAxialWheel = (e: WheelEvent) => handleWheelRef.current(e, 'axial');
+    const onCoronalWheel = (e: WheelEvent) => handleWheelRef.current(e, 'coronal');
+    const onSagittalWheel = (e: WheelEvent) => handleWheelRef.current(e, 'sagittal');
+
+    const axialEl = axialRef.current;
+    const coronalEl = coronalRef.current;
+    const sagittalEl = sagittalRef.current;
+
+    if (axialEl) axialEl.addEventListener('wheel', onAxialWheel, options);
+    if (coronalEl) coronalEl.addEventListener('wheel', onCoronalWheel, options);
+    if (sagittalEl) sagittalEl.addEventListener('wheel', onSagittalWheel, options);
+
+    return () => {
+      if (axialEl) axialEl.removeEventListener('wheel', onAxialWheel);
+      if (coronalEl) coronalEl.removeEventListener('wheel', onCoronalWheel);
+      if (sagittalEl) sagittalEl.removeEventListener('wheel', onSagittalWheel);
+    };
+  }, []);
 
   if (!volume) return null;
 
@@ -356,6 +393,7 @@ export function SliceInteractionHandler({
     >
       {/* Axial slice overlay */}
       <div
+        ref={axialRef}
         style={{
           ...overlayStyle,
           left: `${axialViewport.x}px`,
@@ -367,12 +405,12 @@ export function SliceInteractionHandler({
         onPointerMove={handlePointerMove}
         onPointerUp={handlePointerUp}
         onPointerCancel={handlePointerUp}
-        onWheel={(e) => handleWheel(e, 'axial')}
         onContextMenu={(e) => e.preventDefault()}
       />
 
       {/* Coronal slice overlay */}
       <div
+        ref={coronalRef}
         style={{
           ...overlayStyle,
           left: `${coronalViewport.x}px`,
@@ -384,12 +422,12 @@ export function SliceInteractionHandler({
         onPointerMove={handlePointerMove}
         onPointerUp={handlePointerUp}
         onPointerCancel={handlePointerUp}
-        onWheel={(e) => handleWheel(e, 'coronal')}
         onContextMenu={(e) => e.preventDefault()}
       />
 
       {/* Sagittal slice overlay */}
       <div
+        ref={sagittalRef}
         style={{
           ...overlayStyle,
           left: `${sagittalViewport.x}px`,
@@ -401,7 +439,6 @@ export function SliceInteractionHandler({
         onPointerMove={handlePointerMove}
         onPointerUp={handlePointerUp}
         onPointerCancel={handlePointerUp}
-        onWheel={(e) => handleWheel(e, 'sagittal')}
         onContextMenu={(e) => e.preventDefault()}
       />
     </div>
