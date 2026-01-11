@@ -63,12 +63,14 @@ export function useVolumeSetup() {
 
     setMesh(newMesh);
 
-    // Create buffer pool for zero-allocation texture generation
+    // Create buffer pool for zero-allocation texture generation (4D volumes only)
     // Size: single 3D volume (x * y * z voxels)
     // Only created once per volume, reused for all time step navigations
-    const volumeSize = volume.dimensions.x * volume.dimensions.y * volume.dimensions.z;
-    bufferPoolRef.current = new Float32Array(volumeSize);
-    console.log(`Buffer pool created: ${(volumeSize * 4 / (1024 * 1024)).toFixed(1)} MB`);
+    if (volume.dimensions.t && volume.dimensions.t > 1) {
+      const volumeSize = volume.dimensions.x * volume.dimensions.y * volume.dimensions.z;
+      bufferPoolRef.current = new Float32Array(volumeSize);
+      console.log(`Buffer pool created: ${(volumeSize * 4 / (1024 * 1024)).toFixed(1)} MB`);
+    }
 
     return () => {
       geometry.dispose();
