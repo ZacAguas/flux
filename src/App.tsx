@@ -2,7 +2,8 @@ import { extend, type ThreeToJSXElements } from '@react-three/fiber';
 import * as THREE from 'three/webgpu';
 import './App.css';
 import { FileImport } from './components/FileImport';
-import { LayoutManager } from './components/layouts/LayoutManager';
+import { PersistentLayout } from './components/layouts/PersistentLayout';
+import { LayoutContextProvider } from './context/LayoutContext';
 import { ControlPanel } from './components/ui/ControlPanel';
 import { useViewerStore } from './store/viewerStore';
 
@@ -21,7 +22,9 @@ function App() {
     <>
       {volume ? (
         <>
-          <LayoutManager />
+          <LayoutContextProvider>
+            <PersistentLayout />
+          </LayoutContextProvider>
           <ControlPanel />
         </>
       ) : (
