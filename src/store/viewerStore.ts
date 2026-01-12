@@ -6,6 +6,12 @@ import type { RaymarchSettings, TransferFunction, TransferFunctionPoint } from '
 import type { ClippingPlanes, ClippingPlaneVisualization, ClippingPlane } from '../types/clipping';
 import { getPresetByName } from '../data/transferFunctionPresets';
 
+export interface VolumeCameraState {
+  position: [number, number, number];
+  target: [number, number, number];
+  zoom: number;
+}
+
 interface CrosshairSettings {
   color: string;
   opacity: number;
@@ -42,6 +48,7 @@ interface ViewerStore {
   volumeTexture: THREE.Data3DTexture | null;
   sliceIndices: SliceIndices;
   sliceCameraState: SliceCameraState;
+  volumeCameraState: VolumeCameraState;
   windowLevel: WindowLevel;
   showCrosshairs: boolean;
   crosshairSettings: CrosshairSettings;
@@ -72,6 +79,7 @@ interface ViewerStore {
   setSliceCamera: (orientation: keyof SliceCameraState, camera: Partial<SliceCamera>) => void;
   resetSliceCamera: (orientation: keyof SliceCameraState) => void;
   resetAllSliceCameras: () => void;
+  setVolumeCameraState: (state: Partial<VolumeCameraState>) => void;
   setWindowLevel: (windowLevel: Partial<WindowLevel>) => void;
   setShowCrosshairs: (show: boolean) => void;
   setCrosshairSettings: (settings: Partial<CrosshairSettings>) => void;
@@ -120,6 +128,11 @@ export const useViewerStore = create<ViewerStore>((set, get) => ({
     axial: { ...defaultSliceCamera },
     coronal: { ...defaultSliceCamera },
     sagittal: { ...defaultSliceCamera },
+  },
+  volumeCameraState: {
+    position: [0, 0, 5],
+    target: [0, 0, 0],
+    zoom: 100,
   },
   windowLevel: {
     center: 0,
@@ -323,6 +336,14 @@ export const useViewerStore = create<ViewerStore>((set, get) => ({
         sagittal: { ...defaultSliceCamera },
       },
     }),
+
+  setVolumeCameraState: (newState) =>
+    set((state) => ({
+      volumeCameraState: {
+        ...state.volumeCameraState,
+        ...newState,
+      },
+    })),
 
   setWindowLevel: (newWindowLevel) =>
     set((state) => ({
