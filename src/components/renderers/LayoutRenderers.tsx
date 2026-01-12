@@ -7,17 +7,23 @@ import { useViewerStore } from '../../store/viewerStore';
 import { useLayoutContext } from '../../context/LayoutContext';
 import { ClippingPlaneGizmos } from '../ClippingPlaneGizmos';
 
+interface VolumeDimensions {
+  width: number;
+  height: number;
+  depth: number;
+}
+
 interface LayoutRendererProps {
   // Volume Resources
   volumeMesh: THREE.Mesh | null;
-  volumeDimensions: THREE.Vector3 | null;
+  volumeDimensions: VolumeDimensions | null;
   updateCameraUniforms: (camera: THREE.Camera) => void;
 
   // Clipping Planes (for Gizmos)
   clippingMeshes: {
-    axialMesh: THREE.Mesh | null;
-    coronalMesh: THREE.Mesh | null;
-    sagittalMesh: THREE.Mesh | null;
+    axialMesh: THREE.Mesh | undefined;
+    coronalMesh: THREE.Mesh | undefined;
+    sagittalMesh: THREE.Mesh | undefined;
   };
 
   // Slice Resources
