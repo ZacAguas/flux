@@ -44,12 +44,35 @@ interface LayoutRendererProps {
 // Single Renderer
 // -----------------------------------------------------------------------------
 function SingleRenderer({ volumeMesh, volumeDimensions, updateCameraUniforms, clippingMeshes }: LayoutRendererProps) {
-  const { scene, gl, size } = useThree();
+  const { scene, gl, size, camera } = useThree();
+  const volumeCameraState = useViewerStore((state) => state.volumeCameraState);
+  const setVolumeCameraState = useViewerStore((state) => state.setVolumeCameraState);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const controlsRef = useRef<any>(null);
+
+  // Restore camera state on mount
+  useEffect(() => {
+    if (controlsRef.current) {
+      const controls = controlsRef.current;
+
+      // Apply saved state
+      camera.position.set(...volumeCameraState.position);
+      // Orthographic camera zoom
+      if (camera instanceof THREE.OrthographicCamera) {
+        camera.zoom = volumeCameraState.zoom;
+      }
+      camera.updateProjectionMatrix();
+
+      controls.target.set(...volumeCameraState.target);
+      controls.update();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); // Run once on mount
 
   // Re-parent mesh and clipping gizmos to default scene
   useEffect(() => {
     if (volumeMesh) scene.add(volumeMesh);
-    
+
     // Add Clipping Gizmos
     if (clippingMeshes.axialMesh) scene.add(clippingMeshes.axialMesh);
     if (clippingMeshes.coronalMesh) scene.add(clippingMeshes.coronalMesh);
@@ -57,7 +80,7 @@ function SingleRenderer({ volumeMesh, volumeDimensions, updateCameraUniforms, cl
 
     return () => {
       if (volumeMesh) scene.remove(volumeMesh);
-      
+
       // Remove Clipping Gizmos
       if (clippingMeshes.axialMesh) scene.remove(clippingMeshes.axialMesh);
       if (clippingMeshes.coronalMesh) scene.remove(clippingMeshes.coronalMesh);
@@ -86,7 +109,23 @@ function SingleRenderer({ volumeMesh, volumeDimensions, updateCameraUniforms, cl
         coronalMesh={clippingMeshes.coronalMesh}
         sagittalMesh={clippingMeshes.sagittalMesh}
       />
-      <OrbitControls makeDefault enableDamping dampingFactor={0.05} minDistance={2} maxDistance={10} />
+      <OrbitControls
+        ref={controlsRef}
+        makeDefault
+        enableDamping
+        dampingFactor={0.05}
+        minDistance={2}
+        maxDistance={10}
+        onEnd={() => {
+          if (controlsRef.current) {
+            setVolumeCameraState({
+              position: camera.position.toArray() as [number, number, number],
+              target: controlsRef.current.target.toArray() as [number, number, number],
+              zoom: (camera as THREE.OrthographicCamera).zoom,
+            });
+          }
+        }}
+      />
     </>
   );
 }
@@ -146,6 +185,8 @@ function QuadRenderer(props: LayoutRendererProps) {
 
   const { gl, size } = useThree();
   const { volumeViewportRef } = useLayoutContext();
+  const volumeCameraState = useViewerStore((state) => state.volumeCameraState);
+  const setVolumeCameraState = useViewerStore((state) => state.setVolumeCameraState);
 
   // Local Volume Scene & Camera for Quad View
   // We don't use the default R3F scene here to avoid conflicts/overhead
@@ -153,18 +194,13 @@ function QuadRenderer(props: LayoutRendererProps) {
   const volumeCameraRef = useRef(new THREE.OrthographicCamera(-1, 1, 1, -1, 0.1, 1000));
   const controlsRef = useRef<StdOrbitControls | null>(null);
 
-  // Setup Volume Scene
-  useEffect(() => {
-    volumeCameraRef.current.position.set(0, 0, 5);
-  }, []);
-
   // Re-parent mesh and clipping gizmos to local volume scene
   useEffect(() => {
     const scene = volumeSceneRef.current;
-    
+
     // Add Volume
     if (volumeMesh) scene.add(volumeMesh);
-    
+
     // Add Clipping Gizmos
     if (clippingMeshes.axialMesh) scene.add(clippingMeshes.axialMesh);
     if (clippingMeshes.coronalMesh) scene.add(clippingMeshes.coronalMesh);
@@ -173,7 +209,7 @@ function QuadRenderer(props: LayoutRendererProps) {
     return () => {
       // Remove Volume
       if (volumeMesh) scene.remove(volumeMesh);
-      
+
       // Remove Clipping Gizmos
       if (clippingMeshes.axialMesh) scene.remove(clippingMeshes.axialMesh);
       if (clippingMeshes.coronalMesh) scene.remove(clippingMeshes.coronalMesh);
@@ -187,9 +223,34 @@ function QuadRenderer(props: LayoutRendererProps) {
       const controls = new StdOrbitControls(volumeCameraRef.current, volumeViewportRef.current);
       controls.enableDamping = true;
       controls.dampingFactor = 0.05;
+
+      // Apply saved state
+      const cam = volumeCameraRef.current;
+      cam.position.set(...volumeCameraState.position);
+      cam.zoom = volumeCameraState.zoom;
+      cam.updateProjectionMatrix();
+
+      controls.target.set(...volumeCameraState.target);
+      controls.update();
+
+      // Listen for changes to save state
+      const onEnd = () => {
+        setVolumeCameraState({
+          position: cam.position.toArray() as [number, number, number],
+          target: controls.target.toArray() as [number, number, number],
+          zoom: cam.zoom,
+        });
+      };
+      controls.addEventListener('end', onEnd);
+
       controlsRef.current = controls;
-      return () => controls.dispose();
+      return () => {
+        controls.removeEventListener('end', onEnd);
+        controls.dispose();
+      };
     }
+    // We only want to initialize this once when the viewport element is ready
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [volumeViewportRef]);
 
   // Resize
@@ -200,12 +261,18 @@ function QuadRenderer(props: LayoutRendererProps) {
     // Resize volume camera
     const halfWidth = size.width / 2;
     const halfHeight = size.height / 2;
-    const viewportAspect = halfWidth / halfHeight;
+
     const volCam = volumeCameraRef.current;
-    volCam.left = -viewportAspect;
-    volCam.right = viewportAspect;
-    volCam.top = 1;
-    volCam.bottom = -1;
+
+    // Match R3F default orthographic camera behavior:
+    // Frustum units = Screen pixels
+    // This ensures that "zoom" has the same meaning (pixels per unit) 
+    // in both Single (R3F default) and Quad (Manual) views.
+    volCam.left = -halfWidth / 2;
+    volCam.right = halfWidth / 2;
+    volCam.top = halfHeight / 2;
+    volCam.bottom = -halfHeight / 2;
+
     volCam.updateProjectionMatrix();
   }, [size, resizeCameras]);
 
