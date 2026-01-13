@@ -122,4 +122,7 @@ export interface RenderingSlice {
 
 // --- Combined Store Type ---
 
-export type ViewerStore = VolumeSlice & LayoutSlice & ViewSlice & RenderingSlice;
+export type ViewerStore = VolumeSlice & LayoutSlice & ViewSlice & RenderingSlice & SessionSlice;
+
+// Import SessionSlice type
+import type { SessionSlice } from './slices/sessionSlice';
