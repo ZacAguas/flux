@@ -87,6 +87,7 @@ export async function saveSession(
         };
 
         putRequest.onsuccess = () => {
+          // eslint-disable-next-line @typescript-eslint/no-unused-vars
           const { session: _, ...metadata } = savedSession;
           resolve(metadata);
         };
@@ -168,6 +169,7 @@ export async function listSessions(includeAutoSave = false): Promise<SavedSessio
         // Filter and extract metadata
         const metadata = sessions
           .filter(s => includeAutoSave || !s.isAutoSave)
+          // eslint-disable-next-line @typescript-eslint/no-unused-vars
           .map(({ session: _, ...meta }) => meta)
           .sort((a, b) => b.timestamp - a.timestamp); // Sort by newest first
 
