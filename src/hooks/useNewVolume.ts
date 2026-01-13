@@ -1,0 +1,132 @@
+/**
+ * useNewVolume Hook
+ *
+ * Handles loading a new volume file with unsaved changes protection.
+ * Shows confirmation modal if there are unsaved changes.
+ */
+
+import { useState } from 'react';
+import { useViewerStore } from '../store/viewerStore';
+import { parseNifti } from '../utils/niftiParser';
+import { createVolumeTexture } from '../utils/volumeTextureConverter';
+
+export function useNewVolume() {
+  const isDirty = useViewerStore((state) => state.isDirty);
+  const setVolume = useViewerStore((state) => state.setVolume);
+  const clearCurrentSession = useViewerStore((state) => state.clearCurrentSession);
+
+  const [showUnsavedModal, setShowUnsavedModal] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [pendingFile, setPendingFile] = useState<File | null>(null);
+
+  /**
+   * Trigger file picker to select a new volume.
+   */
+  const triggerFilePicker = () => {
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = '.nii,.nii.gz';
+
+    input.onchange = () => {
+      const file = input.files?.[0];
+      if (file) {
+        handleNewVolume(file);
+      }
+    };
+
+    input.click();
+  };
+
+  /**
+   * Handle loading a new volume file.
+   * Checks dirty state and shows confirmation if needed.
+   */
+  const handleNewVolume = (file: File) => {
+    // Validate file extension
+    if (!file.name.match(/\.(nii|nii\.gz)$/i)) {
+      setError('Please select a valid NIfTI file (.nii or .nii.gz)');
+      return;
+    }
+
+    // Check if there are unsaved changes
+    if (isDirty) {
+      setPendingFile(file);
+      setShowUnsavedModal(true);
+      return;
+    }
+
+    // No unsaved changes, proceed immediately
+    loadVolumeFile(file);
+  };
+
+  /**
+   * Actually load the volume file.
+   */
+  const loadVolumeFile = async (file: File) => {
+    setIsLoading(true);
+    setError(null);
+
+    try {
+      const volume = await parseNifti(file);
+      const texture = createVolumeTexture(volume, 0);
+
+      // Load volume and clear session state
+      setVolume(volume, texture, file.name);
+      clearCurrentSession();
+
+      // Log 4D dataset info
+      if (volume.dimensions.t && volume.dimensions.t > 1) {
+        console.log(`4D dataset: ${volume.dimensions.t} time steps`);
+      }
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Failed to load file';
+      setError(message);
+      console.error('Error loading NIfTI file:', err);
+      throw err; // Re-throw for caller
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  /**
+   * Handle "Save" in unsaved changes modal.
+   * Note: Actual save is handled by parent (needs useSaveSession hook).
+   */
+  const handleSave = () => {
+    setShowUnsavedModal(false);
+    // Return the pending file so parent can save first, then load it
+    return pendingFile;
+  };
+
+  /**
+   * Handle "Don't Save" in unsaved changes modal.
+   */
+  const handleDontSave = () => {
+    setShowUnsavedModal(false);
+    if (pendingFile) {
+      loadVolumeFile(pendingFile);
+      setPendingFile(null);
+    }
+  };
+
+  /**
+   * Handle "Cancel" in unsaved changes modal.
+   */
+  const handleCancel = () => {
+    setShowUnsavedModal(false);
+    setPendingFile(null);
+  };
+
+  return {
+    triggerFilePicker,
+    handleNewVolume,
+    loadVolumeFile,
+    showUnsavedModal,
+    isLoading,
+    error,
+    handleSave,
+    handleDontSave,
+    handleCancel,
+  };
+}
