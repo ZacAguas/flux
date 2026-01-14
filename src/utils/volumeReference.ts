@@ -126,13 +126,11 @@ async function readFileChunk(file: File, start: number, length: number): Promise
  * Optionally suggests a specific filename.
  * Returns the selected File and optionally a FileSystemFileHandle.
  */
-export async function promptForVolumeFile(
-  _suggestedFileName?: string,
-): Promise<{ file: File; fileHandle?: FileSystemFileHandle }> {
+export async function promptForVolumeFile(): Promise<{ file: File; fileHandle?: FileSystemFileHandle }> {
   // Try File System Access API first (provides file handle)
   if ('showOpenFilePicker' in window && typeof window.showOpenFilePicker === 'function') {
     try {
-      const [fileHandle] = await (window.showOpenFilePicker as (options?: any) => Promise<FileSystemFileHandle[]>)({
+      const options = {
         types: [
           {
             description: 'NIfTI Files',
@@ -142,7 +140,9 @@ export async function promptForVolumeFile(
           },
         ],
         multiple: false,
-      });
+      };
+
+      const [fileHandle] = await (window.showOpenFilePicker as (options?: unknown) => Promise<FileSystemFileHandle[]>)(options);
 
       const file = await fileHandle.getFile();
       return { file, fileHandle };
@@ -212,5 +212,5 @@ export async function resolveVolumeFile(
   }
 
   // Fallback: prompt user to select the file
-  return promptForVolumeFile(reference.fileName);
+  return promptForVolumeFile();
 }

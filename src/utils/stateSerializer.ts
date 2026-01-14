@@ -162,7 +162,6 @@ export function getCurrentVersion(): string {
  */
 export function migrateStateIfNeeded(
   state: SerializableViewerState,
-  _fromVersion: string,
 ): SerializableViewerState {
   // TODO: Add migration logic when schema changes
   // Example:
