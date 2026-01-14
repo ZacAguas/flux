@@ -7,6 +7,7 @@
  */
 
 import { Button } from '@heroui/react';
+import { SessionManager } from './SessionManager';
 import { LayoutModeButtons } from './LayoutModeButtons';
 import { SliceControls } from './SliceControls';
 import { WindowLevelControls } from './WindowLevelControls';
@@ -105,6 +106,9 @@ export function ControlPanel() {
         className="bg-black/20 backdrop-blur-sm border-b border-white/10"
       >
         <div className="flex items-start gap-6 px-4 py-3 max-w-full overflow-x-auto flex-wrap">
+          {/* File Menu - Always visible, not collapsible */}
+          <SessionManager />
+
           {/* Layout Mode Selection - Always visible, not collapsible */}
           <div className="flex flex-col gap-2 min-w-fit">
             <span className="text-xs font-semibold text-white/70 uppercase tracking-wide">
