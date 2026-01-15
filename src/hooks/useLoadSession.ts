@@ -113,8 +113,16 @@ export function useLoadSession() {
       const volume = await parseNifti(file);
       const texture = createVolumeTexture(volume, 0);
 
+      // Extract metadata from saved session's volume reference
+      const metadata = {
+        fileName: session.volumeReference.fileName,
+        fileSize: session.volumeReference.fileSize,
+        fileHash: session.volumeReference.fileHash,
+        lastModified: session.volumeReference.lastModified,
+      };
+
       // Load volume
-      setVolume(volume, texture, file.name);
+      setVolume(volume, texture, file.name, metadata);
 
       // Apply session state
       deserializeViewerState(session.viewerState, useViewerStore.getState());

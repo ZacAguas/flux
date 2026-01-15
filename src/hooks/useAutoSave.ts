@@ -30,13 +30,19 @@ export function useAutoSave() {
         // Flush pending updates by reading directly from store
         const viewerState = serializeViewerState(useViewerStore.getState());
 
-        // Create minimal volume reference
-        // FIXME: In production, should store original File object
+        // Get volume metadata from store
+        const metadata = useViewerStore.getState().volumeFileMetadata;
+
+        if (!metadata) {
+          console.warn('Auto-save skipped: No volume metadata available');
+          return;
+        }
+
         const volumeReference = {
-          fileName: useViewerStore.getState().volumeFileName || 'unknown.nii',
-          fileSize: 0,
-          lastModified: Date.now(),
-          fileHash: '',
+          fileName: metadata.fileName,
+          fileSize: metadata.fileSize,
+          lastModified: metadata.lastModified,
+          fileHash: metadata.fileHash,
         };
 
         const session: ViewerSession = {
