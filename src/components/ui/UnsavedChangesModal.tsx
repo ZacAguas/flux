@@ -6,6 +6,7 @@
  */
 
 import { Modal, Button, useOverlayState } from '@heroui/react';
+import { useEffect } from 'react';
 
 interface UnsavedChangesModalProps {
   isOpen: boolean;
@@ -22,8 +23,23 @@ export function UnsavedChangesModal({
 }: UnsavedChangesModalProps) {
   const state = useOverlayState({
     isOpen,
-    onOpenChange: (open) => !open && onCancel(),
+    onOpenChange: (open) => {
+      if (!open) {
+        onCancel();
+      }
+    },
   });
+
+  // Force sync state when isOpen changes
+  useEffect(() => {
+    if (!isOpen && state.isOpen) {
+      state.setOpen(false);
+    }
+  }, [isOpen, state]);
+
+  if (!isOpen) {
+    return null;
+  }
 
   return (
     <Modal state={state}>
