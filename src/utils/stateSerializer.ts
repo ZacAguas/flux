@@ -17,7 +17,6 @@ const CURRENT_VERSION = '1.0.0';
 export function serializeViewerState(store: ViewerStore): SerializableViewerState {
   return {
     // Volume metadata
-    volumeFileName: store.volumeFileName || '',
     timeStep: store.timeStep,
 
     // Layout state

@@ -21,7 +21,6 @@ import { importSessionFromJSON } from '../../utils/sessionStorage';
 import { serializeViewerState, getCurrentVersion } from '../../utils/stateSerializer';
 
 export function SessionManager() {
-  const volumeFileName = useViewerStore((state) => state.volumeFileName);
   const volumeFileMetadata = useViewerStore((state) => state.volumeFileMetadata);
 
   // Hooks
@@ -61,7 +60,7 @@ export function SessionManager() {
    * Handle Export Session (download JSON).
    */
   const handleExportSession = () => {
-    if (!volumeFileName || !volumeFileMetadata) {
+    if (!volumeFileMetadata) {
       console.error('Cannot export session: Missing volume metadata');
       return;
     }
@@ -84,7 +83,7 @@ export function SessionManager() {
         viewerState,
       };
 
-      const fileName = `session-${volumeFileName.replace(/\.(nii|nii\.gz)$/i, '')}-${Date.now()}`;
+      const fileName = `session-${volumeFileMetadata.fileName.replace(/\.(nii|nii\.gz)$/i, '')}-${Date.now()}`;
       exportSessionToJSON(session, fileName);
     } catch (error) {
       console.error('Failed to export session:', error);
@@ -157,7 +156,7 @@ export function SessionManager() {
       {/* Save Session Modal */}
       <SaveSessionModal
         isOpen={saveSession.showSaveModal}
-        volumeFileName={volumeFileName}
+        volumeFileName={volumeFileMetadata?.fileName || null}
         onSave={saveSession.handleSaveFromModal}
         onCancel={saveSession.handleCancelSave}
       />

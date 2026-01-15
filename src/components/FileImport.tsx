@@ -37,7 +37,7 @@ export function FileImport() {
 
       const volume = await parseNifti(file);
       const texture = createVolumeTexture(volume, 0);
-      setVolume(volume, texture, file.name, metadata);
+      setVolume(volume, texture, metadata);
 
       // Log 4D dataset info
       if (volume.dimensions.t && volume.dimensions.t > 1) {

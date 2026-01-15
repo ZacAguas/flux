@@ -64,7 +64,6 @@ export interface VolumeValidationResult {
  */
 export interface SerializableViewerState {
   // Volume metadata
-  volumeFileName: string;
   timeStep: number;
 
   // Layout state

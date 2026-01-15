@@ -122,7 +122,7 @@ export function useLoadSession() {
       };
 
       // Load volume
-      setVolume(volume, texture, file.name, metadata);
+      setVolume(volume, texture, metadata);
 
       // Apply session state
       deserializeViewerState(session.viewerState, useViewerStore.getState());
