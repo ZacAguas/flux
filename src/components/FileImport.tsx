@@ -5,6 +5,7 @@
 import { useState } from 'react';
 import { parseNifti } from '../utils/niftiParser';
 import { createVolumeTexture, calculateTextureMemory } from '../utils/volumeTextureConverter';
+import { createVolumeReference } from '../utils/volumeReference';
 import { useViewerStore } from '../store/viewerStore';
 
 export function FileImport() {
@@ -24,9 +25,19 @@ export function FileImport() {
     setError(null);
 
     try {
+      // PERF: Computing file hash adds ~50-200ms to load time for typical NIfTI files
+      // Future optimization: Move hash computation to Web Worker to avoid blocking main thread
+      const volumeReference = await createVolumeReference(file);
+      const metadata = {
+        fileName: volumeReference.fileName,
+        fileSize: volumeReference.fileSize,
+        fileHash: volumeReference.fileHash,
+        lastModified: volumeReference.lastModified,
+      };
+
       const volume = await parseNifti(file);
       const texture = createVolumeTexture(volume, 0);
-      setVolume(volume, texture, file.name);
+      setVolume(volume, texture, file.name, metadata);
 
       // Log 4D dataset info
       if (volume.dimensions.t && volume.dimensions.t > 1) {

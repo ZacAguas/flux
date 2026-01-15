@@ -22,6 +22,7 @@ import { serializeViewerState, getCurrentVersion } from '../../utils/stateSerial
 
 export function SessionManager() {
   const volumeFileName = useViewerStore((state) => state.volumeFileName);
+  const volumeFileMetadata = useViewerStore((state) => state.volumeFileMetadata);
 
   // Hooks
   const newVolume = useNewVolume();
@@ -60,17 +61,20 @@ export function SessionManager() {
    * Handle Export Session (download JSON).
    */
   const handleExportSession = () => {
-    if (!volumeFileName) return;
+    if (!volumeFileName || !volumeFileMetadata) {
+      console.error('Cannot export session: Missing volume metadata');
+      return;
+    }
 
     try {
       const viewerState = serializeViewerState(useViewerStore.getState());
 
-      // Create minimal volume reference for export
+      // Use stored metadata for export
       const volumeReference = {
-        fileName: volumeFileName,
-        fileSize: 0,
-        lastModified: Date.now(),
-        fileHash: '',
+        fileName: volumeFileMetadata.fileName,
+        fileSize: volumeFileMetadata.fileSize,
+        lastModified: volumeFileMetadata.lastModified,
+        fileHash: volumeFileMetadata.fileHash,
       };
 
       const session = {

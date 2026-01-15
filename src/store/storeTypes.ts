@@ -6,6 +6,13 @@ import type { ClippingPlanes, ClippingPlaneVisualization, ClippingPlane } from '
 
 // --- Shared/Inner Types ---
 
+export interface VolumeFileMetadata {
+  fileName: string;
+  fileSize: number;
+  fileHash: string;
+  lastModified: number;
+}
+
 export interface VolumeCameraState {
   position: [number, number, number];
   target: [number, number, number];
@@ -47,11 +54,12 @@ export interface VolumeSlice {
   volume: NiftiVolume | null;
   volumeTexture: THREE.Data3DTexture | null;
   volumeFileName: string | null;
+  volumeFileMetadata: VolumeFileMetadata | null;
   timeStep: number;
   isLoadingTimeStep: boolean;
   textureCache: Map<number, THREE.Data3DTexture>;
 
-  setVolume: (volume: NiftiVolume, texture: THREE.Data3DTexture, fileName?: string) => void;
+  setVolume: (volume: NiftiVolume, texture: THREE.Data3DTexture, fileName?: string, metadata?: VolumeFileMetadata) => void;
   setVolumeTexture: (texture: THREE.Data3DTexture) => void;
   setTimeStep: (step: number) => void;
   setIsLoadingTimeStep: (loading: boolean) => void;

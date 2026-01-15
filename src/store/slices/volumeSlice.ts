@@ -7,11 +7,12 @@ export const createVolumeSlice: StateCreator<ViewerStore, [], [], VolumeSlice> =
   volume: null,
   volumeTexture: null,
   volumeFileName: null,
+  volumeFileMetadata: null,
   timeStep: 0,
   isLoadingTimeStep: false,
   textureCache: new Map(),
 
-  setVolume: (volume, texture, fileName) => {
+  setVolume: (volume, texture, fileName, metadata) => {
     // Dispose old texture if it exists
     const oldTexture = get().volumeTexture;
     if (oldTexture) {
@@ -50,6 +51,7 @@ export const createVolumeSlice: StateCreator<ViewerStore, [], [], VolumeSlice> =
       isLoadingTimeStep: false,
       textureCache: new Map(),
       volumeFileName: fileName || null,
+      volumeFileMetadata: metadata || null,
     });
   },
 

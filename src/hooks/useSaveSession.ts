@@ -63,17 +63,23 @@ export function useSaveSession() {
       // The store is already up to date since we're accessing it synchronously
       const viewerState = serializeViewerState(useViewerStore.getState());
 
-      // Create volume reference from the provided file or try to get current file
+      // Create volume reference from the provided file or use stored metadata
       let volumeReference;
       if (file) {
         volumeReference = await createVolumeReference(file);
       } else {
-        // FIXME: Store the file reference in the store, as we lose it currently
+        // Use stored metadata from when the volume was loaded
+        const metadata = useViewerStore.getState().volumeFileMetadata;
+
+        if (!metadata) {
+          throw new Error('No volume metadata available. Cannot save session.');
+        }
+
         volumeReference = {
-          fileName: useViewerStore.getState().volumeFileName || 'unknown.nii',
-          fileSize: 0,
-          lastModified: Date.now(),
-          fileHash: '',
+          fileName: metadata.fileName,
+          fileSize: metadata.fileSize,
+          lastModified: metadata.lastModified,
+          fileHash: metadata.fileHash,
         };
       }
 
