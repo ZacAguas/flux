@@ -5,7 +5,7 @@
 import { useState } from 'react';
 import { parseNifti } from '../utils/niftiParser';
 import { createVolumeTexture, calculateTextureMemory } from '../utils/volumeTextureConverter';
-import { createVolumeReference } from '../utils/volumeReference';
+import { createVolumeReference, promptForVolumeFile } from '../utils/volumeReference';
 import { useViewerStore } from '../store/viewerStore';
 
 export function FileImport() {
@@ -79,10 +79,17 @@ export function FileImport() {
     }
   };
 
-  const handleFileInput = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = e.target.files;
-    if (files && files.length > 0) {
-      handleFile(files[0]);
+  const handleBrowseClick = async () => {
+    if (isLoading) return;
+
+    try {
+      const { file } = await promptForVolumeFile();
+      handleFile(file);
+    } catch (err) {
+      // User cancelled or error occurred
+      if ((err as Error).message !== 'File selection cancelled') {
+        setError((err as Error).message);
+      }
     }
   };
 
@@ -101,16 +108,8 @@ export function FileImport() {
         transition: 'all 0.3s ease',
       }}
     >
-      <input
-        type="file"
-        // 'accept' doesn't support double extensions like .nii.gz, so we validate in handleFile instead
-        onChange={handleFileInput}
-        style={{ display: 'none' }}
-        id="file-input"
-        disabled={isLoading}
-      />
-      <label
-        htmlFor="file-input"
+      <div
+        onClick={handleBrowseClick}
         style={{
           cursor: isLoading ? 'not-allowed' : 'pointer',
           display: 'block',
@@ -133,7 +132,7 @@ export function FileImport() {
             </p>
           </div>
         )}
-      </label>
+      </div>
 
       {error && (
         <div
