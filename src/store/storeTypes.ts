@@ -53,13 +53,12 @@ export interface ControlPanelSections {
 export interface VolumeSlice {
   volume: NiftiVolume | null;
   volumeTexture: THREE.Data3DTexture | null;
-  volumeFileName: string | null;
   volumeFileMetadata: VolumeFileMetadata | null;
   timeStep: number;
   isLoadingTimeStep: boolean;
   textureCache: Map<number, THREE.Data3DTexture>;
 
-  setVolume: (volume: NiftiVolume, texture: THREE.Data3DTexture, fileName?: string, metadata?: VolumeFileMetadata) => void;
+  setVolume: (volume: NiftiVolume, texture: THREE.Data3DTexture, metadata?: VolumeFileMetadata) => void;
   setVolumeTexture: (texture: THREE.Data3DTexture) => void;
   setTimeStep: (step: number) => void;
   setIsLoadingTimeStep: (loading: boolean) => void;

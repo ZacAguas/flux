@@ -6,13 +6,12 @@ import type { SliceIndices, WindowLevel } from '../../types/layout';
 export const createVolumeSlice: StateCreator<ViewerStore, [], [], VolumeSlice> = (set, get) => ({
   volume: null,
   volumeTexture: null,
-  volumeFileName: null,
   volumeFileMetadata: null,
   timeStep: 0,
   isLoadingTimeStep: false,
   textureCache: new Map(),
 
-  setVolume: (volume, texture, fileName, metadata) => {
+  setVolume: (volume, texture, metadata) => {
     // Dispose old texture if it exists
     const oldTexture = get().volumeTexture;
     if (oldTexture) {
@@ -50,7 +49,6 @@ export const createVolumeSlice: StateCreator<ViewerStore, [], [], VolumeSlice> =
       timeStep: 0,
       isLoadingTimeStep: false,
       textureCache: new Map(),
-      volumeFileName: fileName || null,
       volumeFileMetadata: metadata || null,
     });
   },

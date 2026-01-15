@@ -27,10 +27,10 @@ export function FileMenu({
 }: FileMenuProps) {
   const isDirty = useViewerStore((state) => state.isDirty);
   const currentSessionName = useViewerStore((state) => state.currentSessionName);
-  const volumeFileName = useViewerStore((state) => state.volumeFileName);
+  const volumeFileMetadata = useViewerStore((state) => state.volumeFileMetadata);
   const [isOpen, setIsOpen] = useState(false);
 
-  const hasVolume = volumeFileName !== null;
+  const hasVolume = volumeFileMetadata !== null;
 
   return (
     <div className="flex flex-col gap-2 min-w-fit">

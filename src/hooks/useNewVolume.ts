@@ -83,7 +83,7 @@ export function useNewVolume() {
       const texture = createVolumeTexture(volume, 0);
 
       // Load volume and clear session state
-      setVolume(volume, texture, file.name, metadata);
+      setVolume(volume, texture, metadata);
       clearCurrentSession();
 
       // Log 4D dataset info

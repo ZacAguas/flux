@@ -73,7 +73,7 @@ function getQualityDisplayName(preset: string): string {
 
 export function MetricOverlays({ layoutMode, canvasWidth, canvasHeight }: MetricOverlaysProps) {
   const volume = useViewerStore((state) => state.volume);
-  const volumeFileName = useViewerStore((state) => state.volumeFileName);
+  const volumeFileMetadata = useViewerStore((state) => state.volumeFileMetadata);
   const sliceIndices = useViewerStore((state) => state.sliceIndices);
   const windowLevel = useViewerStore((state) => state.windowLevel);
   const showMetricOverlays = useViewerStore((state) => state.showMetricOverlays);
@@ -122,7 +122,7 @@ export function MetricOverlays({ layoutMode, canvasWidth, canvasHeight }: Metric
 
   // Render 3D volume metrics
   const renderVolumeMetrics = (left: number, bottom: number) => {
-    const fileName = volumeFileName || 'Unknown Volume';
+    const fileName = volumeFileMetadata?.fileName || 'Unknown Volume';
     const quality = getQualityDisplayName(raymarchSettings.qualityPreset);
     const tfPreset = activeTransferFunctionPreset;
 
