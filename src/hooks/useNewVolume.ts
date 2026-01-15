@@ -9,7 +9,7 @@ import { useState } from 'react';
 import { useViewerStore } from '../store/viewerStore';
 import { parseNifti } from '../utils/niftiParser';
 import { createVolumeTexture } from '../utils/volumeTextureConverter';
-import { createVolumeReference } from '../utils/volumeReference';
+import { createVolumeReference, promptForVolumeFile } from '../utils/volumeReference';
 
 export function useNewVolume() {
   const isDirty = useViewerStore((state) => state.isDirty);
@@ -24,19 +24,16 @@ export function useNewVolume() {
   /**
    * Trigger file picker to select a new volume.
    */
-  const triggerFilePicker = () => {
-    const input = document.createElement('input');
-    input.type = 'file';
-    input.accept = '.nii,.nii.gz';
-
-    input.onchange = () => {
-      const file = input.files?.[0];
-      if (file) {
-        handleNewVolume(file);
+  const triggerFilePicker = async () => {
+    try {
+      const { file } = await promptForVolumeFile();
+      handleNewVolume(file);
+    } catch (err) {
+      // User cancelled or error occurred
+      if ((err as Error).message !== 'File selection cancelled') {
+        setError((err as Error).message);
       }
-    };
-
-    input.click();
+    }
   };
 
   /**
