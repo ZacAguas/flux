@@ -23,6 +23,12 @@ import { serializeViewerState, getCurrentVersion } from '../../utils/stateSerial
 export function SessionManager() {
   const volumeFileMetadata = useViewerStore((state) => state.volumeFileMetadata);
 
+  // Modal state from store (shared with drag-and-drop)
+  const showNewVolumeUnsavedModal = useViewerStore((state) => state.showNewVolumeUnsavedModal);
+  const pendingNewVolumeFile = useViewerStore((state) => state.pendingNewVolumeFile);
+  const setShowNewVolumeUnsavedModal = useViewerStore((state) => state.setShowNewVolumeUnsavedModal);
+  const setPendingNewVolumeFile = useViewerStore((state) => state.setPendingNewVolumeFile);
+
   // Hooks
   const newVolume = useNewVolume();
   const saveSession = useSaveSession();
@@ -116,13 +122,36 @@ export function SessionManager() {
 
   /**
    * Handle "Save" from unsaved changes modal (New Volume flow).
+   * Uses store state (shared with drag-and-drop).
    */
   const handleSaveFromUnsavedModal = async () => {
     await handleSaveSession();
-    const pendingFile = newVolume.handleSave();
-    if (pendingFile) {
-      await newVolume.loadVolumeFile(pendingFile);
+    setShowNewVolumeUnsavedModal(false);
+
+    if (pendingNewVolumeFile) {
+      await newVolume.loadVolumeFile(pendingNewVolumeFile);
+      setPendingNewVolumeFile(null);
     }
+  };
+
+  /**
+   * Handle "Don't Save" from unsaved changes modal (New Volume flow).
+   */
+  const handleDontSaveFromUnsavedModal = () => {
+    setShowNewVolumeUnsavedModal(false);
+
+    if (pendingNewVolumeFile) {
+      newVolume.loadVolumeFile(pendingNewVolumeFile);
+      setPendingNewVolumeFile(null);
+    }
+  };
+
+  /**
+   * Handle "Cancel" from unsaved changes modal (New Volume flow).
+   */
+  const handleCancelFromUnsavedModal = () => {
+    setShowNewVolumeUnsavedModal(false);
+    setPendingNewVolumeFile(null);
   };
 
   /**
@@ -145,12 +174,12 @@ export function SessionManager() {
         onImportSession={handleImportSession}
       />
 
-      {/* Unsaved Changes Modal (New Volume) */}
+      {/* Unsaved Changes Modal (New Volume - shared with drag-and-drop) */}
       <UnsavedChangesModal
-        isOpen={newVolume.showUnsavedModal}
+        isOpen={showNewVolumeUnsavedModal}
         onSave={handleSaveFromUnsavedModal}
-        onDontSave={newVolume.handleDontSave}
-        onCancel={newVolume.handleCancel}
+        onDontSave={handleDontSaveFromUnsavedModal}
+        onCancel={handleCancelFromUnsavedModal}
       />
 
       {/* Save Session Modal */}

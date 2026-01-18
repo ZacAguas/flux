@@ -15,12 +15,18 @@ export interface SessionSlice {
   currentSessionName: string | null;
   lastAutoSave: number | null;
 
+  // New Volume Modal State (shared between SessionManager and drag-and-drop)
+  pendingNewVolumeFile: File | null;
+  showNewVolumeUnsavedModal: boolean;
+
   // Actions
   markDirty: () => void;
   markClean: () => void;
   setCurrentSession: (id: string, name: string) => void;
   clearCurrentSession: () => void;
   setLastAutoSave: (timestamp: number | null) => void;
+  setPendingNewVolumeFile: (file: File | null) => void;
+  setShowNewVolumeUnsavedModal: (show: boolean) => void;
 }
 
 export const createSessionSlice: StateCreator<
@@ -34,6 +40,8 @@ export const createSessionSlice: StateCreator<
   currentSessionId: null,
   currentSessionName: null,
   lastAutoSave: null,
+  pendingNewVolumeFile: null,
+  showNewVolumeUnsavedModal: false,
 
   // Mark state as dirty (unsaved changes)
   markDirty: () => {
@@ -65,5 +73,15 @@ export const createSessionSlice: StateCreator<
   // Update last auto-save timestamp
   setLastAutoSave: (timestamp: number | null) => {
     set({ lastAutoSave: timestamp });
+  },
+
+  // Set pending file for new volume loading
+  setPendingNewVolumeFile: (file: File | null) => {
+    set({ pendingNewVolumeFile: file });
+  },
+
+  // Show/hide unsaved changes modal for new volume
+  setShowNewVolumeUnsavedModal: (show: boolean) => {
+    set({ showNewVolumeUnsavedModal: show });
   },
 });

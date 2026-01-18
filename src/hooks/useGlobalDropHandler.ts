@@ -5,11 +5,20 @@
  * Integrates with useNewVolume to check for unsaved changes.
  */
 
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import { useNewVolume } from './useNewVolume';
 
 export function useGlobalDropHandler() {
   const { handleNewVolume } = useNewVolume();
+
+  // NOTE: Store callback in ref to avoid effect re-runs
+  // The effect cleanup/setup cycle was causing a race condition where drag events were missed
+  const handleNewVolumeRef = useRef(handleNewVolume);
+
+  // Keep ref updated with latest callback
+  useEffect(() => {
+    handleNewVolumeRef.current = handleNewVolume;
+  }, [handleNewVolume]);
 
   useEffect(() => {
     const handleDragOver = (e: DragEvent) => {
@@ -39,8 +48,8 @@ export function useGlobalDropHandler() {
         return;
       }
 
-      // Use useNewVolume hook to handle file (includes dirty check)
-      handleNewVolume(niftiFile);
+      // Use latest version of handleNewVolume via ref
+      handleNewVolumeRef.current(niftiFile);
     };
 
     // Prevent default drag behavior on document
@@ -60,7 +69,7 @@ export function useGlobalDropHandler() {
       document.removeEventListener('dragleave', preventDefaults);
       document.removeEventListener('drop', handleDrop);
     };
-  }, [handleNewVolume]);
+  }, []); // Empty deps - set up listeners once, ref keeps callback fresh
 
   return null;
 }
