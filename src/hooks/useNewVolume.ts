@@ -16,10 +16,14 @@ export function useNewVolume() {
   const setVolume = useViewerStore((state) => state.setVolume);
   const clearCurrentSession = useViewerStore((state) => state.clearCurrentSession);
 
-  const [showUnsavedModal, setShowUnsavedModal] = useState(false);
+  // Use store state instead of local state (shared with drag-and-drop)
+  const showUnsavedModal = useViewerStore((state) => state.showNewVolumeUnsavedModal);
+  const setShowUnsavedModal = useViewerStore((state) => state.setShowNewVolumeUnsavedModal);
+  const pendingFile = useViewerStore((state) => state.pendingNewVolumeFile);
+  const setPendingFile = useViewerStore((state) => state.setPendingNewVolumeFile);
+
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [pendingFile, setPendingFile] = useState<File | null>(null);
 
   /**
    * Trigger file picker to select a new volume.
