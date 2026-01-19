@@ -12,6 +12,7 @@ import { UnsavedChangesModal } from './UnsavedChangesModal';
 import { SessionPickerModal } from './SessionPickerModal';
 import { SaveSessionModal } from './SaveSessionModal';
 import { SessionErrorModal } from './SessionErrorModal';
+import { PermissionRequestModal } from './PermissionRequestModal';
 import { useNewVolume } from '../../hooks/useNewVolume';
 import { useSaveSession } from '../../hooks/useSaveSession';
 import { useLoadSession } from '../../hooks/useLoadSession';
@@ -26,6 +27,7 @@ export function SessionManager() {
   // Modal state from store (shared with drag-and-drop)
   const showNewVolumeUnsavedModal = useViewerStore((state) => state.showNewVolumeUnsavedModal);
   const pendingNewVolumeFile = useViewerStore((state) => state.pendingNewVolumeFile);
+  const pendingNewVolumeFileHandle = useViewerStore((state) => state.pendingNewVolumeFileHandle);
   const setShowNewVolumeUnsavedModal = useViewerStore((state) => state.setShowNewVolumeUnsavedModal);
   const setPendingNewVolumeFile = useViewerStore((state) => state.setPendingNewVolumeFile);
 
@@ -129,7 +131,7 @@ export function SessionManager() {
     setShowNewVolumeUnsavedModal(false);
 
     if (pendingNewVolumeFile) {
-      await newVolume.loadVolumeFile(pendingNewVolumeFile);
+      await newVolume.loadVolumeFile(pendingNewVolumeFile, pendingNewVolumeFileHandle ?? undefined);
       setPendingNewVolumeFile(null);
     }
   };
@@ -141,7 +143,7 @@ export function SessionManager() {
     setShowNewVolumeUnsavedModal(false);
 
     if (pendingNewVolumeFile) {
-      newVolume.loadVolumeFile(pendingNewVolumeFile);
+      newVolume.loadVolumeFile(pendingNewVolumeFile, pendingNewVolumeFileHandle ?? undefined);
       setPendingNewVolumeFile(null);
     }
   };
@@ -214,6 +216,15 @@ export function SessionManager() {
         validationResult={loadSession.validationResult || undefined}
         onClose={loadSession.closeErrorModal}
         onForceLoad={loadSession.handleForceLoad}
+      />
+
+      {/* Permission Request Modal */}
+      <PermissionRequestModal
+        isOpen={loadSession.showPermissionModal}
+        fileName={loadSession.pendingFileName}
+        onGrantPermission={loadSession.handleGrantPermission}
+        onSelectDifferentFile={loadSession.handleSelectDifferentFile}
+        onCancel={loadSession.closePermissionModal}
       />
     </>
   );

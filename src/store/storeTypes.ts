@@ -11,6 +11,7 @@ export interface VolumeFileMetadata {
   fileSize: number;
   fileHash: string;
   lastModified: number;
+  fileHandle?: FileSystemFileHandle;
 }
 
 export interface VolumeCameraState {

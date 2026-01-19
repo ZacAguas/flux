@@ -20,6 +20,7 @@ export function useNewVolume() {
   const showUnsavedModal = useViewerStore((state) => state.showNewVolumeUnsavedModal);
   const setShowUnsavedModal = useViewerStore((state) => state.setShowNewVolumeUnsavedModal);
   const pendingFile = useViewerStore((state) => state.pendingNewVolumeFile);
+  const pendingFileHandle = useViewerStore((state) => state.pendingNewVolumeFileHandle);
   const setPendingFile = useViewerStore((state) => state.setPendingNewVolumeFile);
 
   const [isLoading, setIsLoading] = useState(false);
@@ -30,8 +31,8 @@ export function useNewVolume() {
    */
   const triggerFilePicker = async () => {
     try {
-      const { file } = await promptForVolumeFile();
-      handleNewVolume(file);
+      const { file, fileHandle } = await promptForVolumeFile();
+      handleNewVolume(file, fileHandle);
     } catch (err) {
       // User cancelled or error occurred
       if ((err as Error).message !== 'File selection cancelled') {
@@ -44,7 +45,7 @@ export function useNewVolume() {
    * Handle loading a new volume file.
    * Checks dirty state and shows confirmation if needed.
    */
-  const handleNewVolume = (file: File) => {
+  const handleNewVolume = (file: File, fileHandle?: FileSystemFileHandle) => {
     // Validate file extension
     if (!file.name.match(/\.(nii|nii\.gz)$/i)) {
       setError('Please select a valid NIfTI file (.nii or .nii.gz)');
@@ -53,31 +54,32 @@ export function useNewVolume() {
 
     // Check if there are unsaved changes
     if (isDirty) {
-      setPendingFile(file);
+      setPendingFile(file, fileHandle);
       setShowUnsavedModal(true);
       return;
     }
 
     // No unsaved changes, proceed immediately
-    loadVolumeFile(file);
+    loadVolumeFile(file, fileHandle);
   };
 
   /**
    * Actually load the volume file.
    */
-  const loadVolumeFile = async (file: File) => {
+  const loadVolumeFile = async (file: File, fileHandle?: FileSystemFileHandle) => {
     setIsLoading(true);
     setError(null);
 
     try {
       // PERF: Computing file hash adds ~50-200ms to load time for typical NIfTI files
       // Future optimization: Move hash computation to Web Worker to avoid blocking main thread
-      const volumeReference = await createVolumeReference(file);
+      const volumeReference = await createVolumeReference(file, fileHandle);
       const metadata = {
         fileName: volumeReference.fileName,
         fileSize: volumeReference.fileSize,
         fileHash: volumeReference.fileHash,
         lastModified: volumeReference.lastModified,
+        fileHandle: volumeReference.fileHandle,
       };
 
       const volume = await parseNifti(file);
@@ -108,7 +110,7 @@ export function useNewVolume() {
   const handleSave = () => {
     setShowUnsavedModal(false);
     // Return the pending file so parent can save first, then load it
-    return pendingFile;
+    return { file: pendingFile, fileHandle: pendingFileHandle };
   };
 
   /**
@@ -117,7 +119,7 @@ export function useNewVolume() {
   const handleDontSave = () => {
     setShowUnsavedModal(false);
     if (pendingFile) {
-      loadVolumeFile(pendingFile);
+      loadVolumeFile(pendingFile, pendingFileHandle ?? undefined);
       setPendingFile(null);
     }
   };

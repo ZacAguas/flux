@@ -130,6 +130,9 @@ export type SessionErrorType =
   | 'deserialization-error'
   | 'quota-exceeded'
   | 'version-mismatch'
+  | 'permission-denied'
+  | 'permission-dismissed'
+  | 'handle-invalid'
   | 'unknown';
 
 /**
