@@ -51,6 +51,12 @@ export function SessionErrorModal({
         return 'Storage Quota Exceeded';
       case 'version-mismatch':
         return 'Incompatible Session Version';
+      case 'permission-denied':
+        return 'Permission Denied';
+      case 'permission-dismissed':
+        return 'Permission Required';
+      case 'handle-invalid':
+        return 'File Unavailable';
       default:
         return 'Error';
     }

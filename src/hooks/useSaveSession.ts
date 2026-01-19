@@ -80,6 +80,8 @@ export function useSaveSession() {
           fileSize: metadata.fileSize,
           lastModified: metadata.lastModified,
           fileHash: metadata.fileHash,
+          // Include fileHandle if available for persistent file access
+          fileHandle: metadata.fileHandle,
         };
       }
 

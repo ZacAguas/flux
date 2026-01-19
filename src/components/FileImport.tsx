@@ -14,7 +14,7 @@ export function FileImport() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const handleFile = async (file: File) => {
+  const handleFile = async (file: File, fileHandle?: FileSystemFileHandle) => {
     // Validate file extension
     if (!file.name.match(/\.(nii|nii\.gz)$/i)) {
       setError('Please select a valid NIfTI file (.nii or .nii.gz)');
@@ -27,12 +27,13 @@ export function FileImport() {
     try {
       // PERF: Computing file hash adds ~50-200ms to load time for typical NIfTI files
       // Future optimization: Move hash computation to Web Worker to avoid blocking main thread
-      const volumeReference = await createVolumeReference(file);
+      const volumeReference = await createVolumeReference(file, fileHandle);
       const metadata = {
         fileName: volumeReference.fileName,
         fileSize: volumeReference.fileSize,
         fileHash: volumeReference.fileHash,
         lastModified: volumeReference.lastModified,
+        fileHandle: volumeReference.fileHandle,
       };
 
       const volume = await parseNifti(file);
@@ -83,8 +84,8 @@ export function FileImport() {
     if (isLoading) return;
 
     try {
-      const { file } = await promptForVolumeFile();
-      handleFile(file);
+      const { file, fileHandle } = await promptForVolumeFile();
+      handleFile(file, fileHandle);
     } catch (err) {
       // User cancelled or error occurred
       if ((err as Error).message !== 'File selection cancelled') {

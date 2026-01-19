@@ -6,23 +6,23 @@
  */
 
 import type { VolumeFileReference, VolumeValidationResult } from '../types/session';
+import {
+  tryAccessWithPermission,
+  accessFileWithPermissionRequest,
+  type FileHandleAccessResult,
+  type FileHandlePermissionStatus,
+} from './fileHandlePermissions';
 
 /**
  * Create a volume reference from a File object.
  * Generates multi-chunk hash for robust validation.
+ * Optionally accepts a FileSystemFileHandle for persistence.
  */
-export async function createVolumeReference(file: File): Promise<VolumeFileReference> {
+export async function createVolumeReference(
+  file: File,
+  fileHandle?: FileSystemFileHandle,
+): Promise<VolumeFileReference> {
   const fileHash = await calculateFileHash(file);
-
-  // Try to get FileSystemFileHandle if supported
-  let fileHandle: FileSystemFileHandle | undefined;
-  if ('showOpenFilePicker' in window) {
-    // NOTE: We can't get a handle from a dropped/selected file directly
-    // The handle can only be stored when using showOpenFilePicker
-    // For now, leave this undefined and only store handles
-    // when loading sessions (which will use showOpenFilePicker)
-    fileHandle = undefined;
-  }
 
   return {
     fileName: file.name,
@@ -179,38 +179,94 @@ export async function promptForVolumeFile(): Promise<{ file: File; fileHandle?: 
 }
 
 /**
- * Try to re-access a file using a stored FileSystemFileHandle.
- * Returns the file if successful, null if permission denied or file not found.
+ * Result of attempting to access a file handle with permission checking.
  */
-export async function tryAccessFileHandle(
-  fileHandle: FileSystemFileHandle,
-): Promise<File | null> {
-  try {
-    // Just try to get the file directly
-    // Permission API may not be available on all browsers
-    return await fileHandle.getFile();
-  } catch (error) {
-    // File not found, permission error, or other issue
-    console.warn('Failed to access file handle:', error);
-    return null;
-  }
+export interface FileHandleResult {
+  file: File | null;
+  needsPermission: boolean;
+  status: FileHandlePermissionStatus;
+  error?: Error;
 }
 
 /**
- * Attempt to load a volume file, trying FileSystemFileHandle first,
- * falling back to prompting the user.
+ * Try to re-access a file using a stored FileSystemFileHandle.
+ * Checks permission status first and returns detailed result.
+ * Does NOT prompt the user - use requestFileHandleAccess for that.
+ */
+export async function tryAccessFileHandle(
+  fileHandle: FileSystemFileHandle,
+): Promise<FileHandleResult> {
+  const result = await tryAccessWithPermission(fileHandle);
+  return {
+    file: result.file,
+    needsPermission: result.needsPermission,
+    status: result.status,
+    error: result.error,
+  };
+}
+
+/**
+ * Request permission and access file from a stored handle.
+ * MUST be called from a user gesture (click, keypress, etc.).
+ */
+export async function requestFileHandleAccess(
+  fileHandle: FileSystemFileHandle,
+): Promise<FileHandleResult> {
+  const result = await accessFileWithPermissionRequest(fileHandle);
+  return {
+    file: result.file,
+    needsPermission: false,
+    status: result.status,
+    error: result.error,
+  };
+}
+
+// Re-export types for convenience
+export type { FileHandleAccessResult, FileHandlePermissionStatus };
+
+/**
+ * Result of resolving a volume file.
+ */
+export interface ResolveVolumeResult {
+  file: File | null;
+  fileHandle?: FileSystemFileHandle;
+  needsPermission: boolean;
+  permissionStatus?: FileHandlePermissionStatus;
+}
+
+/**
+ * Attempt to load a volume file using FileSystemFileHandle.
+ * Returns permission status if user action is needed.
+ * Does NOT fall back to file picker - caller should handle that.
  */
 export async function resolveVolumeFile(
   reference: VolumeFileReference,
-): Promise<{ file: File; fileHandle?: FileSystemFileHandle }> {
+): Promise<ResolveVolumeResult> {
   // Try FileSystemFileHandle if available
   if (reference.fileHandle) {
-    const file = await tryAccessFileHandle(reference.fileHandle);
-    if (file) {
-      return { file, fileHandle: reference.fileHandle };
+    const result = await tryAccessFileHandle(reference.fileHandle);
+
+    if (result.file) {
+      return {
+        file: result.file,
+        fileHandle: reference.fileHandle,
+        needsPermission: false,
+        permissionStatus: result.status,
+      };
     }
+
+    // Permission needed or handle invalid
+    return {
+      file: null,
+      fileHandle: reference.fileHandle,
+      needsPermission: result.needsPermission,
+      permissionStatus: result.status,
+    };
   }
 
-  // Fallback: prompt user to select the file
-  return promptForVolumeFile();
+  // No file handle available
+  return {
+    file: null,
+    needsPermission: false,
+  };
 }
