@@ -11,6 +11,7 @@ import { PermissionRequestModal } from './components/ui/PermissionRequestModal';
 import { SessionErrorModal } from './components/ui/SessionErrorModal';
 import { useViewerStore } from './store/viewerStore';
 import { useStateChangeTracking } from './hooks/useStateChangeTracking';
+import { useBeforeUnload } from './hooks/useBeforeUnload';
 import { useGlobalDropHandler } from './hooks/useGlobalDropHandler';
 import { useAutoSave } from './hooks/useAutoSave';
 import { useAutoSaveRestore } from './hooks/useAutoSaveRestore';
@@ -36,6 +37,7 @@ function App() {
 
   // Enable state tracking, auto-save, and global drop handler when volume is loaded
   useStateChangeTracking();
+  useBeforeUnload();
   useGlobalDropHandler();
   useAutoSave();
 
