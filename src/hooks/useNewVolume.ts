@@ -10,6 +10,7 @@ import { useViewerStore } from '../store/viewerStore';
 import { parseNifti } from '../utils/niftiParser';
 import { createVolumeTexture } from '../utils/volumeTextureConverter';
 import { createVolumeReference, promptForVolumeFile } from '../utils/volumeReference';
+import { clearAutoSave } from '../utils/sessionStorage';
 
 export function useNewVolume() {
   const isDirty = useViewerStore((state) => state.isDirty);
@@ -88,6 +89,9 @@ export function useNewVolume() {
       // Load volume and clear session state
       setVolume(volume, texture, metadata);
       clearCurrentSession();
+
+      // Clear any existing autosave (new volume = fresh start)
+      await clearAutoSave();
 
       // Log 4D dataset info
       if (volume.dimensions.t && volume.dimensions.t > 1) {

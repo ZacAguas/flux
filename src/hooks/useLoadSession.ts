@@ -9,15 +9,13 @@
 import { useState } from 'react';
 import { useViewerStore } from '../store/viewerStore';
 import { loadSession, listSessions, deleteSession } from '../utils/sessionStorage';
+import { promptForVolumeFile } from '../utils/volumeReference';
+import { validateSessionVersion } from '../utils/stateSerializer';
 import {
-  resolveVolumeFile,
-  validateVolumeFile,
-  promptForVolumeFile,
-  requestFileHandleAccess,
-} from '../utils/volumeReference';
-import { deserializeViewerState, validateSessionVersion } from '../utils/stateSerializer';
-import { parseNifti } from '../utils/niftiParser';
-import { createVolumeTexture } from '../utils/volumeTextureConverter';
+  resolveSessionFile,
+  requestSessionFileAccess,
+  loadSessionWithFile,
+} from '../utils/sessionLoader';
 import type {
   SavedSessionMetadata,
   SessionError,
@@ -27,7 +25,6 @@ import type {
 
 export function useLoadSession() {
   const isDirty = useViewerStore((state) => state.isDirty);
-  const setVolume = useViewerStore((state) => state.setVolume);
   const setCurrentSession = useViewerStore((state) => state.setCurrentSession);
   const clearCurrentSession = useViewerStore((state) => state.clearCurrentSession);
   const markClean = useViewerStore((state) => state.markClean);
@@ -81,94 +78,47 @@ export function useLoadSession() {
     await performLoad(sessionId);
   };
 
-  /**
-   * Core logic for loading volume and applying session state.
-   */
-  const loadVolumeAndApplyState = async (
-    file: File,
-    session: ViewerSession,
-    fileHandle?: FileSystemFileHandle,
-  ) => {
-    const volume = await parseNifti(file);
-    const texture = createVolumeTexture(volume, session.viewerState.timeStep ?? 0);
-
-    const metadata = {
-      fileName: session.volumeReference.fileName,
-      fileSize: session.volumeReference.fileSize,
-      fileHash: session.volumeReference.fileHash,
-      lastModified: session.volumeReference.lastModified,
-      fileHandle: fileHandle ?? session.volumeReference.fileHandle,
-    };
-
-    setVolume(volume, texture, metadata);
-    deserializeViewerState(session.viewerState, useViewerStore.getState());
-  };
-
-  /**
-   * Load volume and apply session state from IndexedDB session.
-   */
-  const finalizeLoad = async (
-    file: File,
-    session: ViewerSession,
-    sessionId: string,
-    fileHandle?: FileSystemFileHandle,
-  ) => {
-    await loadVolumeAndApplyState(file, session, fileHandle);
-
-    const sessionMeta = sessions.find(s => s.id === sessionId);
-    if (sessionMeta) {
-      setCurrentSession(sessionId, sessionMeta.name);
-    }
-
-    markClean();
-  };
-
-  /**
-   * Load volume and apply session state from JSON import.
-   */
-  const finalizeLoadFromJSON = async (
-    file: File,
-    session: ViewerSession,
-    fileHandle?: FileSystemFileHandle,
-  ) => {
-    await loadVolumeAndApplyState(file, session, fileHandle);
-    clearCurrentSession();
-    markClean();
-  };
-
-  /**
-   * Validate file and set up error state if mismatched.
-   * Returns true if valid, false if mismatch (error modal shown).
-   */
-  const validateFileOrShowError = async (
+  const tryLoadSession = async (
     file: File,
     session: ViewerSession,
     sessionId: string | null,
     fileHandle?: FileSystemFileHandle,
+    skipValidation = false,
   ): Promise<boolean> => {
-    const validation = await validateVolumeFile(file, session.volumeReference);
+    const result = await loadSessionWithFile(file, session, fileHandle, skipValidation);
 
-    if (!validation.isValid) {
-      setValidationResult(validation);
+    if (result.status === 'validation-failed') {
+      setPendingFile(result.file);
+      setPendingFileHandle(result.fileHandle ?? null);
       setPendingSessionId(sessionId);
-      setPendingFile(file);
-      setPendingFileHandle(fileHandle ?? null);
       setPendingSession(session);
-      setError({
-        type: 'file-mismatch',
-        message: 'Volume file does not match session',
-      });
+      setValidationResult(result.validation);
+      setError({ type: 'file-mismatch', message: 'Volume file does not match session' });
       setShowErrorModal(true);
-      setIsLoading(false);
       return false;
     }
 
+    if (result.status === 'error') {
+      setError({ type: 'unknown', message: 'Failed to load session' });
+      setShowErrorModal(true);
+      console.error('Failed to load session:', result.error);
+      return false;
+    }
+
+    // Set current session for IndexedDB loads, clear for JSON imports
+    if (sessionId) {
+      const sessionMeta = sessions.find(s => s.id === sessionId);
+      if (sessionMeta) {
+        setCurrentSession(sessionId, sessionMeta.name);
+      }
+    } else {
+      clearCurrentSession();
+    }
+
+    markClean();
     return true;
   };
 
-  /**
-   * Perform load from JSON session.
-   */
   const performLoadFromJSON = async (session: ViewerSession) => {
     setIsLoading(true);
     setError(null);
@@ -176,28 +126,20 @@ export function useLoadSession() {
 
     try {
       if (!validateSessionVersion(session.version)) {
-        throw {
-          type: 'version-mismatch',
-          message: `Incompatible session version: ${session.version}`,
-        } as SessionError;
+        throw { type: 'version-mismatch', message: `Incompatible session version: ${session.version}` } as SessionError;
       }
 
-      // Always prompt for volume file (JSON doesn't include file handle)
       const pickerResult = await promptForVolumeFile();
 
-      if (!await validateFileOrShowError(pickerResult.file, session, null, pickerResult.fileHandle)) {
-        return;
+      if (await tryLoadSession(pickerResult.file, session, null, pickerResult.fileHandle)) {
+        setIsImportFlow(false);
       }
-
-      await finalizeLoadFromJSON(pickerResult.file, session, pickerResult.fileHandle);
-      setIsImportFlow(false);
     } catch (err) {
       if ((err as Error).message === 'File selection cancelled') {
         setIsImportFlow(false);
         return;
       }
-      const sessionError = err as SessionError;
-      setError(sessionError);
+      setError(err as SessionError);
       setShowErrorModal(true);
       console.error('Error loading session from JSON:', err);
       setIsImportFlow(false);
@@ -224,65 +166,36 @@ export function useLoadSession() {
     await performLoadFromJSON(session);
   };
 
-  /**
-   * Perform the actual load operation.
-   */
-  const performLoad = async (sessionId: string, forceFile?: File) => {
+  const performLoad = async (sessionId: string) => {
     setIsLoading(true);
     setError(null);
     setValidationResult(null);
 
     try {
-      // Load session from IndexedDB
       const session = await loadSession(sessionId);
 
       if (!validateSessionVersion(session.version)) {
-        throw {
-          type: 'version-mismatch',
-          message: `Incompatible session version: ${session.version}`,
-        } as SessionError;
+        throw { type: 'version-mismatch', message: `Incompatible session version: ${session.version}` } as SessionError;
       }
 
-      // Resolve volume file
-      let file: File;
-      let fileHandle: FileSystemFileHandle | undefined;
+      const resolveResult = await resolveSessionFile(session);
 
-      if (forceFile) {
-        file = forceFile;
+      if (resolveResult.status === 'resolved') {
+        await tryLoadSession(resolveResult.file, session, sessionId, resolveResult.fileHandle);
+      } else if (resolveResult.status === 'needs-permission') {
+        setPendingSessionId(sessionId);
+        setPendingFileHandle(resolveResult.fileHandle);
+        setPendingSession(session);
+        setShowPermissionModal(true);
       } else {
-        // Try to resolve using stored fileHandle
-        const resolveResult = await resolveVolumeFile(session.volumeReference);
-
-        if (resolveResult.file) {
-          file = resolveResult.file;
-          fileHandle = resolveResult.fileHandle;
-        } else if (resolveResult.needsPermission && resolveResult.fileHandle) {
-          // Permission needed - show permission modal
-          setPendingSessionId(sessionId);
-          setPendingFileHandle(resolveResult.fileHandle);
-          setPendingSession(session);
-          setShowPermissionModal(true);
-          setIsLoading(false);
-          return;
-        } else {
-          // No fileHandle or permission denied - prompt for file
-          const pickerResult = await promptForVolumeFile();
-          file = pickerResult.file;
-          fileHandle = pickerResult.fileHandle;
-        }
-
-        if (!await validateFileOrShowError(file, session, sessionId, fileHandle)) {
-          return;
-        }
+        const pickerResult = await promptForVolumeFile();
+        await tryLoadSession(pickerResult.file, session, sessionId, pickerResult.fileHandle);
       }
-
-      await finalizeLoad(file, session, sessionId, fileHandle);
     } catch (err) {
       if ((err as Error).message === 'File selection cancelled') {
         return;
       }
-      const sessionError = err as SessionError;
-      setError(sessionError);
+      setError(err as SessionError);
       setShowErrorModal(true);
       console.error('Error loading session:', err);
     } finally {
@@ -290,10 +203,6 @@ export function useLoadSession() {
     }
   };
 
-  /**
-   * Handle granting permission for file access.
-   * MUST be called from a user gesture (button click).
-   */
   const handleGrantPermission = async () => {
     if (!pendingFileHandle || !pendingSession || !pendingSessionId) {
       setShowPermissionModal(false);
@@ -304,34 +213,22 @@ export function useLoadSession() {
     setIsLoading(true);
 
     try {
-      const result = await requestFileHandleAccess(pendingFileHandle);
+      const result = await requestSessionFileAccess(pendingFileHandle);
 
       if (result.file) {
-        if (!await validateFileOrShowError(result.file, pendingSession, pendingSessionId, pendingFileHandle)) {
-          return;
+        if (await tryLoadSession(result.file, pendingSession, pendingSessionId, pendingFileHandle)) {
+          clearPendingState();
         }
-
-        await finalizeLoad(result.file, pendingSession, pendingSessionId, pendingFileHandle);
-        clearPendingState();
-      } else if (result.status === 'denied') {
-        setError({
-          type: 'permission-denied',
-          message: 'File access permission was denied. Please select the file manually.',
-        });
+      } else if (result.denied) {
+        setError({ type: 'permission-denied', message: 'File access permission was denied. Please select the file manually.' });
         setShowErrorModal(true);
         clearPendingState();
       } else {
-        setError({
-          type: 'permission-dismissed',
-          message: 'Permission request was dismissed. Please try again or select the file manually.',
-        });
+        setError({ type: 'permission-dismissed', message: 'Permission request was dismissed. Please try again or select the file manually.' });
         setShowErrorModal(true);
       }
     } catch {
-      setError({
-        type: 'handle-invalid',
-        message: 'Failed to access the file. It may have been moved or deleted.',
-      });
+      setError({ type: 'handle-invalid', message: 'Failed to access the file. It may have been moved or deleted.' });
       setShowErrorModal(true);
       clearPendingState();
     } finally {
@@ -339,9 +236,6 @@ export function useLoadSession() {
     }
   };
 
-  /**
-   * Handle selecting a different file when permission is needed.
-   */
   const handleSelectDifferentFile = async () => {
     if (!pendingSession || !pendingSessionId) {
       setShowPermissionModal(false);
@@ -354,18 +248,12 @@ export function useLoadSession() {
     try {
       const { file, fileHandle } = await promptForVolumeFile();
 
-      if (!await validateFileOrShowError(file, pendingSession, pendingSessionId, fileHandle)) {
-        return;
+      if (await tryLoadSession(file, pendingSession, pendingSessionId, fileHandle)) {
+        clearPendingState();
       }
-
-      await finalizeLoad(file, pendingSession, pendingSessionId, fileHandle);
-      clearPendingState();
     } catch (err) {
       if ((err as Error).message !== 'File selection cancelled') {
-        setError({
-          type: 'file-not-found',
-          message: 'Failed to select file',
-        });
+        setError({ type: 'file-not-found', message: 'Failed to select file' });
         setShowErrorModal(true);
       }
       clearPendingState();
@@ -385,33 +273,21 @@ export function useLoadSession() {
     setIsImportFlow(false);
   };
 
-  /**
-   * Handle force load (when file mismatch).
-   */
   const handleForceLoad = async () => {
-    if (pendingFile && pendingSession) {
-      setShowErrorModal(false);
-      setIsLoading(true);
+    if (!pendingFile || !pendingSession) return;
 
-      try {
-        if (pendingSessionId) {
-          // IndexedDB session load
-          await finalizeLoad(pendingFile, pendingSession, pendingSessionId, pendingFileHandle ?? undefined);
-        } else {
-          // JSON import - no session ID
-          await finalizeLoadFromJSON(pendingFile, pendingSession, pendingFileHandle ?? undefined);
+    setShowErrorModal(false);
+    setIsLoading(true);
+
+    try {
+      if (await tryLoadSession(pendingFile, pendingSession, pendingSessionId, pendingFileHandle ?? undefined, true)) {
+        if (!pendingSessionId) {
+          setIsImportFlow(false);
         }
-      } catch (err) {
-        setError({
-          type: 'unknown',
-          message: 'Failed to load session',
-        });
-        setShowErrorModal(true);
-        console.error('Error force loading session:', err);
-      } finally {
-        setIsLoading(false);
-        clearPendingState();
       }
+    } finally {
+      setIsLoading(false);
+      clearPendingState();
     }
   };
 

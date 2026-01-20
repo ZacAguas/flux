@@ -11,11 +11,9 @@ import { serializeViewerState, getCurrentVersion } from '../utils/stateSerialize
 import { autoSaveSession, getAutoSave, clearAutoSave } from '../utils/sessionStorage';
 import type { ViewerSession } from '../types/session';
 
-const AUTO_SAVE_INTERVAL = 2 * 60 * 1000; // 2 minutes
+const AUTO_SAVE_INTERVAL = 60 * 1000; // 1 minute
 
 export function useAutoSave() {
-  const store = useViewerStore();
-  const isDirty = useViewerStore((state) => state.isDirty);
   const volume = useViewerStore((state) => state.volume);
   const setLastAutoSave = useViewerStore((state) => state.setLastAutoSave);
 
@@ -24,6 +22,8 @@ export function useAutoSave() {
     if (!volume) return; // No volume loaded, nothing to save
 
     const interval = setInterval(async () => {
+      // Read directly from store to avoid stale closure
+      const { isDirty } = useViewerStore.getState();
       if (!isDirty) return; // No changes to save
 
       try {
@@ -43,6 +43,7 @@ export function useAutoSave() {
           fileSize: metadata.fileSize,
           lastModified: metadata.lastModified,
           fileHash: metadata.fileHash,
+          fileHandle: metadata.fileHandle,
         };
 
         const session: ViewerSession = {
@@ -63,7 +64,7 @@ export function useAutoSave() {
     }, AUTO_SAVE_INTERVAL);
 
     return () => clearInterval(interval);
-  }, [isDirty, volume, store, setLastAutoSave]);
+  }, [volume, setLastAutoSave]);
 
   return null;
 }
