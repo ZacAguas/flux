@@ -6,6 +6,7 @@ import * as THREE from 'three/webgpu';
 import { useViewerStore } from '../../store/viewerStore';
 import { useLayoutContext } from '../../context/LayoutContext';
 import { ClippingPlaneGizmos } from '../ClippingPlaneGizmos';
+import { useSlicePlanesInVolume } from '../../hooks/useSlicePlanesInVolume';
 
 interface VolumeDimensions {
   width: number;
@@ -49,6 +50,8 @@ function SingleRenderer({ volumeMesh, volumeDimensions, updateCameraUniforms, cl
   const setVolumeCameraState = useViewerStore((state) => state.setVolumeCameraState);
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const controlsRef = useRef<any>(null);
+
+  useSlicePlanesInVolume(scene);
 
   // Restore camera state on mount
   useEffect(() => {
@@ -193,6 +196,8 @@ function QuadRenderer(props: LayoutRendererProps) {
   const volumeSceneRef = useRef(new THREE.Scene());
   const volumeCameraRef = useRef(new THREE.OrthographicCamera(-1, 1, 1, -1, 0.1, 1000));
   const controlsRef = useRef<StdOrbitControls | null>(null);
+
+  useSlicePlanesInVolume(volumeSceneRef.current);
 
   // Re-parent mesh and clipping gizmos to local volume scene
   useEffect(() => {

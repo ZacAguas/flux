@@ -3,7 +3,7 @@ import type { ViewerStore, RenderingSlice } from '../storeTypes';
 import { getPresetByName } from '../../data/transferFunctionPresets';
 
 export const createRenderingSlice: StateCreator<ViewerStore, [], [], RenderingSlice> = (set, get) => ({
-  showSlicePlanes: true,
+  showSlicePlanes: false,
   slicePlaneSettings: {
     opacity: 0.35,
     mode: 'textured',
