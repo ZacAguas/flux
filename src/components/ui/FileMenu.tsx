@@ -45,9 +45,9 @@ export function FileMenu({
           onPress={() => setIsOpen(!isOpen)}
           className="!bg-white/10 backdrop-blur-sm !border !border-white/20 !text-white text-xs px-3 py-1"
         >
-          <span className="flex items-center gap-1">
+          <span className="flex items-center">
             {currentSessionName || 'Menu'}
-            {isDirty && <span className="text-yellow-400">*</span>}
+            <span className={`text-yellow-400 ${isDirty ? '' : 'invisible'}`}>*</span>
             <span className="text-white/50">▼</span>
           </span>
         </Button>

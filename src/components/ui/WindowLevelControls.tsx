@@ -13,6 +13,7 @@ export function WindowLevelControls() {
   const volume = useViewerStore((state) => state.volume);
   const windowLevel = useViewerStore((state) => state.windowLevel);
   const setWindowLevel = useViewerStore((state) => state.setWindowLevel);
+  const markDirty = useViewerStore((state) => state.markDirty);
 
   if (!volume) return null;
 
@@ -26,6 +27,7 @@ export function WindowLevelControls() {
         value={windowLevel.center}
         isDisabled={layoutMode === 'single'}
         onChange={(value) => setWindowLevel({ center: value as number })}
+        onChangeEnd={markDirty}
         minValue={min}
         maxValue={max}
         step={range / 1000}
@@ -46,6 +48,7 @@ export function WindowLevelControls() {
         value={windowLevel.width}
         isDisabled={layoutMode === 'single'}
         onChange={(value) => setWindowLevel({ width: value as number })}
+        onChangeEnd={markDirty}
         minValue={0}
         maxValue={range}
         step={range / 1000}

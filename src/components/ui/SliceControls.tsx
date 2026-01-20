@@ -13,6 +13,7 @@ export function SliceControls() {
   const volume = useViewerStore((state) => state.volume);
   const sliceIndices = useViewerStore((state) => state.sliceIndices);
   const setSliceIndex = useViewerStore((state) => state.setSliceIndex);
+  const markDirty = useViewerStore((state) => state.markDirty);
 
   if (!volume) return null;
 
@@ -23,6 +24,7 @@ export function SliceControls() {
         value={sliceIndices.axial}
         isDisabled={layoutMode === 'single'}
         onChange={(value) => setSliceIndex('axial', value as number)}
+        onChangeEnd={markDirty}
         minValue={0}
         maxValue={volume.dimensions.z - 1}
         step={1}
@@ -41,6 +43,7 @@ export function SliceControls() {
         value={sliceIndices.coronal}
         isDisabled={layoutMode === 'single'}
         onChange={(value) => setSliceIndex('coronal', value as number)}
+        onChangeEnd={markDirty}
         minValue={0}
         maxValue={volume.dimensions.y - 1}
         step={1}
@@ -59,6 +62,7 @@ export function SliceControls() {
         value={sliceIndices.sagittal}
         isDisabled={layoutMode === 'single'}
         onChange={(value) => setSliceIndex('sagittal', value as number)}
+        onChangeEnd={markDirty}
         minValue={0}
         maxValue={volume.dimensions.x - 1}
         step={1}
