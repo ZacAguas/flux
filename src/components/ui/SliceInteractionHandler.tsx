@@ -39,6 +39,7 @@ export function SliceInteractionHandler({
   const setSliceIndex = useViewerStore((state) => state.setSliceIndex);
   const setSliceCamera = useViewerStore((state) => state.setSliceCamera);
   const setWindowLevel = useViewerStore((state) => state.setWindowLevel);
+  const markDirty = useViewerStore((state) => state.markDirty);
 
   const [isDragging, setIsDragging] = useState(false);
   const [interactionMode, setInteractionMode] = useState<InteractionMode>('crosshair');
@@ -233,6 +234,11 @@ export function SliceInteractionHandler({
    */
   const handlePointerUp = (e: React.PointerEvent<HTMLDivElement>) => {
     if (!isDragging) return;
+
+    // Mark dirty for window/level and crosshair (slice index) changes
+    if (interactionMode === 'windowLevel' || interactionMode === 'crosshair') {
+      markDirty();
+    }
 
     e.currentTarget.releasePointerCapture(e.pointerId);
     setIsDragging(false);
