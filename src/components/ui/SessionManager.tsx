@@ -7,6 +7,7 @@
  * - Hook integration
  */
 
+import { useEffect } from 'react';
 import { FileMenu } from './FileMenu';
 import { UnsavedChangesModal } from './UnsavedChangesModal';
 import { SessionPickerModal } from './SessionPickerModal';
@@ -35,6 +36,46 @@ export function SessionManager() {
   const newVolume = useNewVolume();
   const saveSession = useSaveSession();
   const loadSession = useLoadSession();
+
+  // Keyboard shortcuts
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      // Handle Cmd on Mac, Ctrl on Windows/Linux
+      const modifierKey = e.metaKey || e.ctrlKey;
+      if (!modifierKey) return;
+
+      // Cmd+N - New Volume
+      if (e.key === 'n' && !e.shiftKey) {
+        e.preventDefault();
+        newVolume.triggerFilePicker();
+        return;
+      }
+
+      // Cmd+S - Save Session (quick save)
+      if (e.key === 's' && !e.shiftKey) {
+        e.preventDefault();
+        saveSession.quickSave();
+        return;
+      }
+
+      // Shift+Cmd+S - Save Session As
+      if (e.key === 's' && e.shiftKey) {
+        e.preventDefault();
+        saveSession.saveAs();
+        return;
+      }
+
+      // Cmd+O - Load Session
+      if (e.key === 'o' && !e.shiftKey) {
+        e.preventDefault();
+        loadSession.openSessionPicker();
+        return;
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [newVolume, saveSession, loadSession]);
 
   /**
    * Handle New Volume from File Menu.
