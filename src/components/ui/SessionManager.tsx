@@ -112,8 +112,7 @@ export function SessionManager() {
 
       try {
         const session = await importSessionFromJSON(file);
-        // TODO: Load the imported session
-        console.log('Session imported:', session);
+        await loadSession.loadFromJSON(session);
       } catch (error) {
         console.error('Failed to import session:', error);
       }
