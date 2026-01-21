@@ -12,6 +12,7 @@ interface AutoSaveRestoreModalProps {
   isOpen: boolean;
   timestamp: number | null;
   volumeFileName: string | null;
+  thumbnail: string | null;
   onRestore: () => void;
   onDismiss: () => void;
 }
@@ -59,6 +60,7 @@ export function AutoSaveRestoreModal({
   isOpen,
   timestamp,
   volumeFileName,
+  thumbnail,
   onRestore,
   onDismiss,
 }: AutoSaveRestoreModalProps) {
@@ -114,16 +116,50 @@ export function AutoSaveRestoreModal({
             <p className="text-sm text-white/70">
               An auto-saved session was found:
             </p>
-            {volumeFileName && (
-              <p className="text-sm text-white font-medium bg-white/5 px-3 py-2 rounded truncate">
-                {volumeFileName}
-              </p>
-            )}
-            {timestamp && (
-              <p className="text-sm text-white/50">
-                Saved {formatTimestamp(timestamp)}
-              </p>
-            )}
+
+            <div className="flex gap-4 items-start">
+              {/* Thumbnail */}
+              <div className="flex-shrink-0">
+                {thumbnail ? (
+                  <img
+                    src={thumbnail}
+                    alt=""
+                    className="w-20 h-20 rounded object-cover bg-white/5"
+                  />
+                ) : (
+                  <div className="w-20 h-20 rounded bg-white/5 flex items-center justify-center">
+                    <svg
+                      className="w-8 h-8 text-white/20"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={1.5}
+                        d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
+                      />
+                    </svg>
+                  </div>
+                )}
+              </div>
+
+              {/* Session info */}
+              <div className="flex-1 min-w-0 space-y-1">
+                {volumeFileName && (
+                  <p className="text-sm text-white font-medium truncate">
+                    {volumeFileName}
+                  </p>
+                )}
+                {timestamp && (
+                  <p className="text-sm text-white/50">
+                    Saved {formatTimestamp(timestamp)}
+                  </p>
+                )}
+              </div>
+            </div>
+
             <p className="text-sm text-white/70">
               Would you like to restore this session?
             </p>

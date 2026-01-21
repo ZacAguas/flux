@@ -92,7 +92,11 @@ export function useSaveSession() {
         viewerState,
       };
 
-      const metadata = await saveSession(session, name, false, id);
+      // Capture thumbnail before saving
+      const captureFn = useViewerStore.getState().captureCanvasThumbnail;
+      const thumbnail = captureFn?.() ?? undefined;
+
+      const metadata = await saveSession(session, name, false, id, thumbnail);
 
       // Update current session in store
       setCurrentSession(metadata.id, name);
