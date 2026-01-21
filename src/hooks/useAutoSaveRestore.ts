@@ -15,6 +15,7 @@ import {
   promptSessionFile,
   loadSessionWithFile,
 } from '../utils/sessionLoader';
+import { getAutoSaveMetadata } from '../utils/sessionStorage';
 import type { ViewerSession, SessionError, VolumeValidationResult } from '../types/session';
 
 export function useAutoSaveRestore() {
@@ -24,6 +25,7 @@ export function useAutoSaveRestore() {
   const [showPermissionModal, setShowPermissionModal] = useState(false);
   const [showErrorModal, setShowErrorModal] = useState(false);
   const [autoSaveSession, setAutoSaveSession] = useState<ViewerSession | null>(null);
+  const [autoSaveThumbnail, setAutoSaveThumbnail] = useState<string | null>(null);
   const [pendingFileHandle, setPendingFileHandle] = useState<FileSystemFileHandle | null>(null);
   const [pendingFile, setPendingFile] = useState<File | null>(null);
   const [error, setError] = useState<SessionError | null>(null);
@@ -39,6 +41,12 @@ export function useAutoSaveRestore() {
       if (session) {
         setAutoSaveSession(session);
         setShowRestoreModal(true);
+
+        // Fetch metadata for thumbnail
+        const metadata = await getAutoSaveMetadata();
+        if (metadata?.thumbnail) {
+          setAutoSaveThumbnail(metadata.thumbnail);
+        }
       }
     };
 
@@ -105,6 +113,7 @@ export function useAutoSaveRestore() {
     setShowRestoreModal(false);
     await dismissAutoSave();
     setAutoSaveSession(null);
+    setAutoSaveThumbnail(null);
   };
 
   /**
@@ -206,6 +215,7 @@ export function useAutoSaveRestore() {
     setPendingFileHandle(null);
     setPendingFile(null);
     setAutoSaveSession(null);
+    setAutoSaveThumbnail(null);
     setValidationResult(null);
   };
 
@@ -215,6 +225,7 @@ export function useAutoSaveRestore() {
     showErrorModal,
     autoSaveTimestamp: autoSaveSession?.timestamp ?? null,
     autoSaveFileName: autoSaveSession?.volumeReference.fileName ?? null,
+    autoSaveThumbnail,
     error,
     validationResult,
     isLoading,

@@ -72,6 +72,7 @@ function App() {
         isOpen={autoSaveRestore.showRestoreModal}
         timestamp={autoSaveRestore.autoSaveTimestamp}
         volumeFileName={autoSaveRestore.autoSaveFileName}
+        thumbnail={autoSaveRestore.autoSaveThumbnail}
         onRestore={autoSaveRestore.handleRestore}
         onDismiss={autoSaveRestore.handleDismiss}
       />

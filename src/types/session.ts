@@ -110,6 +110,7 @@ export interface SavedSessionMetadata {
   volumeFileName: string; // For display/filtering
   timestamp: number; // Unix timestamp (ms)
   isAutoSave: boolean;
+  thumbnail?: string; // Base64 JPEG thumbnail of the canvas
 }
 
 /**

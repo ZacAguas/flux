@@ -8,6 +8,7 @@ import { useClippingPlanesInVolume } from '../../hooks/useClippingPlanesInVolume
 import { InspectorControls } from '../debug/InspectorControls';
 import { ActiveRenderer } from '../renderers/LayoutRenderers';
 import { LayoutOverlays } from '../overlays/LayoutOverlays';
+import { useThumbnailCapture } from '../../hooks/useThumbnailCapture';
 import { useViewerStore } from '../../store/viewerStore';
 import { parseNifti } from '../../utils/niftiParser';
 import { createVolumeTexture } from '../../utils/volumeTextureConverter';
@@ -38,15 +39,20 @@ function SceneResources() {
   // parents them to the correct scene (Default vs Local).
   const { axialMesh, coronalMesh, sagittalMesh } = useClippingPlanesInVolume(scene);
 
+  const sliceScenes = { axial: axialScene, coronal: coronalScene, sagittal: sagittalScene };
+  const sliceCameras = { axial: axialCamera, coronal: coronalCamera, sagittal: sagittalCamera };
+
+  useThumbnailCapture({ volumeMesh, sliceScenes, sliceCameras });
+
   return (
     <ActiveRenderer
-      volumeMesh={volumeMesh}
-      volumeDimensions={volumeDimensions}
-      updateCameraUniforms={updateCameraUniforms}
-      clippingMeshes={{ axialMesh, coronalMesh, sagittalMesh }}
-      sliceScenes={{ axial: axialScene, coronal: coronalScene, sagittal: sagittalScene }}
-      sliceCameras={{ axial: axialCamera, coronal: coronalCamera, sagittal: sagittalCamera }}
-      resizeCameras={resizeCameras}
+        volumeMesh={volumeMesh}
+        volumeDimensions={volumeDimensions}
+        updateCameraUniforms={updateCameraUniforms}
+        clippingMeshes={{ axialMesh, coronalMesh, sagittalMesh }}
+        sliceScenes={sliceScenes}
+        sliceCameras={sliceCameras}
+        resizeCameras={resizeCameras}
     />
   );
 }

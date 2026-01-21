@@ -58,6 +58,7 @@ export async function saveSession(
   name: string,
   isAutoSave = false,
   id?: string,
+  thumbnail?: string,
 ): Promise<SavedSessionMetadata> {
   try {
     const savedSession: SavedSession = {
@@ -66,6 +67,7 @@ export async function saveSession(
       volumeFileName: session.volumeReference.fileName,
       timestamp: session.timestamp,
       isAutoSave,
+      thumbnail,
       session,
     };
 
@@ -231,10 +233,52 @@ export async function getAutoSave(): Promise<ViewerSession | null> {
 }
 
 /**
+ * Get the auto-save metadata (including thumbnail) if it exists.
+ */
+export async function getAutoSaveMetadata(): Promise<SavedSessionMetadata | null> {
+  return new Promise((resolve, reject) => {
+    const request = indexedDB.open(DB_NAME, DB_VERSION);
+
+    request.onerror = () => {
+      reject(createSessionError('indexeddb-error', 'Failed to open database'));
+    };
+
+    request.onsuccess = () => {
+      const db = request.result;
+      const transaction = db.transaction([STORE_NAME], 'readonly');
+      const objectStore = transaction.objectStore(STORE_NAME);
+      const getRequest = objectStore.get(AUTO_SAVE_ID);
+
+      getRequest.onerror = () => {
+        reject(createSessionError('indexeddb-error', 'Failed to load auto-save metadata'));
+      };
+
+      getRequest.onsuccess = () => {
+        const savedSession = getRequest.result as SavedSession | undefined;
+        if (!savedSession) {
+          resolve(null);
+        } else {
+          // eslint-disable-next-line @typescript-eslint/no-unused-vars
+          const { session: _, ...metadata } = savedSession;
+          resolve(metadata);
+        }
+      };
+
+      transaction.oncomplete = () => {
+        db.close();
+      };
+    };
+  });
+}
+
+/**
  * Save to auto-save slot (overwrites existing auto-save).
  */
-export async function autoSaveSession(session: ViewerSession): Promise<SavedSessionMetadata> {
-  return saveSession(session, 'Auto-save', true, AUTO_SAVE_ID);
+export async function autoSaveSession(
+  session: ViewerSession,
+  thumbnail?: string,
+): Promise<SavedSessionMetadata> {
+  return saveSession(session, 'Auto-save', true, AUTO_SAVE_ID, thumbnail);
 }
 
 /**

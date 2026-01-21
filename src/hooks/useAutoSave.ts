@@ -53,7 +53,11 @@ export function useAutoSave() {
           viewerState,
         };
 
-        await autoSaveSession(session);
+        // Capture thumbnail for auto-save
+        const captureFn = useViewerStore.getState().captureCanvasThumbnail;
+        const thumbnail = captureFn?.() ?? undefined;
+
+        await autoSaveSession(session, thumbnail);
         setLastAutoSave(Date.now());
 
         console.log('Auto-save completed');

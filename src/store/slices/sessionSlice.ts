@@ -14,11 +14,14 @@ export interface SessionSlice {
   currentSessionId: string | null;
   currentSessionName: string | null;
   lastAutoSave: number | null;
-
-  // New Volume Modal State (shared between SessionManager and drag-and-drop)
   pendingNewVolumeFile: File | null;
   pendingNewVolumeFileHandle: FileSystemFileHandle | null;
   showNewVolumeUnsavedModal: boolean;
+
+  // Registered by useThumbnailCapture inside R3F Canvas context
+  // NOTE: This field is lost when serializing (to IndexedDB) since it's a function, but that's fine.
+  // We also use .getState() instead of using a selector, to avoid re-renders when the function reference changes
+  captureCanvasThumbnail: (() => string | null) | null;
 
   // Actions
   markDirty: () => void;
@@ -28,6 +31,7 @@ export interface SessionSlice {
   setLastAutoSave: (timestamp: number | null) => void;
   setPendingNewVolumeFile: (file: File | null, fileHandle?: FileSystemFileHandle | null) => void;
   setShowNewVolumeUnsavedModal: (show: boolean) => void;
+  setCaptureCanvasThumbnail: (fn: (() => string | null) | null) => void;
 }
 
 export const createSessionSlice: StateCreator<
@@ -44,6 +48,7 @@ export const createSessionSlice: StateCreator<
   pendingNewVolumeFile: null,
   pendingNewVolumeFileHandle: null,
   showNewVolumeUnsavedModal: false,
+  captureCanvasThumbnail: null,
 
   // Mark state as dirty (unsaved changes)
   markDirty: () => {
@@ -88,5 +93,10 @@ export const createSessionSlice: StateCreator<
   // Show/hide unsaved changes modal for new volume
   setShowNewVolumeUnsavedModal: (show: boolean) => {
     set({ showNewVolumeUnsavedModal: show });
+  },
+
+  // Register thumbnail capture function from useThumbnailCapture hook
+  setCaptureCanvasThumbnail: (fn: (() => string | null) | null) => {
+    set({ captureCanvasThumbnail: fn });
   },
 });
