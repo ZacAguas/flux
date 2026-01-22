@@ -77,11 +77,6 @@ function MeasurementListItem({ measurement, isSelected, onSelect, onDelete }: Me
 
   const orientationLabel = measurement.orientation.charAt(0).toUpperCase();
 
-  const handleDeleteClick = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    onDelete(measurement.id);
-  };
-
   return (
     <div
       className={`flex items-center justify-between p-1.5 rounded cursor-pointer transition-colors ${isSelected ? 'bg-white/20' : 'hover:bg-white/10'
@@ -97,13 +92,14 @@ function MeasurementListItem({ measurement, isSelected, onSelect, onDelete }: Me
         <span>{valueText}</span>
         <span className="text-white/40">({orientationLabel}:{measurement.sliceIndex})</span>
       </div>
-      <div onClick={handleDeleteClick}>
+      <div>
         <Button
           size="sm"
           variant="secondary"
-          className="!px-1.5 !py-0.5 !min-w-0 !text-[10px] text-white/60 hover:text-red-400"
+          className="!px-2 !py-1 !min-w-6 !h-6 !text-[10px] text-white/60 hover:text-red-400"
+          onPress={() => onDelete(measurement.id)}
         >
-          x
+          X
         </Button>
       </div>
     </div>

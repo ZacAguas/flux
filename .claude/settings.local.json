@@ -8,7 +8,8 @@
       "Bash(pnpm build:*)",
       "Bash(find:*)",
       "WebFetch(domain:v3.heroui.com)",
-      "Bash(/bin/ls:*)"
+      "Bash(/bin/ls:*)",
+      "Bash(pnpm lint:*)"
     ],
     "deny": [],
     "ask": []
