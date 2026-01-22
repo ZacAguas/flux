@@ -66,6 +66,24 @@ export function serializeViewerState(store: ViewerStore): SerializableViewerStat
       ...store.clippingPlaneVisualization,
       colors: { ...store.clippingPlaneVisualization.colors },
     },
+
+    // Measurement state (only complete measurements have all points defined)
+    measurements: store.measurements
+      .filter((m) => m.status === 'complete')
+      .map((m) => {
+        if (m.type === 'distance') {
+          return {
+            ...m,
+            points: [{ ...m.points[0] }, { ...m.points[1]! }],
+          };
+        } else {
+          return {
+            ...m,
+            points: [{ ...m.points[0] }, { ...m.points[1]! }, { ...m.points[2]! }],
+          };
+        }
+      }) as typeof store.measurements,
+    showMeasurements: store.showMeasurements,
   };
 }
 
@@ -131,6 +149,14 @@ export function deserializeViewerState(
     store.setClippingPlane(orientation as keyof typeof state.clippingPlanes, plane);
   });
   store.setClippingPlaneVisualization(state.clippingPlaneVisualization);
+
+  // Measurement state
+  if (state.measurements) {
+    store.setMeasurements(state.measurements);
+  }
+  if (state.showMeasurements !== undefined) {
+    store.setShowMeasurements(state.showMeasurements);
+  }
 
   // NOTE: timeStep is handled separately during volume loading
 }

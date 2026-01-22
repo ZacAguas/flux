@@ -26,6 +26,7 @@ import type {
   SlicePlaneSettings,
   ControlPanelSections,
 } from '../store/storeTypes';
+import type { Measurement } from './measurement';
 
 /**
  * Reference to the original NIfTI volume file.
@@ -88,6 +89,10 @@ export interface SerializableViewerState {
   activeTransferFunctionPreset: string;
   clippingPlanes: ClippingPlanes;
   clippingPlaneVisualization: ClippingPlaneVisualization;
+
+  // Measurement state
+  measurements: Measurement[];
+  showMeasurements: boolean;
 }
 
 /**

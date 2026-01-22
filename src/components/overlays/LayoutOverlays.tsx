@@ -4,7 +4,9 @@ import { useLayoutContext } from '../../context/LayoutContext';
 import { SliceInteractionHandler } from '../ui/SliceInteractionHandler';
 import { Crosshairs } from '../ui/Crosshairs';
 import { MetricOverlays } from '../ui/MetricOverlays';
+import { MeasurementOverlay } from '../measurements/MeasurementOverlay';
 import { useSliceViewKeyboardShortcuts } from '../../hooks/useSliceViewKeyboardShortcuts';
+import { useMeasurementKeyboardShortcuts } from '../../hooks/useMeasurementKeyboardShortcuts';
 
 interface OverlayProps {
   width: number;
@@ -41,6 +43,7 @@ function SingleOverlays({ width, height, panelHeight, labelOffset }: OverlayProp
 function SlicesOverlays({ width, height, panelHeight, labelOffset }: OverlayProps) {
   // Enable keyboard shortcuts
   useSliceViewKeyboardShortcuts();
+  useMeasurementKeyboardShortcuts();
 
   return (
     <>
@@ -66,6 +69,12 @@ function SlicesOverlays({ width, height, panelHeight, labelOffset }: OverlayProp
         canvasHeight={height}
         panelHeight={panelHeight}
       />
+      <MeasurementOverlay
+        layoutMode="slices"
+        canvasWidth={width}
+        canvasHeight={height}
+        panelHeight={panelHeight}
+      />
       <MetricOverlays
         layoutMode="slices"
         canvasWidth={width}
@@ -79,6 +88,7 @@ function SlicesOverlays({ width, height, panelHeight, labelOffset }: OverlayProp
 function QuadOverlays({ width, height, panelHeight, labelOffset }: OverlayProps) {
   const { volumeViewportRef } = useLayoutContext();
   useSliceViewKeyboardShortcuts();
+  useMeasurementKeyboardShortcuts();
 
   return (
     <>
@@ -115,6 +125,12 @@ function QuadOverlays({ width, height, panelHeight, labelOffset }: OverlayProps)
       <div style={{ position: 'absolute', top: `${panelHeight}px`, bottom: 0, left: '50%', width: '2px', backgroundColor: '#333', pointerEvents: 'none', transition: 'top 300ms cubic-bezier(0.4, 0, 0.2, 1)' }} />
 
       <Crosshairs
+        layoutMode="quad"
+        canvasWidth={width}
+        canvasHeight={height}
+        panelHeight={panelHeight}
+      />
+      <MeasurementOverlay
         layoutMode="quad"
         canvasWidth={width}
         canvasHeight={height}
