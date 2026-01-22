@@ -17,6 +17,7 @@ import { ViewOptionsControls } from './ViewOptionsControls';
 import { RenderingControls } from './RenderingControls';
 import { ClippingPlaneControls } from './ClippingPlaneControls';
 import { TransferFunctionEditor } from './TransferFunctionEditor';
+import { MeasurementControls } from './MeasurementControls';
 import { CollapsibleSection } from './CollapsibleSection';
 import { useViewerStore } from '../../store/viewerStore';
 import { useState, useRef, useEffect } from 'react';
@@ -178,21 +179,12 @@ export function ControlPanel() {
             <TransferFunctionEditor />
           </CollapsibleSection>
 
-          {/* Measurements & Tools Section - Placeholder for future */}
+          {/* Measurements & Tools Section */}
           <CollapsibleSection
             id="measurementsTools"
             title="Measurements & Tools"
           >
-            <div className="flex flex-col gap-2 text-xs text-white/50">
-              <div className="font-medium text-white/60">Coming Soon:</div>
-              <ul className="list-disc list-inside space-y-1 pl-2">
-                <li>Distance measurements between points</li>
-                <li>Angle measurements</li>
-                <li>Volume ROI calculations</li>
-                <li>Annotations and labels</li>
-                <li>Segmentation tools</li>
-              </ul>
-            </div>
+            <MeasurementControls />
           </CollapsibleSection>
 
           {/* Presets & Settings Section - Placeholder for future */}

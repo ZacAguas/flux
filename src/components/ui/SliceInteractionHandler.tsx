@@ -2,7 +2,7 @@
  * SliceInteractionHandler Component
  *
  * Handles multi-modal interactions on 2D slice views:
- * - Left-click drag: Update crosshair positions
+ * - Left-click drag: Update crosshair positions (or place measurements when tool active)
  * - Middle-click or Ctrl+left-click drag: Pan view
  * - Right-click drag: Adjust window/level
  * - Mouse wheel: Zoom in/out
@@ -13,12 +13,19 @@ import { useRef, useState, useEffect } from 'react';
 import { useViewerStore } from '../../store/viewerStore';
 import {
   pixelToVoxelIndices,
+  pixelToVoxel,
   getViewportBounds,
 } from '../../utils/sliceInteraction';
 import { getSliceDimensions } from '../../utils/layout';
+import { calculateDistance, calculateAngle } from '../../utils/measurementUtils';
 import type { SliceOrientation } from '../../types/layout';
+import type { DistanceMeasurement, AngleMeasurement } from '../../types/measurement';
 
-type InteractionMode = 'crosshair' | 'pan' | 'windowLevel';
+/** Custom cursors for measurement tools. Hotspot positions the click point. */
+const DISTANCE_CURSOR = 'url("/icons/distance-cursor.svg") 12 12, crosshair';
+const ANGLE_CURSOR = 'url("/icons/angle-cursor.svg") 12 6, crosshair';
+
+type InteractionMode = 'crosshair' | 'pan' | 'windowLevel' | 'measurement';
 
 interface SliceInteractionHandlerProps {
   layoutMode: 'quad' | 'slices';
@@ -35,11 +42,20 @@ export function SliceInteractionHandler({
 }: SliceInteractionHandlerProps) {
   const volume = useViewerStore((state) => state.volume);
   const sliceCameraState = useViewerStore((state) => state.sliceCameraState);
+  const sliceIndices = useViewerStore((state) => state.sliceIndices);
   const windowLevel = useViewerStore((state) => state.windowLevel);
   const setSliceIndex = useViewerStore((state) => state.setSliceIndex);
   const setSliceCamera = useViewerStore((state) => state.setSliceCamera);
   const setWindowLevel = useViewerStore((state) => state.setWindowLevel);
   const markDirty = useViewerStore((state) => state.markDirty);
+
+  // Measurement state
+  const activeTool = useViewerStore((state) => state.activeTool);
+  const measurements = useViewerStore((state) => state.measurements);
+  const activeMeasurementId = useViewerStore((state) => state.activeMeasurementId);
+  const startMeasurement = useViewerStore((state) => state.startMeasurement);
+  const addPointToMeasurement = useViewerStore((state) => state.addPointToMeasurement);
+  const completeMeasurement = useViewerStore((state) => state.completeMeasurement);
 
   const [isDragging, setIsDragging] = useState(false);
   const [interactionMode, setInteractionMode] = useState<InteractionMode>('crosshair');
@@ -111,6 +127,64 @@ export function SliceInteractionHandler({
   };
 
   /**
+   * Handle measurement tool click
+   */
+  const handleMeasurementClick = (
+    clientX: number,
+    clientY: number,
+    orientation: SliceOrientation
+  ) => {
+    if (!volume || !containerRef.current) return;
+
+    const rect = containerRef.current.getBoundingClientRect();
+    const pixelX = clientX - rect.left;
+    const pixelY = clientY - rect.top;
+
+    const viewport = getViewportBounds(
+      layoutMode,
+      orientation,
+      canvasWidth,
+      canvasHeight,
+      panelHeight
+    );
+
+    const cameraState = sliceCameraState[orientation];
+    const point = pixelToVoxel({ x: pixelX, y: pixelY }, orientation, volume, viewport, cameraState);
+    const currentSliceIndex = sliceIndices[orientation];
+
+    // Check if we're placing a new measurement or adding to an existing one
+    if (!activeMeasurementId) {
+      // Start a new measurement
+      startMeasurement(activeTool as 'distance' | 'angle', orientation, currentSliceIndex, point);
+    } else {
+      const activeMeasurement = measurements.find((m) => m.id === activeMeasurementId);
+      if (!activeMeasurement) return;
+
+      // Add point to the measurement
+      if (activeMeasurement.type === 'distance') {
+        const dm = activeMeasurement as DistanceMeasurement;
+        if (!dm.points[1]) {
+          // Complete distance measurement
+          addPointToMeasurement(point);
+          const distance = calculateDistance(dm.points[0], point, orientation, volume);
+          completeMeasurement(distance);
+        }
+      } else if (activeMeasurement.type === 'angle') {
+        const am = activeMeasurement as AngleMeasurement;
+        if (!am.points[1]) {
+          // Add vertex point
+          addPointToMeasurement(point);
+        } else if (!am.points[2]) {
+          // Complete angle measurement
+          addPointToMeasurement(point);
+          const angle = calculateAngle(am.points[0], am.points[1], point, orientation, volume);
+          completeMeasurement(angle);
+        }
+      }
+    }
+  };
+
+  /**
    * Handle pointer down - start interaction and determine mode
    */
   const handlePointerDown = (
@@ -144,9 +218,15 @@ export function SliceInteractionHandler({
       });
       e.preventDefault(); // Prevent context menu
     } else if (e.button === 0) {
-      // Left button only = crosshair
-      mode = 'crosshair';
-      updateSliceIndicesFromPointer(e.clientX, e.clientY, orientation);
+      // Left button - check if measurement tool is active
+      if (activeTool !== 'none') {
+        mode = 'measurement';
+        handleMeasurementClick(e.clientX, e.clientY, orientation);
+      } else {
+        // Default: crosshair mode
+        mode = 'crosshair';
+        updateSliceIndicesFromPointer(e.clientX, e.clientY, orientation);
+      }
     }
 
     setInteractionMode(mode);
@@ -227,6 +307,7 @@ export function SliceInteractionHandler({
     } else if (interactionMode === 'windowLevel') {
       handleWindowLevelDrag(e);
     }
+    // measurement mode: no drag behavior, points are placed on click
   };
 
   /**
@@ -371,10 +452,18 @@ export function SliceInteractionHandler({
     if (isDragging) {
       if (interactionMode === 'pan') return 'grabbing';
       if (interactionMode === 'windowLevel') return 'ns-resize';
+      if (interactionMode === 'measurement') {
+        if (activeTool === 'distance') return DISTANCE_CURSOR;
+        if (activeTool === 'angle') return ANGLE_CURSOR;
+        return 'crosshair';
+      }
       return 'grabbing';
     }
     // Show cursor preview based on Ctrl key
     if (isCtrlPressed) return 'grab';
+    // Show tool-specific cursor for measurement tools
+    if (activeTool === 'distance') return DISTANCE_CURSOR;
+    if (activeTool === 'angle') return ANGLE_CURSOR;
     return 'crosshair';
   };
 

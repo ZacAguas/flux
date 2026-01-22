@@ -8,7 +8,7 @@
  */
 
 import type { NiftiVolume } from '../types/nifti';
-import type { SliceIndices, SliceCamera } from '../types/layout';
+import type { SliceIndices, SliceCamera, SliceOrientation } from '../types/layout';
 import { getSliceDimensions } from './layout';
 
 export interface ViewportBounds {
@@ -23,34 +23,42 @@ export interface CrosshairPosition {
   vertical: number; // X pixel position for vertical line
 }
 
-interface CameraFrustum {
+export interface CameraFrustum {
   left: number;
   right: number;
   top: number;
   bottom: number;
 }
 
-interface VoxelIndices {
+export interface WorldPosition {
+  x: number;
+  y: number;
+}
+
+export interface PixelPosition {
+  x: number;
+  y: number;
+}
+
+export interface InPlaneVoxelIndices {
   index1: number;
   index2: number;
+}
+
+interface VoxelIndicesWithOrientation extends InPlaneVoxelIndices {
   orientation1: keyof SliceIndices;
   orientation2: keyof SliceIndices;
 }
 
+// Low-level coordinate transformation functions
+
 /**
  * Calculate camera frustum bounds for orthographic camera
  * Used by both forward and reverse coordinate transformations
- *
- * @param volume - Volume data with dimensions and spacing
- * @param orientation - Which slice view
- * @param viewport - Viewport bounds for the slice view
- * @param zoom - Camera zoom multiplier (1.0 = fit-to-viewport, >1.0 = zoomed in)
- * @param panX - Camera pan offset in world space X
- * @param panY - Camera pan offset in world space Y
  */
-function calculateCameraFrustum(
+export function calculateCameraFrustum(
   volume: NiftiVolume,
-  orientation: 'axial' | 'coronal' | 'sagittal',
+  orientation: SliceOrientation,
   viewport: ViewportBounds,
   zoom: number = 1.0,
   panX: number = 0,
@@ -80,24 +88,154 @@ function calculateCameraFrustum(
 }
 
 /**
+ * Convert in-plane voxel indices to world space coordinates.
+ * index1 = horizontal axis, index2 = vertical axis in the slice view.
+ */
+export function inPlaneVoxelToWorld(
+  index1: number,
+  index2: number,
+  orientation: SliceOrientation,
+  volume: NiftiVolume
+): WorldPosition {
+  const { dimensions, spacing } = volume;
+
+  switch (orientation) {
+    case 'axial':
+      // index1 = X (sagittal), index2 = Y (coronal)
+      return {
+        x: (index1 - dimensions.x / 2) * spacing.x,
+        y: (index2 - dimensions.y / 2) * spacing.y,
+      };
+    case 'coronal':
+      // index1 = X (sagittal), index2 = Z (axial)
+      return {
+        x: (index1 - dimensions.x / 2) * spacing.x,
+        y: (index2 - dimensions.z / 2) * spacing.z,
+      };
+    case 'sagittal':
+      // index1 = Y (coronal), index2 = Z (axial)
+      return {
+        x: (index1 - dimensions.y / 2) * spacing.y,
+        y: (index2 - dimensions.z / 2) * spacing.z,
+      };
+  }
+}
+
+/**
+ * Convert world space coordinates to in-plane voxel indices.
+ * Returns unclamped float values - caller should clamp/round as needed.
+ */
+export function worldToInPlaneVoxel(
+  worldX: number,
+  worldY: number,
+  orientation: SliceOrientation,
+  volume: NiftiVolume
+): InPlaneVoxelIndices {
+  const { dimensions, spacing } = volume;
+
+  switch (orientation) {
+    case 'axial':
+      return {
+        index1: worldX / spacing.x + dimensions.x / 2,
+        index2: worldY / spacing.y + dimensions.y / 2,
+      };
+    case 'coronal':
+      return {
+        index1: worldX / spacing.x + dimensions.x / 2,
+        index2: worldY / spacing.z + dimensions.z / 2,
+      };
+    case 'sagittal':
+      return {
+        index1: worldX / spacing.y + dimensions.y / 2,
+        index2: worldY / spacing.z + dimensions.z / 2,
+      };
+  }
+}
+
+/**
+ * Convert world space coordinates to pixel coordinates.
+ */
+export function worldToPixel(
+  world: WorldPosition,
+  viewport: ViewportBounds,
+  frustum: CameraFrustum
+): PixelPosition {
+  // World space to NDC (-1 to 1)
+  const ndcX = ((world.x - frustum.left) / (frustum.right - frustum.left)) * 2 - 1;
+  const ndcY = ((world.y - frustum.bottom) / (frustum.top - frustum.bottom)) * 2 - 1;
+
+  // NDC to viewport pixels
+  return {
+    x: viewport.x + ((ndcX + 1) / 2) * viewport.width,
+    y: viewport.y + ((1 - ndcY) / 2) * viewport.height,
+  };
+}
+
+/**
+ * Convert pixel coordinates to world space coordinates.
+ */
+export function pixelToWorld(
+  pixel: PixelPosition,
+  viewport: ViewportBounds,
+  frustum: CameraFrustum
+): WorldPosition {
+  // Pixel to NDC (-1 to 1)
+  const ndcX = ((pixel.x - viewport.x) / viewport.width) * 2 - 1;
+  const ndcY = 1 - ((pixel.y - viewport.y) / viewport.height) * 2;
+
+  // NDC to World Space
+  return {
+    x: frustum.left + ((ndcX + 1) / 2) * (frustum.right - frustum.left),
+    y: frustum.bottom + ((ndcY + 1) / 2) * (frustum.top - frustum.bottom),
+  };
+}
+
+/**
+ * Get the in-plane dimension limits for a given orientation.
+ * Returns [max1, max2] for bounds checking index1 and index2.
+ */
+export function getInPlaneDimensionLimits(
+  orientation: SliceOrientation,
+  dimensions: { x: number; y: number; z: number }
+): [number, number] {
+  switch (orientation) {
+    case 'axial':
+      return [dimensions.x, dimensions.y];
+    case 'coronal':
+      return [dimensions.x, dimensions.z];
+    case 'sagittal':
+      return [dimensions.y, dimensions.z];
+  }
+}
+
+/**
+ * Clamp and round voxel indices to valid range.
+ */
+export function clampVoxelIndices(
+  indices: InPlaneVoxelIndices,
+  orientation: SliceOrientation,
+  dimensions: { x: number; y: number; z: number }
+): InPlaneVoxelIndices {
+  const [max1, max2] = getInPlaneDimensionLimits(orientation, dimensions);
+  return {
+    index1: Math.max(0, Math.min(max1 - 1, Math.round(indices.index1))),
+    index2: Math.max(0, Math.min(max2 - 1, Math.round(indices.index2))),
+  };
+}
+
+// High-level convenience functions
+
+/**
  * Calculate crosshair pixel positions from voxel indices.
  * Forward transformation: Voxel indices -> World space -> NDC -> Pixel coordinates
- *
- * @param orientation - Which slice view to calculate positions for
- * @param sliceIndices - Current slice indices for all three orientations
- * @param volume - Volume data with dimensions and spacing
- * @param viewport - Viewport bounds for the slice view
- * @param cameraState - Optional camera state (zoom, pan) for the view
- * @returns Pixel positions for horizontal and vertical crosshair lines
  */
 export function calculateCrosshairPositions(
-  orientation: 'axial' | 'coronal' | 'sagittal',
+  orientation: SliceOrientation,
   sliceIndices: SliceIndices,
   volume: NiftiVolume,
   viewport: ViewportBounds,
   cameraState?: SliceCamera
 ): CrosshairPosition {
-  const { dimensions, spacing } = volume;
   const frustum = calculateCameraFrustum(
     volume,
     orientation,
@@ -107,58 +245,42 @@ export function calculateCrosshairPositions(
     cameraState?.panY
   );
 
-  // Calculate world positions based on orientation
-  let worldX: number, worldY: number;
+  // Get the two orthogonal slice indices that form crosshairs on this view
+  let index1: number;
+  let index2: number;
 
   if (orientation === 'axial') {
-    // Axial (XY plane): vertical at sagittal slice, horizontal at coronal slice
-    worldX = (sliceIndices.sagittal - dimensions.x / 2) * spacing.x;
-    worldY = (sliceIndices.coronal - dimensions.y / 2) * spacing.y;
+    index1 = sliceIndices.sagittal;
+    index2 = sliceIndices.coronal;
   } else if (orientation === 'coronal') {
-    // Coronal (XZ plane): vertical at sagittal slice, horizontal at axial slice
-    worldX = (sliceIndices.sagittal - dimensions.x / 2) * spacing.x;
-    worldY = (sliceIndices.axial - dimensions.z / 2) * spacing.z;
+    index1 = sliceIndices.sagittal;
+    index2 = sliceIndices.axial;
   } else {
-    // Sagittal (YZ plane): vertical at coronal slice, horizontal at axial slice
-    worldX = (sliceIndices.coronal - dimensions.y / 2) * spacing.y;
-    worldY = (sliceIndices.axial - dimensions.z / 2) * spacing.z;
+    index1 = sliceIndices.coronal;
+    index2 = sliceIndices.axial;
   }
 
-  // Convert world space to NDC (-1 to 1)
-  const ndcX = ((worldX - frustum.left) / (frustum.right - frustum.left)) * 2 - 1;
-  const ndcY = ((worldY - frustum.bottom) / (frustum.top - frustum.bottom)) * 2 - 1;
-
-  // Convert NDC to viewport pixels
-  const pixelX = viewport.x + ((ndcX + 1) / 2) * viewport.width;
-  const pixelY = viewport.y + (1 - ndcY) / 2 * viewport.height;
+  const world = inPlaneVoxelToWorld(index1, index2, orientation, volume);
+  const pixel = worldToPixel(world, viewport, frustum);
 
   return {
-    vertical: pixelX,
-    horizontal: pixelY,
+    vertical: pixel.x,
+    horizontal: pixel.y,
   };
 }
 
 /**
- * Convert pixel coordinates to voxel indices
+ * Convert pixel coordinates to voxel indices with orientation info.
  * Reverse transformation: Pixel coordinates -> NDC -> World space -> Voxel indices
- *
- * @param pixelX - X pixel position relative to canvas
- * @param pixelY - Y pixel position relative to canvas (accounting for panelHeight)
- * @param orientation - Which slice view was clicked
- * @param volume - Volume data with dimensions and spacing
- * @param viewport - Viewport bounds for the clicked slice view
- * @param cameraState - Optional camera state (zoom, pan) for the view
- * @returns Voxel indices for the two orthogonal dimensions
  */
 export function pixelToVoxelIndices(
   pixelX: number,
   pixelY: number,
-  orientation: 'axial' | 'coronal' | 'sagittal',
+  orientation: SliceOrientation,
   volume: NiftiVolume,
   viewport: ViewportBounds,
   cameraState?: SliceCamera
-): VoxelIndices {
-  const { dimensions, spacing } = volume;
+): VoxelIndicesWithOrientation {
   const frustum = calculateCameraFrustum(
     volume,
     orientation,
@@ -168,70 +290,91 @@ export function pixelToVoxelIndices(
     cameraState?.panY
   );
 
-  // Step 1: Pixel to NDC (-1 to 1)
-  const ndcX = ((pixelX - viewport.x) / viewport.width) * 2 - 1;
-  const ndcY = 1 - ((pixelY - viewport.y) / viewport.height) * 2;
+  const world = pixelToWorld({ x: pixelX, y: pixelY }, viewport, frustum);
+  const rawIndices = worldToInPlaneVoxel(world.x, world.y, orientation, volume);
+  const clamped = clampVoxelIndices(rawIndices, orientation, volume.dimensions);
 
-  // Step 2: NDC to World Space
-  const worldX = frustum.left + ((ndcX + 1) / 2) * (frustum.right - frustum.left);
-  const worldY = frustum.bottom + ((ndcY + 1) / 2) * (frustum.top - frustum.bottom);
-
-  // Step 3: World Space to Voxel Index (orientation-dependent)
-  let index1: number;
-  let index2: number;
+  // Determine which slice orientations correspond to index1 and index2
   let orientation1: keyof SliceIndices;
   let orientation2: keyof SliceIndices;
 
   if (orientation === 'axial') {
-    // Axial (XY plane): horizontal = X (sagittal), vertical = Y (coronal)
-    index1 = worldX / spacing.x + dimensions.x / 2;
-    index2 = worldY / spacing.y + dimensions.y / 2;
     orientation1 = 'sagittal';
     orientation2 = 'coronal';
   } else if (orientation === 'coronal') {
-    // Coronal (XZ plane): horizontal = X (sagittal), vertical = Z (axial)
-    index1 = worldX / spacing.x + dimensions.x / 2;
-    index2 = worldY / spacing.z + dimensions.z / 2;
     orientation1 = 'sagittal';
     orientation2 = 'axial';
   } else {
-    // Sagittal (YZ plane): horizontal = Y (coronal), vertical = Z (axial)
-    index1 = worldX / spacing.y + dimensions.y / 2;
-    index2 = worldY / spacing.z + dimensions.z / 2;
     orientation1 = 'coronal';
     orientation2 = 'axial';
   }
 
-  // Step 4: Clamp to valid range and round to integer
-  // orientation1 can be 'sagittal' or 'coronal'
-  // orientation2 can be 'coronal' or 'axial'
-  const maxIndex1 = orientation1 === 'coronal' ? dimensions.y : dimensions.x;
-  const maxIndex2 = orientation2 === 'axial' ? dimensions.z : dimensions.y;
-
-  const clampedIndex1 = Math.max(0, Math.min(maxIndex1 - 1, Math.round(index1)));
-  const clampedIndex2 = Math.max(0, Math.min(maxIndex2 - 1, Math.round(index2)));
-
   return {
-    index1: clampedIndex1,
-    index2: clampedIndex2,
+    ...clamped,
     orientation1,
     orientation2,
   };
 }
 
 /**
+ * Convert in-plane voxel indices to pixel position.
+ * Convenience function combining voxel -> world -> pixel.
+ */
+export function voxelToPixel(
+  indices: InPlaneVoxelIndices,
+  orientation: SliceOrientation,
+  volume: NiftiVolume,
+  viewport: ViewportBounds,
+  cameraState?: SliceCamera
+): PixelPosition {
+  const frustum = calculateCameraFrustum(
+    volume,
+    orientation,
+    viewport,
+    cameraState?.zoom,
+    cameraState?.panX,
+    cameraState?.panY
+  );
+
+  const world = inPlaneVoxelToWorld(indices.index1, indices.index2, orientation, volume);
+  return worldToPixel(world, viewport, frustum);
+}
+
+/**
+ * Convert pixel position to in-plane voxel indices (clamped).
+ * Convenience function combining pixel -> world -> voxel.
+ */
+export function pixelToVoxel(
+  pixel: PixelPosition,
+  orientation: SliceOrientation,
+  volume: NiftiVolume,
+  viewport: ViewportBounds,
+  cameraState?: SliceCamera
+): InPlaneVoxelIndices {
+  const frustum = calculateCameraFrustum(
+    volume,
+    orientation,
+    viewport,
+    cameraState?.zoom,
+    cameraState?.panX,
+    cameraState?.panY
+  );
+
+  const world = pixelToWorld(pixel, viewport, frustum);
+  const rawIndices = worldToInPlaneVoxel(world.x, world.y, orientation, volume);
+  return clampVoxelIndices(rawIndices, orientation, volume.dimensions);
+}
+
+// ----------------------------------------------------------------------------
+// Layout utilities
+// ----------------------------------------------------------------------------
+
+/**
  * Get viewport bounds for a specific orientation and layout mode
- *
- * @param layoutMode - 'quad' or 'slices'
- * @param orientation - Which slice view
- * @param canvasWidth - Total canvas width
- * @param canvasHeight - Total canvas height (excluding panelHeight)
- * @param panelHeight - Height of control panel at top
- * @returns Viewport bounds
  */
 export function getViewportBounds(
   layoutMode: 'quad' | 'slices',
-  orientation: 'axial' | 'coronal' | 'sagittal',
+  orientation: SliceOrientation,
   canvasWidth: number,
   canvasHeight: number,
   panelHeight: number
@@ -240,9 +383,6 @@ export function getViewportBounds(
     const halfWidth = canvasWidth / 2;
     const halfHeight = canvasHeight / 2;
 
-    // LayoutQuad: 2x2 grid
-    // Top-left: axial, Top-right: coronal
-    // Bottom-left: sagittal, Bottom-right: volume (3D)
     switch (orientation) {
       case 'axial':
         return { x: 0, y: panelHeight, width: halfWidth, height: halfHeight };
@@ -259,8 +399,6 @@ export function getViewportBounds(
         throw new Error(`Invalid orientation: ${orientation}`);
     }
   } else {
-    // LayoutSlices: 3x1 horizontal
-    // Left: axial, Center: coronal, Right: sagittal
     const thirdWidth = canvasWidth / 3;
 
     switch (orientation) {
@@ -283,14 +421,6 @@ export function getViewportBounds(
 
 /**
  * Determine which slice view was clicked based on pixel position
- *
- * @param pixelX - X pixel position relative to window
- * @param pixelY - Y pixel position relative to window
- * @param layoutMode - 'quad' or 'slices'
- * @param canvasWidth - Total canvas width
- * @param canvasHeight - Total canvas height (excluding panelHeight)
- * @param panelHeight - Height of control panel at top
- * @returns Orientation of clicked slice view, or null if clicked outside slice views
  */
 export function getOrientationFromPixel(
   pixelX: number,
@@ -299,7 +429,7 @@ export function getOrientationFromPixel(
   canvasWidth: number,
   canvasHeight: number,
   panelHeight: number
-): 'axial' | 'coronal' | 'sagittal' | null {
+): SliceOrientation | null {
   // Adjust Y for panel height
   const canvasY = pixelY - panelHeight;
 
@@ -321,7 +451,6 @@ export function getOrientationFromPixel(
     // Bottom-right is volume view (3D), not a slice
     return null;
   } else {
-    // LayoutSlices
     const thirdWidth = canvasWidth / 3;
 
     if (pixelX < thirdWidth) return 'axial';

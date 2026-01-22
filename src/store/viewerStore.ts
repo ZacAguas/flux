@@ -5,6 +5,7 @@ import { createLayoutSlice } from './slices/layoutSlice';
 import { createViewSlice } from './slices/viewSlice';
 import { createRenderingSlice } from './slices/renderingSlice';
 import { createSessionSlice } from './slices/sessionSlice';
+import { createMeasurementSlice } from './slices/measurementSlice';
 
 // Re-export types for backward compatibility
 export * from './storeTypes';
@@ -15,4 +16,5 @@ export const useViewerStore = create<ViewerStore>((...a) => ({
   ...createViewSlice(...a),
   ...createRenderingSlice(...a),
   ...createSessionSlice(...a),
+  ...createMeasurementSlice(...a),
 }));
