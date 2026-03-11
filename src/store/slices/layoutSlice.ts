@@ -31,6 +31,7 @@ export const createLayoutSlice: StateCreator<ViewerStore, [], [], LayoutSlice> =
           controlPanelSections: {
             ...sections,
             sliceNavigation: false,
+            measurements: false,
             volumeRendering: true,
           },
         });
