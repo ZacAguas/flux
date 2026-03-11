@@ -15,12 +15,7 @@ export function TimeStepControls() {
   const setTimeStep = useViewerStore((state) => state.setTimeStep);
   const isLoadingTimeStep = useViewerStore((state) => state.isLoadingTimeStep);
 
-  // Only show for 4D volumes with multiple time steps
-  if (!volume?.dimensions.t || volume.dimensions.t <= 1) {
-    return null;
-  }
-
-  const totalTimeSteps = volume.dimensions.t;
+  const totalTimeSteps = volume!.dimensions.t;
 
   return (
     <div className="flex flex-col gap-3">

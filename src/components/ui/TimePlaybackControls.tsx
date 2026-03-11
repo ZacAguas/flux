@@ -12,7 +12,6 @@ import { useViewerStore } from '../../store/viewerStore';
 import { useState, useEffect, useRef } from 'react';
 
 export function TimePlaybackControls() {
-  const volume = useViewerStore((state) => state.volume);
   const timeStep = useViewerStore((state) => state.timeStep);
   const setTimeStep = useViewerStore((state) => state.setTimeStep);
   const isLoadingTimeStep = useViewerStore((state) => state.isLoadingTimeStep);
@@ -22,12 +21,11 @@ export function TimePlaybackControls() {
   const [loop, setLoop] = useState(true);
   const intervalRef = useRef<number | null>(null);
 
-  const is4D = volume?.dimensions.t && volume.dimensions.t > 1;
-  const totalTimeSteps = volume?.dimensions.t || 0;
+  const totalTimeSteps = volume!.dimensions.t;
 
   // Playback logic
   useEffect(() => {
-    if (!is4D || !isPlaying) {
+    if (!isPlaying) {
       if (intervalRef.current !== null) {
         clearInterval(intervalRef.current);
         intervalRef.current = null;
@@ -57,7 +55,7 @@ export function TimePlaybackControls() {
         clearInterval(intervalRef.current);
       }
     };
-  }, [isPlaying, fps, loop, totalTimeSteps, timeStep, setTimeStep, is4D]);
+  }, [isPlaying, fps, loop, totalTimeSteps, timeStep, setTimeStep]);
 
   // Stop playback if loading takes too long (safety)
   useEffect(() => {
@@ -73,10 +71,6 @@ export function TimePlaybackControls() {
   }, [isLoadingTimeStep, isPlaying]);
 
   // Only show for 4D volumes
-  if (!is4D) {
-    return null;
-  }
-
   return (
     <div className="flex flex-col gap-2">
       <div className="flex items-center gap-2">
