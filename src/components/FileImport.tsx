@@ -99,53 +99,29 @@ export function FileImport() {
       onDragOver={handleDragOver}
       onDragLeave={handleDragLeave}
       onDrop={handleDrop}
-      style={{
-        border: `2px dashed ${isDragging ? '#4CAF50' : '#ccc'}`,
-        borderRadius: '8px',
-        padding: '40px',
-        textAlign: 'center',
-        backgroundColor: isDragging ? '#f0f8f0' : '#fafafa',
-        cursor: 'pointer',
-        transition: 'all 0.3s ease',
-      }}
+      onClick={handleBrowseClick}
+      className={`border rounded-[0.625rem] py-12 px-13 text-center transition-all duration-300 ${isLoading ? 'cursor-not-allowed' : 'cursor-pointer'
+        } ${isDragging
+          ? 'border-[rgba(19,221,209,0.55)] bg-[rgba(19,221,209,0.05)] shadow-[0_0_1.5rem_rgba(19,221,209,0.12)]'
+          : 'border-white/10 bg-white/[0.03] shadow-none'
+        }`}
     >
-      <div
-        onClick={handleBrowseClick}
-        style={{
-          cursor: isLoading ? 'not-allowed' : 'pointer',
-          display: 'block',
-        }}
-      >
-        {isLoading ? (
-          <div>
-            <p style={{ fontSize: '18px', marginBottom: '8px', color: '#666' }}>Loading...</p>
-            <p style={{ fontSize: '14px', color: '#666' }}>
-              Parsing NIfTI file...
-            </p>
-          </div>
-        ) : (
-          <div>
-            <p style={{ fontSize: '18px', marginBottom: '8px', color: '#666' }}>
-              Drop NIfTI file here or click to browse
-            </p>
-            <p style={{ fontSize: '14px', color: '#666' }}>
-              Supports .nii and .nii.gz files
-            </p>
-          </div>
-        )}
-      </div>
+      {isLoading ? (
+        <div>
+          <p className="text-[1.05rem] text-white/55 mb-2">Loading...</p>
+          <p className="text-[0.85rem] text-white/30 m-0">Parsing NIfTI file...</p>
+        </div>
+      ) : (
+        <div>
+          <p className="text-[1.05rem] text-white/55 mb-2">
+            Click to browse or drop a file
+          </p>
+          <p className="text-[0.85rem] text-white/25 m-0">.nii/.nii.gz</p>
+        </div>
+      )}
 
       {error && (
-        <div
-          style={{
-            marginTop: '16px',
-            padding: '12px',
-            backgroundColor: '#ffebee',
-            color: '#c62828',
-            borderRadius: '4px',
-            fontSize: '14px',
-          }}
-        >
+        <div className="mt-4 py-2.5 px-3.5 bg-red-500/10 text-red-300/90 rounded-md text-[0.85rem] border border-red-500/25">
           {error}
         </div>
       )}

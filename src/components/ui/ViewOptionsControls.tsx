@@ -131,6 +131,7 @@ export function ViewOptionsControls() {
 
             <div className="ml-6 flex flex-col gap-2">
               <CheckboxGroup
+                className="[&_[data-slot='checkbox']]:mt-1"
                 value={selectedPlanes as unknown as string[]}
                 onChange={(values) => {
                   const newVisibility = {
