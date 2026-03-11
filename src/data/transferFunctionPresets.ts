@@ -19,7 +19,7 @@ export const TRANSFER_FUNCTION_PRESETS: TransferFunctionPreset[] = [
   },
   {
     name: 'bone',
-    description: 'CT bone visualization - emphasizes high-density structures',
+    description: 'CT bone visualization - emphasises high-density structures',
     points: [
       { value: 0.0, color: { r: 0, g: 0, b: 0 }, opacity: 0.0 },
       { value: 0.3, color: { r: 100, g: 50, b: 30 }, opacity: 0.0 },

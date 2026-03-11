@@ -41,12 +41,13 @@ export interface SlicePlaneSettings {
 }
 
 export interface ControlPanelSections {
-  viewSettings: boolean;
-  viewOptions: boolean;
-  rendering3D: boolean;
+  sliceNavigation: boolean;
+  playback: boolean;
+  display: boolean;
+  volumeRendering: boolean;
+  clippingPlanes: boolean;
   transferFunction: boolean;
-  measurementsTools: boolean;
-  presetsSettings: boolean;
+  measurements: boolean;
 }
 
 // --- Slice Interfaces ---

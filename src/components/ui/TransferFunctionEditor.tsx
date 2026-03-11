@@ -34,14 +34,14 @@ export function TransferFunctionEditor() {
           onOpenChange={setPopoverOpen}
         >
           <Label className="text-white/50 text-xs font-medium">Preset</Label>
-          <Select.Trigger className="bg-white/10 border-white/20 text-white text-xs">
+          <Select.Trigger className="!bg-white/10 backdrop-blur-sm !border-white/20 text-white text-xs">
             <Select.Value>
               {TRANSFER_FUNCTION_PRESETS.find((p) => p.name === activePreset)
                 ?.name.replace(/-/g, ' ').toUpperCase() || 'Custom'}
             </Select.Value>
             <Select.Indicator />
           </Select.Trigger>
-          <Select.Popover className="bg-neutral-900 border border-white/20 rounded-md shadow-lg">
+          <Select.Popover className="bg-black/70 backdrop-blur-sm border border-white/20 rounded-md shadow-lg">
             <ListBox>
               {TRANSFER_FUNCTION_PRESETS.map((preset) => (
                 <ListBox.Item
