@@ -119,6 +119,12 @@ export function ControlPanel() {
       >
         <div className="flex items-start gap-4 px-4 py-3 max-w-full overflow-x-auto">
           <div className="flex flex-col gap-2 min-w-fit shrink-0">
+            <div className="flex items-center gap-2 px-0.5">
+              <img src="/logo.svg" alt="" draggable={false} className="w-5 h-5 shrink-0" />
+              <span className="text-sm font-light tracking-[0.2em] bg-gradient-to-r from-[#13ddd1] to-[#0a72f5] bg-clip-text text-transparent">
+                FLUX
+              </span>
+            </div>
             <SessionManager />
             <div className="flex flex-col gap-1.5">
               <span className="text-[10px] font-semibold text-white/50 uppercase tracking-wide px-0.5">
