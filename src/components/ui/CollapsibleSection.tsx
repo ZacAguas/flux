@@ -10,6 +10,7 @@ interface CollapsibleSectionProps {
   autoCollapseOn?: LayoutMode[]
   autoExpandOn?: LayoutMode[]
   badge?: string
+  className?: string
   children: ReactNode
 }
 
@@ -18,6 +19,7 @@ export function CollapsibleSection({
   title,
   icon,
   badge,
+  className,
   children,
 }: CollapsibleSectionProps) {
   const isExpanded = useViewerStore((state) => state.controlPanelSections[id as keyof typeof state.controlPanelSections] ?? false);
@@ -28,7 +30,7 @@ export function CollapsibleSection({
   };
 
   return (
-    <div className={`flex flex-col transition-all duration-300 ${isExpanded ? 'min-w-fit' : 'min-w-0'}`}>
+    <div className={`flex flex-col transition-all duration-300 min-w-0 shrink ${className ?? ''}`}>
       <button
         onClick={handleToggle}
         className="flex items-center gap-1.5 !text-sm font-semibold text-white/60 uppercase tracking-wide hover:text-white/90 transition-colors duration-200 cursor-pointer py-1 px-2 rounded whitespace-nowrap"

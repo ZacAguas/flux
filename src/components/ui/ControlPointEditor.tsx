@@ -44,7 +44,7 @@ export function ControlPointEditor({
   };
 
   return (
-    <div className="flex flex-col gap-3 p-3 bg-white/5 rounded border border-white/20">
+    <div className="flex flex-col gap-3 p-3 bg-white/5 rounded border border-white/20 w-full overflow-hidden">
       <div className="min-h-[200px] flex flex-col gap-3">
         {selectedPoint ? (
           <>
