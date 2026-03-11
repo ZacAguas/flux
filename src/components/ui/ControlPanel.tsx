@@ -117,7 +117,7 @@ export function ControlPanel() {
         ref={panelRef}
         className="bg-black/20 backdrop-blur-sm border-b border-white/10"
       >
-        <div className="flex items-start gap-4 px-4 py-3 max-w-full overflow-x-auto">
+        <div className="flex items-start gap-4 px-4 py-3 overflow-hidden">
           <div className="flex flex-col gap-2 min-w-fit shrink-0">
             <div className="flex items-center gap-2 px-0.5">
               <img src="/logo.svg" alt="" draggable={false} className="w-5 h-5 shrink-0" />
@@ -136,7 +136,7 @@ export function ControlPanel() {
 
           <div className="self-stretch w-px bg-white/10 shrink-0" />
 
-          <div className="flex items-start gap-5 flex-wrap flex-1 min-w-0">
+          <div className="flex items-start gap-5 flex-1 min-w-0">
             <CollapsibleSection
               id="sliceNavigation"
               title="Slice Navigation"
@@ -166,6 +166,7 @@ export function ControlPanel() {
               id="display"
               title="Display"
               icon={<EyeIcon className="w-3.5 h-3.5" />}
+              className="grow"
             >
               <ViewOptionsControls />
             </CollapsibleSection>
@@ -198,6 +199,7 @@ export function ControlPanel() {
               id="measurements"
               title="Measurements"
               icon={<CalculatorIcon className="w-3.5 h-3.5" />}
+              className="max-w-[220px]"
             >
               <MeasurementControls />
             </CollapsibleSection>

@@ -51,10 +51,10 @@ export function RenderingControls() {
           selectedKey={raymarchSettings.qualityPreset}
           onSelectionChange={(key) => handlePresetChange(key.valueOf() as RenderQualityPreset)}
         >
-          <Tabs.ListContainer>
+          <Tabs.ListContainer className="w-full">
             <Tabs.List
               aria-label="Quality Preset"
-              className="bg-transparent *:px-2 *:py-1 *:text-xs *:text-white/70 *:transition-all *:duration-200 *:data-[selected=true]:text-white *:rounded-md *:bg-transparent gap-1"
+              className="bg-transparent w-full *:flex-1 *:text-center *:px-1 *:py-1 *:text-xs *:text-white/70 *:transition-all *:duration-200 *:data-[selected=true]:text-white *:rounded-md *:bg-transparent gap-1"
             >
               <Tabs.Tab id="draft" isDisabled={isDisabled}>
                 Draft

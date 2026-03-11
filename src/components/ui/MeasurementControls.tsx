@@ -83,14 +83,14 @@ function MeasurementListItem({ measurement, isSelected, onSelect, onDelete }: Me
         }`}
       onClick={() => onSelect(isSelected ? null : measurement.id)}
     >
-      <div className="flex items-center gap-2 text-xs text-white/80">
+      <div className="flex items-center gap-2 text-xs text-white/80 min-w-0 overflow-hidden">
         <span
           className="w-3 h-3 rounded-sm flex-shrink-0"
           style={{ backgroundColor: measurement.color }}
         />
         {icon}
-        <span>{valueText}</span>
-        <span className="text-white/40">({orientationLabel}:{measurement.sliceIndex})</span>
+        <span className="truncate">{valueText}</span>
+        <span className="text-white/40 shrink-0">({orientationLabel}:{measurement.sliceIndex})</span>
       </div>
       <div>
         <Button
@@ -142,10 +142,10 @@ export function MeasurementControls() {
           />
         </div>
         {activeTool !== 'none' && (
-          <p className="text-[10px] text-white/40 italic">
+          <p className="text-[10px] text-white/40 italic text-wrap break-words">
             {activeTool === 'distance'
               ? 'Click two points to measure distance'
-              : 'Click three points to measure angle (middle point is vertex)'}
+              : 'Click three points to measure angle'}
           </p>
         )}
       </div>
@@ -203,8 +203,8 @@ export function MeasurementControls() {
       )}
 
       {/* Keyboard Shortcuts Hint */}
-      <div className="text-[10px] text-white/30 border-t border-white/10 pt-2 mt-1">
-        <span className="font-medium">Shortcuts:</span> D = Distance, A = Angle, Esc = Cancel, Del = Delete selected
+      <div className="text-[10px] text-white/30 border-t border-white/10 pt-2 mt-1 text-wrap break-words">
+        <span className="font-medium">Shortcuts:</span> D = Distance, A = Angle, Esc = Cancel, Del = Delete
       </div>
     </div>
   );
