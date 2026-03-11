@@ -12,6 +12,7 @@ import { useViewerStore } from '../../store/viewerStore';
 import { useState, useEffect, useRef } from 'react';
 
 export function TimePlaybackControls() {
+  const volume = useViewerStore((state) => state.volume);
   const timeStep = useViewerStore((state) => state.timeStep);
   const setTimeStep = useViewerStore((state) => state.setTimeStep);
   const isLoadingTimeStep = useViewerStore((state) => state.isLoadingTimeStep);
