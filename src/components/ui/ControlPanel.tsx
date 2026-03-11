@@ -41,6 +41,8 @@ export function ControlPanel() {
   const setControlPanelPinned = useViewerStore((state) => state.setControlPanelPinned);
   const setControlPanelContentHeight = useViewerStore((state) => state.setControlPanelContentHeight);
   const popoverOpen = useViewerStore((state) => state.popoverOpen);
+  const volume = useViewerStore((state) => state.volume);
+  const is4D = Boolean(volume?.dimensions.t && volume.dimensions.t > 1);
   const [isMouseOverPanel, setIsMouseOverPanel] = useState(false);
   // Prevents panel from opening due to hover after unpinning (until mouse leaves)
   // Unpinning while hovering should close panel, not keep it open
@@ -141,16 +143,18 @@ export function ControlPanel() {
               </div>
             </CollapsibleSection>
 
-            <CollapsibleSection
-              id="playback"
-              title="Playback"
-              icon={<FilmIcon className="w-3.5 h-3.5" />}
-            >
-              <div className="flex flex-col gap-3">
-                <TimeStepControls />
-                <TimePlaybackControls />
-              </div>
-            </CollapsibleSection>
+            {is4D && (
+              <CollapsibleSection
+                id="playback"
+                title="Playback"
+                icon={<FilmIcon className="w-3.5 h-3.5" />}
+              >
+                <div className="flex flex-col gap-3">
+                  <TimeStepControls />
+                  <TimePlaybackControls />
+                </div>
+              </CollapsibleSection>
+            )}
 
             <CollapsibleSection
               id="display"
