@@ -63,17 +63,7 @@ function App() {
           <ControlPanel />
         </>
       ) : (
-        <div style={{
-          position: 'absolute',
-          top: '50%',
-          left: '50%',
-          transform: 'translate(-50%, -50%)',
-          zIndex: 10,
-          maxWidth: '500px',
-          width: '90%'
-        }}>
-          <FileImport />
-        </div>
+        <SplashScreen />
       )}
 
       {/* Auto-Save Restore Modal */}
