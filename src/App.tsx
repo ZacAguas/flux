@@ -2,7 +2,7 @@ import { extend, type ThreeToJSXElements } from '@react-three/fiber';
 import * as THREE from 'three/webgpu';
 import { useEffect } from 'react';
 import './App.css';
-import { FileImport } from './components/FileImport';
+import { SplashScreen } from './components/SplashScreen';
 import { PersistentLayout } from './components/layouts/PersistentLayout';
 import { LayoutContextProvider } from './context/LayoutContext';
 import { ControlPanel } from './components/ui/ControlPanel';
@@ -27,6 +27,15 @@ extend(THREE as any);
 
 function App() {
   const volume = useViewerStore((state) => state.volume);
+  const volumeFileMetadata = useViewerStore((state) => state.volumeFileMetadata);
+  const currentSessionName = useViewerStore((state) => state.currentSessionName);
+
+  // Sync document title: prefer session name, fall back to filename
+  useEffect(() => {
+    const label = currentSessionName
+      ?? volumeFileMetadata?.fileName?.replace(/\.nii(\.gz)?$/i, '');
+    document.title = label ? `${label} — Flux` : 'Flux';
+  }, [currentSessionName, volumeFileMetadata]);
 
   // Initialize IndexedDB on mount
   useEffect(() => {
