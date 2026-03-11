@@ -5,6 +5,7 @@
  */
 
 import { Tabs } from '@heroui/react';
+import { WindowIcon, ViewColumnsIcon, Squares2X2Icon } from '@heroicons/react/24/outline';
 import { useViewerStore } from '../../store/viewerStore';
 import type { LayoutMode } from '../../types/layout';
 
@@ -21,18 +22,18 @@ export function LayoutModeButtons() {
       <Tabs.ListContainer>
         <Tabs.List
           aria-label="Layout Mode"
-          className="bg-transparent *:px-3 *:py-1.5 *:text-sm *:text-white/70 *:transition-all *:duration-200 *:data-[selected=true]:text-white *:rounded-md *:bg-transparent gap-1"
+          className="bg-transparent *:px-2.5 *:py-1.5 *:text-white/70 *:transition-all *:duration-200 *:data-[selected=true]:text-white *:rounded-md *:bg-transparent gap-1"
         >
-          <Tabs.Tab id="single">
-            Single
+          <Tabs.Tab id="single" title="Single">
+            <WindowIcon className="w-4 h-4" />
             <Tabs.Indicator className="bg-white/15 backdrop-blur-sm transition-all duration-300 ease-out rounded-md" />
           </Tabs.Tab>
-          <Tabs.Tab id="slices">
-            Slices
+          <Tabs.Tab id="slices" title="Slices">
+            <ViewColumnsIcon className="w-4 h-4" />
             <Tabs.Indicator className="bg-white/15 backdrop-blur-sm transition-all duration-300 ease-out rounded-md" />
           </Tabs.Tab>
-          <Tabs.Tab id="quad">
-            Quad
+          <Tabs.Tab id="quad" title="Quad">
+            <Squares2X2Icon className="w-4 h-4" />
             <Tabs.Indicator className="bg-white/15 backdrop-blur-sm transition-all duration-300 ease-out rounded-md" />
           </Tabs.Tab>
         </Tabs.List>

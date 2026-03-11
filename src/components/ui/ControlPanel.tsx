@@ -7,6 +7,18 @@
  */
 
 import { Button } from '@heroui/react';
+import {
+  PhotoIcon,
+  FilmIcon,
+  EyeIcon,
+  CubeIcon,
+  ScissorsIcon,
+  ChartBarSquareIcon,
+  CalculatorIcon,
+  ChevronUpIcon,
+  ChevronDownIcon,
+  MapPinIcon,
+} from '@heroicons/react/24/outline';
 import { SessionManager } from './SessionManager';
 import { LayoutModeButtons } from './LayoutModeButtons';
 import { SliceControls } from './SliceControls';
@@ -29,7 +41,6 @@ export function ControlPanel() {
   const setControlPanelPinned = useViewerStore((state) => state.setControlPanelPinned);
   const setControlPanelContentHeight = useViewerStore((state) => state.setControlPanelContentHeight);
   const popoverOpen = useViewerStore((state) => state.popoverOpen);
-  const [isHoveringButton, setIsHoveringButton] = useState(false);
   const [isMouseOverPanel, setIsMouseOverPanel] = useState(false);
   // Prevents panel from opening due to hover after unpinning (until mouse leaves)
   // Unpinning while hovering should close panel, not keep it open
@@ -62,14 +73,13 @@ export function ControlPanel() {
     }
   }, [isMouseOverPanel, popoverOpen, controlPanelPinned, suppressHoverOpen, setControlPanelOpen]);
 
-  const getButtonLabel = () => {
+  const getButtonIcon = () => {
     if (controlPanelOpen) {
-      if (isHoveringButton) {
-        return controlPanelPinned ? '↑' : '📌';
-      }
-      return controlPanelPinned ? '↑' : '📌';
+      return controlPanelPinned
+        ? <ChevronUpIcon className="w-3.5 h-3.5" />
+        : <MapPinIcon className="w-3.5 h-3.5" />;
     }
-    return '↓';
+    return <ChevronDownIcon className="w-3.5 h-3.5" />;
   };
 
   const handleMouseEnter = () => {
@@ -101,123 +111,98 @@ export function ControlPanel() {
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
     >
-      {/* Main panel content */}
       <div
         ref={panelRef}
         className="bg-black/20 backdrop-blur-sm border-b border-white/10"
       >
-        <div className="flex items-start gap-6 px-4 py-3 max-w-full overflow-x-auto flex-wrap">
-          {/* File Menu - Always visible, not collapsible */}
-          <SessionManager />
-
-          {/* Layout Mode Selection - Always visible, not collapsible */}
-          <div className="flex flex-col gap-2 min-w-fit">
-            <span className="text-xs font-semibold text-white/70 uppercase tracking-wide">
-              Layout
-            </span>
-            <LayoutModeButtons />
+        <div className="flex items-start gap-4 px-4 py-3 max-w-full overflow-x-auto">
+          <div className="flex flex-col gap-2 min-w-fit shrink-0">
+            <SessionManager />
+            <div className="flex flex-col gap-1.5">
+              <span className="text-[10px] font-semibold text-white/50 uppercase tracking-wide px-0.5">
+                Layout
+              </span>
+              <LayoutModeButtons />
+            </div>
           </div>
 
-          {/* View Settings Section */}
-          <CollapsibleSection
-            id="viewSettings"
-            title="View Settings"
-          >
-            <div className="flex flex-col gap-3">
-              <SliceControls />
-              <WindowLevelControls />
+          <div className="self-stretch w-px bg-white/10 shrink-0" />
 
-              {/* Time navigation controls */}
-              <hr className="border-t border-white/10" />
-              <TimeStepControls />
-              <TimePlaybackControls />
-            </div>
-          </CollapsibleSection>
+          <div className="flex items-start gap-5 flex-wrap flex-1 min-w-0">
+            <CollapsibleSection
+              id="sliceNavigation"
+              title="Slice Navigation"
+              icon={<PhotoIcon className="w-3.5 h-3.5" />}
+            >
+              <div className="flex flex-col gap-3">
+                <SliceControls />
+                <hr className="border-t border-white/10" />
+                <WindowLevelControls />
+              </div>
+            </CollapsibleSection>
 
-          {/* View Options Section */}
-          <CollapsibleSection
-            id="viewOptions"
-            title="View Options"
-          >
-            <div className="flex flex-col gap-3">
+            <CollapsibleSection
+              id="playback"
+              title="Playback"
+              icon={<FilmIcon className="w-3.5 h-3.5" />}
+            >
+              <div className="flex flex-col gap-3">
+                <TimeStepControls />
+                <TimePlaybackControls />
+              </div>
+            </CollapsibleSection>
+
+            <CollapsibleSection
+              id="display"
+              title="Display"
+              icon={<EyeIcon className="w-3.5 h-3.5" />}
+            >
               <ViewOptionsControls />
+            </CollapsibleSection>
 
-              {/* Additional view options placeholder */}
-              <hr className="border-t border-white/10" />
-              <div className="text-[10px] text-white/40 italic">
-                Coming soon: orientation markers, scale bar
-              </div>
-            </div>
-          </CollapsibleSection>
-
-          {/* 3D Rendering Section */}
-          <CollapsibleSection
-            id="rendering3D"
-            title="3D Rendering"
-          >
-            <div className="flex flex-col gap-3">
+            <CollapsibleSection
+              id="volumeRendering"
+              title="Volume Rendering"
+              icon={<CubeIcon className="w-3.5 h-3.5" />}
+            >
               <RenderingControls />
+            </CollapsibleSection>
 
-              {/* Clipping Planes */}
-              <hr className="border-t border-white/10" />
-              <div className="text-xs font-medium text-white/60">Clipping Planes</div>
+            <CollapsibleSection
+              id="clippingPlanes"
+              title="Clipping Planes"
+              icon={<ScissorsIcon className="w-3.5 h-3.5" />}
+            >
               <ClippingPlaneControls />
+            </CollapsibleSection>
 
-              {/* Advanced rendering features placeholder */}
-              <hr className="border-t border-white/10" />
-              <div className="text-[10px] text-white/40 italic">
-                Coming soon: lighting controls
-              </div>
-            </div>
-          </CollapsibleSection>
+            <CollapsibleSection
+              id="transferFunction"
+              title="Transfer Function"
+              icon={<ChartBarSquareIcon className="w-3.5 h-3.5" />}
+            >
+              <TransferFunctionEditor />
+            </CollapsibleSection>
 
-          {/* Transfer Function Section */}
-          <CollapsibleSection
-            id="transferFunction"
-            title="Transfer Function"
-          >
-            <TransferFunctionEditor />
-          </CollapsibleSection>
-
-          {/* Measurements & Tools Section */}
-          <CollapsibleSection
-            id="measurementsTools"
-            title="Measurements & Tools"
-          >
-            <MeasurementControls />
-          </CollapsibleSection>
-
-          {/* Presets & Settings Section - Placeholder for future */}
-          <CollapsibleSection
-            id="presetsSettings"
-            title="Presets & Settings"
-          >
-            <div className="flex flex-col gap-2 text-xs text-white/50">
-              <div className="font-medium text-white/60">Coming Soon:</div>
-              <ul className="list-disc list-inside space-y-1 pl-2">
-                <li>Save/load viewer configurations</li>
-                <li>Camera position presets</li>
-                <li>Transfer function presets</li>
-                <li>Multi-volume comparison</li>
-                <li>Export settings</li>
-              </ul>
-            </div>
-          </CollapsibleSection>
+            <CollapsibleSection
+              id="measurements"
+              title="Measurements"
+              icon={<CalculatorIcon className="w-3.5 h-3.5" />}
+            >
+              <MeasurementControls />
+            </CollapsibleSection>
+          </div>
         </div>
       </div>
 
-      {/* Toggle button attached to bottom of panel */}
       <div className="flex justify-center">
         <Button
           size="sm"
           variant="secondary"
           onPress={handleToggleClick}
-          onHoverChange={(isHovering) => setIsHoveringButton(isHovering)}
-          className="!rounded-t-none !rounded-b-lg !bg-black/20 backdrop-blur-sm !border !border-white/10 !border-t-0 px-4 py-1 shadow-lg"
+          className="!rounded-t-none !rounded-b-lg !bg-black/20 backdrop-blur-sm !border !border-white/10 !border-t-0 px-4 py-1 shadow-lg text-white/70"
         >
-          <span className="text-xs text-white/70">
-            {getButtonLabel()}
-          </span>
+          {getButtonIcon()}
         </Button>
       </div>
     </div>

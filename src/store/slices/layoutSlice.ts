@@ -7,12 +7,13 @@ export const createLayoutSlice: StateCreator<ViewerStore, [], [], LayoutSlice> =
   controlPanelPinned: true,
   controlPanelContentHeight: 0,
   controlPanelSections: {
-    viewSettings: true,
-    viewOptions: false,
-    rendering3D: true,
+    sliceNavigation: true,
+    playback: false,
+    display: false,
+    volumeRendering: true,
+    clippingPlanes: false,
     transferFunction: false,
-    measurementsTools: false,
-    presetsSettings: false,
+    measurements: false,
   },
   popoverOpen: false,
 
@@ -24,33 +25,33 @@ export const createLayoutSlice: StateCreator<ViewerStore, [], [], LayoutSlice> =
       const sections = get().controlPanelSections;
 
       if (mode === 'single') {
-        // Single mode: collapse view settings (slices disabled), expand 3D rendering
+        // Single mode: collapse slice navigation (slices disabled), expand volume rendering
         set({
           layoutMode: mode,
           controlPanelSections: {
             ...sections,
-            viewSettings: false,
-            rendering3D: true,
+            sliceNavigation: false,
+            volumeRendering: true,
           },
         });
       } else if (mode === 'slices') {
-        // Slices mode: expand view settings, collapse 3D rendering
+        // Slices mode: expand slice navigation, collapse volume rendering
         set({
           layoutMode: mode,
           controlPanelSections: {
             ...sections,
-            viewSettings: true,
-            rendering3D: false,
+            sliceNavigation: true,
+            volumeRendering: false,
           },
         });
       } else if (mode === 'quad') {
-        // Quad mode: expand both view settings and 3D rendering
+        // Quad mode: expand slice navigation and volume rendering
         set({
           layoutMode: mode,
           controlPanelSections: {
             ...sections,
-            viewSettings: true,
-            rendering3D: true,
+            sliceNavigation: true,
+            volumeRendering: true,
           },
         });
       } else {

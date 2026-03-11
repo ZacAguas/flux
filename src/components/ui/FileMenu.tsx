@@ -33,11 +33,7 @@ export function FileMenu({
   const hasVolume = volumeFileMetadata !== null;
 
   return (
-    <div className="flex flex-col gap-2 min-w-fit">
-      <span className="text-xs font-semibold text-white/70 uppercase tracking-wide">
-        File
-      </span>
-
+    <div className="relative">
       <div className="relative">
         <Button
           size="sm"
@@ -45,8 +41,8 @@ export function FileMenu({
           onPress={() => setIsOpen(!isOpen)}
           className="!bg-white/10 backdrop-blur-sm !border !border-white/20 !text-white text-xs px-3 py-1"
         >
-          <span className="flex items-center">
-            {currentSessionName || 'Menu'}
+          <span className="flex items-center gap-1">
+            <span>{currentSessionName || 'Untitled'}</span>
             <span className={`text-yellow-400 ${isDirty ? '' : 'invisible'}`}>*</span>
             <span className="text-white/50">▼</span>
           </span>
@@ -66,7 +62,7 @@ export function FileMenu({
                 }}
                 className="w-full text-left px-3 py-2 text-white text-xs hover:bg-white/10 flex items-center justify-between"
               >
-                <span>New Volume...</span>
+                <span>New Volume</span>
                 <Kbd className="text-[10px] text-white/70 bg-white/5 backdrop-blur-sm rounded-md px-2 py-1">
                   <Kbd.Abbr keyValue="command" />
                   <Kbd.Content>N</Kbd.Content>
@@ -101,7 +97,7 @@ export function FileMenu({
                 disabled={!hasVolume}
                 className="w-full text-left px-3 py-2 text-white text-xs hover:bg-white/10 disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-between"
               >
-                <span>Save Session As...</span>
+                <span>Save Session As</span>
                 <Kbd className="text-[10px] text-white/70 bg-white/5 backdrop-blur-sm rounded-md px-2 py-1">
                   <Kbd.Abbr keyValue="shift" />
                   <Kbd.Abbr keyValue="command" />
@@ -117,7 +113,7 @@ export function FileMenu({
                 }}
                 className="w-full text-left px-3 py-2 text-white text-xs hover:bg-white/10 flex items-center justify-between"
               >
-                <span>Load Session...</span>
+                <span>Load Session</span>
                 <Kbd className="text-[10px] text-white/70 bg-white/5 backdrop-blur-sm rounded-md px-2 py-1">
                   <Kbd.Abbr keyValue="command" />
                   <Kbd.Content>O</Kbd.Content>
@@ -136,7 +132,7 @@ export function FileMenu({
                 disabled={!hasVolume}
                 className="w-full text-left px-3 py-2 text-white text-xs hover:bg-white/10 disabled:opacity-40 disabled:cursor-not-allowed"
               >
-                Export Session...
+                Export Session
               </button>
 
               {/* Import Session */}
@@ -147,7 +143,7 @@ export function FileMenu({
                 }}
                 className="w-full text-left px-3 py-2 text-white text-xs hover:bg-white/10"
               >
-                Import Session...
+                Import Session
               </button>
             </div>
           </div>

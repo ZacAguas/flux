@@ -6,6 +6,8 @@
  */
 
 import { Button, Slider, Label } from '@heroui/react';
+import { PlayIcon, PauseIcon, ArrowPathIcon, ArrowUturnLeftIcon } from '@heroicons/react/24/outline';
+import { ArrowPathIcon as ArrowPathIconSolid } from '@heroicons/react/24/solid';
 import { useViewerStore } from '../../store/viewerStore';
 import { useState, useEffect, useRef } from 'react';
 
@@ -16,7 +18,7 @@ export function TimePlaybackControls() {
   const isLoadingTimeStep = useViewerStore((state) => state.isLoadingTimeStep);
 
   const [isPlaying, setIsPlaying] = useState(false);
-  const [fps, setFps] = useState(5); // Frames per second
+  const [fps, setFps] = useState(5);
   const [loop, setLoop] = useState(true);
   const intervalRef = useRef<number | null>(null);
 
@@ -83,20 +85,30 @@ export function TimePlaybackControls() {
           size="sm"
           onPress={() => setIsPlaying(!isPlaying)}
           isDisabled={isLoadingTimeStep}
-          className="bg-white/15 hover:bg-white/25 text-white text-xs px-3 py-1 rounded-md min-w-[60px]"
+          title={isPlaying ? 'Pause' : 'Play'}
+          className="!bg-white/15 backdrop-blur-sm hover:!bg-white/25 text-white px-2.5 py-1 rounded-md"
         >
-          {isPlaying ? 'Pause' : 'Play'}
+          {isPlaying
+            ? <PauseIcon className="w-4 h-4" />
+            : <PlayIcon className="w-4 h-4" />
+          }
         </Button>
 
         {/* Loop Toggle */}
         <Button
           size="sm"
           onPress={() => setLoop(!loop)}
-          className={`text-xs px-3 py-1 rounded-md ${
-            loop ? 'bg-blue-500/30 hover:bg-blue-500/40' : 'bg-white/10 hover:bg-white/15'
-          } text-white`}
+          title={loop ? 'Loop: On' : 'Loop: Off'}
+          className={`px-2.5 py-1 rounded-md transition-all duration-200 ${
+            loop
+              ? '!bg-white/15 backdrop-blur-sm text-white'
+              : '!bg-transparent text-white/50 hover:text-white/70'
+          }`}
         >
-          Loop: {loop ? 'On' : 'Off'}
+          {loop
+            ? <ArrowPathIconSolid className="w-4 h-4" />
+            : <ArrowPathIcon className="w-4 h-4" />
+          }
         </Button>
 
         {/* Reset to start */}
@@ -107,9 +119,10 @@ export function TimePlaybackControls() {
             setIsPlaying(false);
           }}
           isDisabled={isLoadingTimeStep || timeStep === 0}
-          className="bg-white/10 hover:bg-white/15 text-white text-xs px-3 py-1 rounded-md"
+          title="Reset to start"
+          className="!bg-white/10 backdrop-blur-sm hover:!bg-white/15 text-white px-2.5 py-1 rounded-md"
         >
-          Reset
+          <ArrowUturnLeftIcon className="w-4 h-4" />
         </Button>
       </div>
 
