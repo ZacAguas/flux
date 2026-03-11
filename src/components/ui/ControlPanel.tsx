@@ -137,6 +137,24 @@ export function ControlPanel() {
           <div className="self-stretch w-px bg-white/10 shrink-0" />
 
           <div className="flex items-start gap-5 flex-1 min-w-0">
+            <div className="flex flex-col gap-2">
+              <CollapsibleSection
+                id="volumeRendering"
+                title="Volume Rendering"
+                icon={<CubeIcon className="w-3.5 h-3.5" />}
+              >
+                <RenderingControls />
+              </CollapsibleSection>
+
+              <CollapsibleSection
+                id="clippingPlanes"
+                title="Clipping Planes"
+                icon={<ScissorsIcon className="w-3.5 h-3.5" />}
+              >
+                <ClippingPlaneControls />
+              </CollapsibleSection>
+            </div>
+
             <CollapsibleSection
               id="sliceNavigation"
               title="Slice Navigation"
@@ -166,25 +184,8 @@ export function ControlPanel() {
               id="display"
               title="Display"
               icon={<EyeIcon className="w-3.5 h-3.5" />}
-              className="grow"
             >
               <ViewOptionsControls />
-            </CollapsibleSection>
-
-            <CollapsibleSection
-              id="volumeRendering"
-              title="Volume Rendering"
-              icon={<CubeIcon className="w-3.5 h-3.5" />}
-            >
-              <RenderingControls />
-            </CollapsibleSection>
-
-            <CollapsibleSection
-              id="clippingPlanes"
-              title="Clipping Planes"
-              icon={<ScissorsIcon className="w-3.5 h-3.5" />}
-            >
-              <ClippingPlaneControls />
             </CollapsibleSection>
 
             <CollapsibleSection

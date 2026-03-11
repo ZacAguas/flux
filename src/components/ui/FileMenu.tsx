@@ -39,12 +39,12 @@ export function FileMenu({
           size="sm"
           variant="secondary"
           onPress={() => setIsOpen(!isOpen)}
-          className="!bg-white/10 backdrop-blur-sm !border !border-white/20 !text-white text-xs px-3 py-1"
+          className="!bg-white/10 backdrop-blur-sm !border !border-white/20 !text-white text-xs px-2 py-1"
         >
-          <span className="flex items-center gap-1">
-            <span>{currentSessionName || 'Untitled'}</span>
+          <span className="flex items-center">
+            <span className="text-xs max-w-[50px] truncate">{currentSessionName || 'Untitled'}</span>
             <span className={`text-yellow-400 ${isDirty ? '' : 'invisible'}`}>*</span>
-            <span className="text-white/50">▼</span>
+            <span className="text-white/50 text-[8px]">▼</span>
           </span>
         </Button>
 
