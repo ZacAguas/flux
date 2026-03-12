@@ -5,7 +5,8 @@
  * Includes special handling for file mismatch warnings.
  */
 
-import { Modal, Button, useOverlayState } from '@heroui/react';
+import { ExclamationTriangleIcon } from '@heroicons/react/24/outline';
+import { Modal, Button } from '@heroui/react';
 import type { SessionError } from '../../types/session';
 import type { VolumeValidationResult } from '../../types/session';
 
@@ -26,11 +27,6 @@ export function SessionErrorModal({
   onRetry,
   onForceLoad,
 }: SessionErrorModalProps) {
-  const state = useOverlayState({
-    isOpen,
-    onOpenChange: (open) => !open && onClose(),
-  });
-
   if (!error) return null;
 
   const isFileMismatch = error.type === 'file-mismatch' && !!validationResult;
@@ -72,34 +68,17 @@ export function SessionErrorModal({
   };
 
   return (
-    <Modal state={state}>
-      <Modal.Container
-        isDismissable
-        variant="blur"
-        className="max-w-lg"
-      >
-        <Modal.Dialog
-          style={{
-            backgroundColor: 'rgb(23 23 23)',
-            borderColor: 'rgba(255 255 255 / 0.2)',
-            borderWidth: '1px',
-            borderRadius: '0.5rem',
-          }}
-        >
-          <Modal.Header
-            className="px-6 py-4"
-            style={{
-              borderBottom: '1px solid rgba(255 255 255 / 0.1)',
-              backgroundColor: 'transparent',
-            }}
-          >
-            <h2 className="text-lg font-semibold text-white">{getErrorTitle()}</h2>
+    <Modal isOpen={isOpen} onOpenChange={(open: boolean) => !open && onClose()}>
+      <Modal.Container variant="blur" isDismissable>
+        <Modal.Dialog className="max-w-lg bg-neutral-900 border border-white/20">
+          <Modal.Header className="px-6 py-4 border-b border-white/10 bg-transparent !flex-row !items-center gap-3">
+            <Modal.Icon className="bg-red-500/20 text-red-400">
+              <ExclamationTriangleIcon className="size-5" />
+            </Modal.Icon>
+            <Modal.Heading className="text-white">{getErrorTitle()}</Modal.Heading>
           </Modal.Header>
 
-          <Modal.Body
-            className="px-6 py-4 space-y-4"
-            style={{ backgroundColor: 'transparent' }}
-          >
+          <Modal.Body className="px-6 py-4 space-y-4 bg-transparent">
             <>
               <p className="text-sm text-white/70">{getErrorMessage()}</p>
 
@@ -140,13 +119,7 @@ export function SessionErrorModal({
             </>
           </Modal.Body>
 
-          <Modal.Footer
-            className="px-6 py-4 flex justify-end gap-3"
-            style={{
-              borderTop: '1px solid rgba(255 255 255 / 0.1)',
-              backgroundColor: 'transparent',
-            }}
-          >
+          <Modal.Footer className="px-6 py-4 flex justify-end gap-3 border-t border-white/10 bg-transparent">
             <Button
               size="sm"
               variant="secondary"

@@ -5,8 +5,8 @@
  * with a stored FileSystemFileHandle. Requires a user gesture to request permission.
  */
 
-import { Modal, Button, useOverlayState } from '@heroui/react';
-import { useEffect } from 'react';
+import { KeyIcon } from '@heroicons/react/24/outline';
+import { Modal, Button } from '@heroui/react';
 
 interface PermissionRequestModalProps {
   isOpen: boolean;
@@ -23,55 +23,18 @@ export function PermissionRequestModal({
   onSelectDifferentFile,
   onCancel,
 }: PermissionRequestModalProps) {
-  const state = useOverlayState({
-    isOpen,
-    onOpenChange: (open) => {
-      if (!open) {
-        onCancel();
-      }
-    },
-  });
-
-  // Force sync state when isOpen changes
-  useEffect(() => {
-    if (!isOpen && state.isOpen) {
-      state.setOpen(false);
-    }
-  }, [isOpen, state]);
-
-  if (!isOpen) {
-    return null;
-  }
-
   return (
-    <Modal state={state}>
-      <Modal.Container
-        isDismissable
-        variant="blur"
-        className="max-w-md"
-      >
-        <Modal.Dialog
-          style={{
-            backgroundColor: 'rgb(23 23 23)',
-            borderColor: 'rgba(255 255 255 / 0.2)',
-            borderWidth: '1px',
-            borderRadius: '0.5rem',
-          }}
-        >
-          <Modal.Header
-            className="px-6 py-4"
-            style={{
-              borderBottom: '1px solid rgba(255 255 255 / 0.1)',
-              backgroundColor: 'transparent',
-            }}
-          >
-            <h2 className="text-lg font-semibold text-white">File Access Required</h2>
+    <Modal isOpen={isOpen} onOpenChange={(open: boolean) => !open && onCancel()}>
+      <Modal.Container variant="blur" isDismissable>
+        <Modal.Dialog className="max-w-md bg-neutral-900 border border-white/20">
+          <Modal.Header className="px-6 py-4 border-b border-white/10 bg-transparent !flex-row !items-center gap-3">
+            <Modal.Icon className="bg-yellow-500/20 text-yellow-400">
+              <KeyIcon className="size-5" />
+            </Modal.Icon>
+            <Modal.Heading className="text-white">File Access Required</Modal.Heading>
           </Modal.Header>
 
-          <Modal.Body
-            className="px-6 py-4 space-y-3"
-            style={{ backgroundColor: 'transparent' }}
-          >
+          <Modal.Body className="px-6 py-4 space-y-3 bg-transparent">
             <p className="text-sm text-white/70">
               This session was saved with the file:
             </p>
@@ -85,13 +48,7 @@ export function PermissionRequestModal({
             </p>
           </Modal.Body>
 
-          <Modal.Footer
-            className="px-6 py-4 flex flex-wrap justify-end gap-2"
-            style={{
-              borderTop: '1px solid rgba(255 255 255 / 0.1)',
-              backgroundColor: 'transparent',
-            }}
-          >
+          <Modal.Footer className="px-6 py-4 flex flex-wrap justify-end gap-2 border-t border-white/10 bg-transparent">
             <Button
               size="sm"
               variant="secondary"
