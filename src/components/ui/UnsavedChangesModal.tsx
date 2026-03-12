@@ -22,7 +22,8 @@ export function UnsavedChangesModal({
 }: UnsavedChangesModalProps) {
   return (
     <AlertDialog isOpen={isOpen} onOpenChange={(open) => !open && onCancel()}>
-      <AlertDialog.Container backdropVariant="blur" isDismissable>
+      <AlertDialog.Backdrop variant="blur" isDismissable>
+        <AlertDialog.Container>
         <AlertDialog.Dialog
           className="max-w-md bg-neutral-900 border border-white/20"
         >
@@ -46,7 +47,8 @@ export function UnsavedChangesModal({
             </Button>
           </AlertDialog.Footer>
         </AlertDialog.Dialog>
-      </AlertDialog.Container>
+        </AlertDialog.Container>
+      </AlertDialog.Backdrop>
     </AlertDialog>
   );
 }

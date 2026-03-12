@@ -69,7 +69,8 @@ export function SessionErrorModal({
 
   return (
     <Modal isOpen={isOpen} onOpenChange={(open: boolean) => !open && onClose()}>
-      <Modal.Container variant="blur" isDismissable>
+      <Modal.Backdrop variant="blur" isDismissable>
+        <Modal.Container>
         <Modal.Dialog className="max-w-lg bg-neutral-900 border border-white/20">
           <Modal.Header className="px-6 py-4 border-b border-white/10 bg-transparent !flex-row !items-center gap-3">
             <Modal.Icon className="bg-red-500/20 text-red-400">
@@ -158,7 +159,8 @@ export function SessionErrorModal({
             )}
           </Modal.Footer>
         </Modal.Dialog>
-      </Modal.Container>
+        </Modal.Container>
+      </Modal.Backdrop>
     </Modal>
   );
 }

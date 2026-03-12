@@ -25,7 +25,8 @@ export function PermissionRequestModal({
 }: PermissionRequestModalProps) {
   return (
     <Modal isOpen={isOpen} onOpenChange={(open: boolean) => !open && onCancel()}>
-      <Modal.Container variant="blur" isDismissable>
+      <Modal.Backdrop variant="blur" isDismissable>
+        <Modal.Container>
         <Modal.Dialog className="max-w-md bg-neutral-900 border border-white/20">
           <Modal.Header className="px-6 py-4 border-b border-white/10 bg-transparent !flex-row !items-center gap-3">
             <Modal.Icon className="bg-yellow-500/20 text-yellow-400">
@@ -77,7 +78,8 @@ export function PermissionRequestModal({
             </Button>
           </Modal.Footer>
         </Modal.Dialog>
-      </Modal.Container>
+        </Modal.Container>
+      </Modal.Backdrop>
     </Modal>
   );
 }
