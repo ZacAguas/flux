@@ -8,7 +8,8 @@
 
 import { Label, Slider, Kbd } from '@heroui/react';
 import { useViewerStore } from '../../store/viewerStore';
-import { rgbToHex, hexToRgb } from '../../utils/colorConversion';
+import { hexToRgb, rgbToHex } from '../../utils/colorConversion';
+import { ColorPickerInput } from './ColorPickerInput';
 
 interface ControlPointEditorProps {
   selectedPointIndex: number | null;
@@ -91,21 +92,11 @@ export function ControlPointEditor({
             </Slider>
 
             {/* Color Picker */}
-            <div className="flex flex-col gap-1">
-              <Label className="text-white/50 text-xs font-medium">Color</Label>
-              <input
-                type="color"
-                value={rgbToHex(selectedPoint.color)}
-                onChange={(e) => handleColorChange(e.target.value)}
-                className="w-full h-5 rounded-md border-0 cursor-pointer
-                [&::-webkit-color-swatch-wrapper]:p-0
-                [&::-webkit-color-swatch-wrapper]:rounded-md
-                [&::-webkit-color-swatch]:border-0
-                [&::-webkit-color-swatch]:rounded-md
-                [&::-moz-color-swatch]:border-0
-                [&::-moz-color-swatch]:rounded-md"
-              />
-            </div>
+            <ColorPickerInput
+              value={rgbToHex(selectedPoint.color)}
+              onChange={handleColorChange}
+              label="Color"
+            />
           </>
         ) : (
           <div className="text-xs text-white/50 text-center flex items-center justify-center h-full">
