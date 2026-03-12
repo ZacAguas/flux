@@ -5,8 +5,8 @@
  * Shows timestamp and volume filename for context.
  */
 
-import { Modal, Button, useOverlayState } from '@heroui/react';
-import { useEffect } from 'react';
+import { ArrowPathIcon } from '@heroicons/react/24/outline';
+import { Modal, Button } from '@heroui/react';
 
 interface AutoSaveRestoreModalProps {
   isOpen: boolean;
@@ -64,55 +64,18 @@ export function AutoSaveRestoreModal({
   onRestore,
   onDismiss,
 }: AutoSaveRestoreModalProps) {
-  const state = useOverlayState({
-    isOpen,
-    onOpenChange: (open) => {
-      if (!open) {
-        onDismiss();
-      }
-    },
-  });
-
-  // Force sync state when isOpen changes
-  useEffect(() => {
-    if (!isOpen && state.isOpen) {
-      state.setOpen(false);
-    }
-  }, [isOpen, state]);
-
-  if (!isOpen) {
-    return null;
-  }
-
   return (
-    <Modal state={state}>
-      <Modal.Container
-        isDismissable
-        variant="blur"
-        className="max-w-md"
-      >
-        <Modal.Dialog
-          style={{
-            backgroundColor: 'rgb(23 23 23)',
-            borderColor: 'rgba(255 255 255 / 0.2)',
-            borderWidth: '1px',
-            borderRadius: '0.5rem',
-          }}
-        >
-          <Modal.Header
-            className="px-6 py-4"
-            style={{
-              borderBottom: '1px solid rgba(255 255 255 / 0.1)',
-              backgroundColor: 'transparent',
-            }}
-          >
-            <h2 className="text-lg font-semibold text-white">Restore Previous Session?</h2>
+    <Modal isOpen={isOpen} onOpenChange={(open: boolean) => !open && onDismiss()}>
+      <Modal.Container variant="blur" isDismissable>
+        <Modal.Dialog className="max-w-lg bg-neutral-900 border border-white/20">
+          <Modal.Header className="px-6 py-4 border-b border-white/10 bg-transparent !flex-row !items-center gap-3">
+            <Modal.Icon className="bg-blue-500/20 text-blue-400">
+              <ArrowPathIcon className="size-5" />
+            </Modal.Icon>
+            <Modal.Heading className="text-white">Restore Previous Session?</Modal.Heading>
           </Modal.Header>
 
-          <Modal.Body
-            className="px-6 py-4 space-y-3"
-            style={{ backgroundColor: 'transparent' }}
-          >
+          <Modal.Body className="px-6 py-4 space-y-3 bg-transparent">
             <p className="text-sm text-white/70">
               An auto-saved session was found:
             </p>
@@ -165,13 +128,7 @@ export function AutoSaveRestoreModal({
             </p>
           </Modal.Body>
 
-          <Modal.Footer
-            className="px-6 py-4 flex justify-end gap-3"
-            style={{
-              borderTop: '1px solid rgba(255 255 255 / 0.1)',
-              backgroundColor: 'transparent',
-            }}
-          >
+          <Modal.Footer className="px-6 py-4 flex justify-end gap-3 border-t border-white/10 bg-transparent">
             <Button
               size="sm"
               variant="secondary"

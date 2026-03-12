@@ -4,7 +4,8 @@
  * Prompts user to name a session before saving.
  */
 
-import { Modal, Button, useOverlayState } from '@heroui/react';
+import { Modal, Button } from '@heroui/react';
+import { BookmarkIcon } from '@heroicons/react/24/outline';
 import { useState } from 'react';
 
 interface SaveSessionModalProps {
@@ -34,40 +35,18 @@ export function SaveSessionModal({
     onCancel();
   };
 
-  const state = useOverlayState({
-    isOpen,
-    onOpenChange: (open) => !open && handleCancel(),
-  });
-
   return (
-    <Modal state={state}>
-      <Modal.Container
-        isDismissable
-        variant="blur"
-        className="max-w-md"
-      >
-        <Modal.Dialog
-          style={{
-            backgroundColor: 'rgb(23 23 23)', // neutral-900
-            borderColor: 'rgba(255 255 255 / 0.2)',
-            borderWidth: '1px',
-            borderRadius: '0.5rem',
-          }}
-        >
-          <Modal.Header
-            className="px-6 py-4"
-            style={{
-              borderBottom: '1px solid rgba(255 255 255 / 0.1)',
-              backgroundColor: 'transparent',
-            }}
-          >
-            <h2 className="text-lg font-semibold text-white">Save Session As</h2>
+    <Modal isOpen={isOpen} onOpenChange={(open: boolean) => !open && handleCancel()}>
+      <Modal.Container variant="blur" isDismissable>
+        <Modal.Dialog className="max-w-md bg-neutral-900 border border-white/20">
+          <Modal.Header className="px-6 py-4 border-b border-white/10 bg-transparent !flex-row !items-center gap-3">
+            <Modal.Icon className="bg-white/10 text-white/70">
+              <BookmarkIcon className="size-5" />
+            </Modal.Icon>
+            <Modal.Heading className="text-white">Save Session As</Modal.Heading>
           </Modal.Header>
 
-          <Modal.Body
-            className="px-6 py-4 space-y-4"
-            style={{ backgroundColor: 'transparent' }}
-          >
+          <Modal.Body className="px-6 py-4 space-y-4 bg-transparent">
             <div>
               <label htmlFor="session-name" className="block text-sm font-medium text-white/70 mb-2">
                 Session Name
@@ -100,13 +79,7 @@ export function SaveSessionModal({
             </div>
           </Modal.Body>
 
-          <Modal.Footer
-            className="px-6 py-4 flex justify-end gap-3"
-            style={{
-              borderTop: '1px solid rgba(255 255 255 / 0.1)',
-              backgroundColor: 'transparent',
-            }}
-          >
+          <Modal.Footer className="px-6 py-4 flex justify-end gap-3 border-t border-white/10 bg-transparent">
             <Button
               size="sm"
               variant="secondary"

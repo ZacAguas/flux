@@ -5,8 +5,7 @@
  * (loading new volume, loading session, etc.).
  */
 
-import { Modal, Button, useOverlayState } from '@heroui/react';
-import { useEffect } from 'react';
+import { AlertDialog, Button } from '@heroui/react';
 
 interface UnsavedChangesModalProps {
   isOpen: boolean;
@@ -21,96 +20,33 @@ export function UnsavedChangesModal({
   onDontSave,
   onCancel,
 }: UnsavedChangesModalProps) {
-  const state = useOverlayState({
-    isOpen,
-    onOpenChange: (open) => {
-      if (!open) {
-        onCancel();
-      }
-    },
-  });
-
-  // Force sync state when isOpen changes
-  useEffect(() => {
-    if (!isOpen && state.isOpen) {
-      state.setOpen(false);
-    }
-  }, [isOpen, state]);
-
-  if (!isOpen) {
-    return null;
-  }
-
   return (
-    <Modal state={state}>
-      <Modal.Container
-        isDismissable
-        variant="blur"
-        className="max-w-md"
-      >
-        <Modal.Dialog
-          style={{
-            backgroundColor: 'rgb(23 23 23)',
-            borderColor: 'rgba(255 255 255 / 0.2)',
-            borderWidth: '1px',
-            borderRadius: '0.5rem',
-          }}
+    <AlertDialog isOpen={isOpen} onOpenChange={(open) => !open && onCancel()}>
+      <AlertDialog.Container backdropVariant="blur" isDismissable>
+        <AlertDialog.Dialog
+          className="max-w-md bg-neutral-900 border border-white/20"
         >
-          <Modal.Header
-            className="px-6 py-4"
-            style={{
-              borderBottom: '1px solid rgba(255 255 255 / 0.1)',
-              backgroundColor: 'transparent',
-            }}
-          >
-            <h2 className="text-lg font-semibold text-white">Unsaved Changes</h2>
-          </Modal.Header>
-
-          <Modal.Body
-            className="px-6 py-4"
-            style={{ backgroundColor: 'transparent' }}
-          >
-            <p className="text-sm text-white/70">
-              You have unsaved changes. Would you like to save before continuing?
-            </p>
-          </Modal.Body>
-
-          <Modal.Footer
-            className="px-6 py-4 flex justify-end gap-3"
-            style={{
-              borderTop: '1px solid rgba(255 255 255 / 0.1)',
-              backgroundColor: 'transparent',
-            }}
-          >
-            <Button
-              size="sm"
-              variant="secondary"
-              onPress={onCancel}
-              className="!bg-white/10 !border-white/20 !text-white text-xs"
-            >
+          <AlertDialog.CloseTrigger className="!text-white/70 hover:!text-white" />
+          <AlertDialog.Header className="px-6 py-4 border-b border-white/10 bg-transparent !flex-row !items-center gap-3">
+            <AlertDialog.Icon status="warning" />
+            <AlertDialog.Heading className="text-white">Unsaved Changes</AlertDialog.Heading>
+          </AlertDialog.Header>
+          <AlertDialog.Body className="px-6 py-4 bg-transparent">
+            <p className="text-white/70">You have unsaved changes. Would you like to save before continuing?</p>
+          </AlertDialog.Body>
+          <AlertDialog.Footer className="px-6 py-4 flex justify-end gap-3 border-t border-white/10 bg-transparent">
+            <Button size="sm" variant="tertiary" className="!bg-white/10 !border-white/20 !text-white text-xs" onPress={onCancel}>
               Cancel
             </Button>
-
-            <Button
-              size="sm"
-              variant="secondary"
-              onPress={onDontSave}
-              className="!bg-white/10 !border-white/20 !text-white text-xs"
-            >
-              Don't Save
+            <Button size="sm" variant="tertiary" className="!bg-white/10 !border-white/20 !text-white text-xs" onPress={onDontSave}>
+              Don&apos;t Save
             </Button>
-
-            <Button
-              size="sm"
-              variant="primary"
-              onPress={onSave}
-              className="!bg-blue-600 !border-blue-500 !text-white text-xs"
-            >
+            <Button size="sm" variant="primary" className="!bg-blue-600 !border-blue-500 !text-white text-xs" onPress={onSave}>
               Save
             </Button>
-          </Modal.Footer>
-        </Modal.Dialog>
-      </Modal.Container>
-    </Modal>
+          </AlertDialog.Footer>
+        </AlertDialog.Dialog>
+      </AlertDialog.Container>
+    </AlertDialog>
   );
 }

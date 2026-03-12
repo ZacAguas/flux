@@ -4,7 +4,8 @@
  * Lists all saved sessions and allows user to load or delete them.
  */
 
-import { Modal, Button, useOverlayState } from '@heroui/react';
+import { FolderOpenIcon } from '@heroicons/react/24/outline';
+import { Modal, Button } from '@heroui/react';
 import type { SavedSessionMetadata } from '../../types/session';
 
 interface SessionPickerModalProps {
@@ -26,41 +27,18 @@ export function SessionPickerModal({
     return new Date(timestamp).toLocaleString();
   };
 
-  const state = useOverlayState({
-    isOpen,
-    onOpenChange: (open) => !open && onClose(),
-  });
-
   return (
-    <Modal state={state}>
-      <Modal.Container
-        isDismissable
-        variant="blur"
-        scroll="inside"
-        className="max-w-2xl max-h-[80vh]"
-      >
-        <Modal.Dialog
-          style={{
-            backgroundColor: 'rgb(23 23 23)',
-            borderColor: 'rgba(255 255 255 / 0.2)',
-            borderWidth: '1px',
-            borderRadius: '0.5rem',
-          }}
-        >
-          <Modal.Header
-            className="px-6 py-4"
-            style={{
-              borderBottom: '1px solid rgba(255 255 255 / 0.1)',
-              backgroundColor: 'transparent',
-            }}
-          >
-            <h2 className="text-lg font-semibold text-white">Load Session</h2>
+    <Modal isOpen={isOpen} onOpenChange={(open: boolean) => !open && onClose()}>
+      <Modal.Container variant="blur" isDismissable scroll="inside">
+        <Modal.Dialog className="max-w-2xl max-h-[80vh] bg-neutral-900 border border-white/20">
+          <Modal.Header className="px-6 py-4 border-b border-white/10 bg-transparent !flex-row !items-center gap-3">
+            <Modal.Icon className="bg-white/10 text-white/70">
+              <FolderOpenIcon className="size-5" />
+            </Modal.Icon>
+            <Modal.Heading className="text-white">Load Session</Modal.Heading>
           </Modal.Header>
 
-          <Modal.Body
-            className="px-6 py-4"
-            style={{ backgroundColor: 'transparent' }}
-          >
+          <Modal.Body className="px-6 py-4 bg-transparent">
             {sessions.length === 0 ? (
               <p className="text-sm text-white/50 text-center py-8">
                 No saved sessions found. Save your current session to see it here.
@@ -149,13 +127,7 @@ export function SessionPickerModal({
             )}
           </Modal.Body>
 
-          <Modal.Footer
-            className="px-6 py-4 flex justify-end"
-            style={{
-              borderTop: '1px solid rgba(255 255 255 / 0.1)',
-              backgroundColor: 'transparent',
-            }}
-          >
+          <Modal.Footer className="px-6 py-4 flex justify-end border-t border-white/10 bg-transparent">
             <Button
               size="sm"
               variant="secondary"

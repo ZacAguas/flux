@@ -13,11 +13,12 @@ import {
   CursorArrowRaysIcon,
   FilmIcon,
   PhotoIcon,
+  QuestionMarkCircleIcon,
   RocketLaunchIcon,
   ScissorsIcon,
   Squares2X2Icon,
 } from '@heroicons/react/24/outline';
-import { Button, Kbd, Modal, useOverlayState } from '@heroui/react';
+import { Button, Kbd, Modal } from '@heroui/react';
 import { useState } from 'react';
 
 interface HelpModalProps {
@@ -395,40 +396,18 @@ export function HelpModal({ isOpen, onClose }: HelpModalProps) {
 
   const activeTab = TABS.find((t) => t.id === activeTabId) ?? TABS[0];
 
-  const state = useOverlayState({
-    isOpen,
-    onOpenChange: (open) => !open && onClose(),
-  });
-
   return (
-    <Modal state={state}>
-      <Modal.Container
-        isDismissable
-        variant="blur"
-        className="max-w-3xl"
-      >
-        <Modal.Dialog
-          style={{
-            backgroundColor: 'rgb(23 23 23)',
-            borderColor: 'rgba(255 255 255 / 0.2)',
-            borderWidth: '1px',
-            borderRadius: '0.5rem',
-          }}
-        >
-          <Modal.Header
-            className="px-6 py-4"
-            style={{
-              borderBottom: '1px solid rgba(255 255 255 / 0.1)',
-              backgroundColor: 'transparent',
-            }}
-          >
-            <h2 className="text-lg font-semibold text-white">Help</h2>
+    <Modal isOpen={isOpen} onOpenChange={(open: boolean) => !open && onClose()}>
+      <Modal.Container variant="blur" isDismissable>
+        <Modal.Dialog className="max-w-3xl bg-neutral-900 border border-white/20">
+          <Modal.Header className="px-6 py-4 border-b border-white/10 bg-transparent !flex-row !items-center gap-3">
+            <Modal.Icon className="bg-white/10 text-white/70">
+              <QuestionMarkCircleIcon className="size-5" />
+            </Modal.Icon>
+            <Modal.Heading className="text-white">Help</Modal.Heading>
           </Modal.Header>
 
-          <Modal.Body
-            className="px-0 py-0"
-            style={{ backgroundColor: 'transparent', maxHeight: '75vh' }}
-          >
+          <Modal.Body className="px-0 py-0 bg-transparent" style={{ maxHeight: '75vh' }}>
             <div className="flex h-full" style={{ minHeight: 0 }}>
               {/* Sidebar */}
               <nav className="w-48 shrink-0 border-r border-white/10 py-2 overflow-y-auto">
@@ -454,13 +433,7 @@ export function HelpModal({ isOpen, onClose }: HelpModalProps) {
             </div>
           </Modal.Body>
 
-          <Modal.Footer
-            className="px-6 py-4 flex justify-end"
-            style={{
-              borderTop: '1px solid rgba(255 255 255 / 0.1)',
-              backgroundColor: 'transparent',
-            }}
-          >
+          <Modal.Footer className="px-6 py-4 flex justify-end border-t border-white/10 bg-transparent">
             <Button
               size="sm"
               variant="secondary"
