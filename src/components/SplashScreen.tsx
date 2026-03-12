@@ -1,7 +1,11 @@
 import { ThreadsBackground } from './ui/ThreadsBackground';
 import { FileImport } from './FileImport';
+import { QuestionMarkCircleIcon } from '@heroicons/react/24/outline';
+import { useViewerStore } from '../store/viewerStore';
 
 export function SplashScreen() {
+  const setHelpModalOpen = useViewerStore((state) => state.setHelpModalOpen);
+
   return (
     <div className="fixed inset-0 bg-[#0d0d10] flex items-center justify-center overflow-hidden">
       <ThreadsBackground />
@@ -35,6 +39,15 @@ export function SplashScreen() {
           Drop a NIfTI file anywhere to get started (.nii/.nii.gz)
         </p>
       </div>
+
+      {/* Help button */}
+      <button
+        onClick={() => setHelpModalOpen(true)}
+        className="absolute bottom-6 right-6 z-10 p-2 text-white/40 hover:text-white/70 transition-colors"
+        aria-label="Open help"
+      >
+        <QuestionMarkCircleIcon className="w-6 h-6" />
+      </button>
     </div>
   );
 }

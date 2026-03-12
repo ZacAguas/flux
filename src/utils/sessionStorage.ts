@@ -315,7 +315,7 @@ export function exportSessionToJSON(session: ViewerSession, fileName: string): v
 
     const a = document.createElement('a');
     a.href = url;
-    a.download = `${fileName}.json`;
+    a.download = `${fileName}.flux`;
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);

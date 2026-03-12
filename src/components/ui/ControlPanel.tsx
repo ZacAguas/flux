@@ -18,6 +18,7 @@ import {
   ChevronUpIcon,
   ChevronDownIcon,
   MapPinIcon,
+  QuestionMarkCircleIcon,
 } from '@heroicons/react/24/outline';
 import { SessionManager } from './SessionManager';
 import { LayoutModeButtons } from './LayoutModeButtons';
@@ -41,6 +42,7 @@ export function ControlPanel() {
   const setControlPanelPinned = useViewerStore((state) => state.setControlPanelPinned);
   const setControlPanelContentHeight = useViewerStore((state) => state.setControlPanelContentHeight);
   const popoverOpen = useViewerStore((state) => state.popoverOpen);
+  const setHelpModalOpen = useViewerStore((state) => state.setHelpModalOpen);
   const volume = useViewerStore((state) => state.volume);
   const is4D = Boolean(volume?.dimensions.t && volume.dimensions.t > 1);
   const [isMouseOverPanel, setIsMouseOverPanel] = useState(false);
@@ -117,7 +119,7 @@ export function ControlPanel() {
         ref={panelRef}
         className="bg-black/20 backdrop-blur-sm border-b border-white/10"
       >
-        <div className="flex items-start gap-4 px-4 py-3 overflow-hidden">
+        <div className="flex items-start gap-4 px-4 py-3">
           <div className="flex flex-col gap-2 min-w-fit shrink-0">
             <div className="flex items-center gap-2 px-0.5">
               <img src="/logo.svg" alt="" draggable={false} className="w-5 h-5 shrink-0" />
@@ -132,6 +134,14 @@ export function ControlPanel() {
               </span>
               <LayoutModeButtons />
             </div>
+            <button
+              onClick={() => setHelpModalOpen(true)}
+              className="flex items-center gap-1.5 px-0.5 text-white/40 hover:text-white/70 transition-colors"
+              aria-label="Open help"
+            >
+              <QuestionMarkCircleIcon className="w-5 h-5" />
+              <span className="text-[10px] font-semibold uppercase tracking-wide">Help</span>
+            </button>
           </div>
 
           <div className="self-stretch w-px bg-white/10 shrink-0" />

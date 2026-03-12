@@ -16,6 +16,7 @@ export const createLayoutSlice: StateCreator<ViewerStore, [], [], LayoutSlice> =
     measurements: false,
   },
   popoverOpen: false,
+  helpModalOpen: false,
 
   setLayoutMode: (mode) => {
     const currentMode = get().layoutMode;
@@ -78,6 +79,8 @@ export const createLayoutSlice: StateCreator<ViewerStore, [], [], LayoutSlice> =
     })),
 
   setPopoverOpen: (open) => set({ popoverOpen: open }),
+
+  setHelpModalOpen: (open) => set({ helpModalOpen: open }),
 
   toggleAllSections: (expanded) =>
     set((state) => ({

@@ -145,7 +145,7 @@ export function SessionManager() {
   const handleImportSession = () => {
     const input = document.createElement('input');
     input.type = 'file';
-    input.accept = '.json';
+    input.accept = '.flux,.json';
 
     input.onchange = async () => {
       const file = input.files?.[0];
