@@ -75,6 +75,7 @@ export interface LayoutSlice {
   controlPanelContentHeight: number;
   controlPanelSections: ControlPanelSections;
   popoverOpen: boolean;
+  helpModalOpen: boolean;
 
   setLayoutMode: (mode: LayoutMode) => void;
   setControlPanelOpen: (open: boolean) => void;
@@ -82,6 +83,7 @@ export interface LayoutSlice {
   setControlPanelContentHeight: (height: number) => void;
   setControlPanelSectionExpanded: (sectionId: string, expanded: boolean) => void;
   setPopoverOpen: (open: boolean) => void;
+  setHelpModalOpen: (open: boolean) => void;
   toggleAllSections: (expanded: boolean) => void;
 }
 

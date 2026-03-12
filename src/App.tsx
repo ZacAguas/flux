@@ -9,6 +9,7 @@ import { ControlPanel } from './components/ui/ControlPanel';
 import { AutoSaveRestoreModal } from './components/ui/AutoSaveRestoreModal';
 import { PermissionRequestModal } from './components/ui/PermissionRequestModal';
 import { SessionErrorModal } from './components/ui/SessionErrorModal';
+import { HelpModal } from './components/ui/HelpModal';
 import { useViewerStore } from './store/viewerStore';
 import { useStateChangeTracking } from './hooks/useStateChangeTracking';
 import { useBeforeUnload } from './hooks/useBeforeUnload';
@@ -29,6 +30,8 @@ function App() {
   const volume = useViewerStore((state) => state.volume);
   const volumeFileMetadata = useViewerStore((state) => state.volumeFileMetadata);
   const currentSessionName = useViewerStore((state) => state.currentSessionName);
+  const helpModalOpen = useViewerStore((state) => state.helpModalOpen);
+  const setHelpModalOpen = useViewerStore((state) => state.setHelpModalOpen);
 
   // Sync document title: prefer session name, fall back to filename
   useEffect(() => {
@@ -93,6 +96,9 @@ function App() {
         onClose={autoSaveRestore.closeErrorModal}
         onForceLoad={autoSaveRestore.handleForceLoad}
       />
+
+      {/* Help Modal */}
+      <HelpModal isOpen={helpModalOpen} onClose={() => setHelpModalOpen(false)} />
     </>
   );
 }
