@@ -7,6 +7,7 @@
 
 import { Switch, Label, Slider, Checkbox, CheckboxGroup, Tabs } from '@heroui/react';
 import { useViewerStore } from '../../store/viewerStore';
+import { ColorPickerInput } from './ColorPickerInput';
 
 export function ViewOptionsControls() {
   const layoutMode = useViewerStore((state) => state.layoutMode);
@@ -43,21 +44,11 @@ export function ViewOptionsControls() {
 
       {/* Crosshair Color Picker */}
       {showCrosshairs && layoutMode !== 'single' && (
-        <div className="flex flex-col gap-1">
-          <Label className="text-white/50 text-xs font-medium">Crosshair Color</Label>
-          <input
-            type="color"
-            value={crosshairSettings.color}
-            onChange={(e) => setCrosshairSettings({ color: e.target.value })}
-            className="w-full h-5 rounded-md border-0 cursor-pointer
-            [&::-webkit-color-swatch-wrapper]:p-0
-            [&::-webkit-color-swatch-wrapper]:rounded-md
-            [&::-webkit-color-swatch]:border-0
-            [&::-webkit-color-swatch]:rounded-md
-            [&::-moz-color-swatch]:border-0
-            [&::-moz-color-swatch]:rounded-md"
-          />
-        </div>
+        <ColorPickerInput
+          value={crosshairSettings.color}
+          onChange={(hex) => setCrosshairSettings({ color: hex })}
+          label="Crosshair Color"
+        />
       )}
 
       {/* Crosshair Opacity Slider */}
