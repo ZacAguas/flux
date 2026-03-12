@@ -1,6 +1,8 @@
 import { extend, type ThreeToJSXElements } from '@react-three/fiber';
 import * as THREE from 'three/webgpu';
 import { useEffect } from 'react';
+import { ArrowDownTrayIcon } from '@heroicons/react/24/outline';
+import { Chip } from '@heroui/react';
 import './App.css';
 import { SplashScreen } from './components/SplashScreen';
 import { PersistentLayout } from './components/layouts/PersistentLayout';
@@ -50,7 +52,7 @@ function App() {
   // Enable state tracking, auto-save, and global drop handler when volume is loaded
   useStateChangeTracking();
   useBeforeUnload();
-  useGlobalDropHandler();
+  const { isDraggingFile } = useGlobalDropHandler();
   useAutoSave();
 
   // Auto-save restore flow
@@ -99,6 +101,21 @@ function App() {
 
       {/* Help Modal */}
       <HelpModal isOpen={helpModalOpen} onClose={() => setHelpModalOpen(false)} />
+
+      {/* Global drag-over indicator */}
+      <div
+        className={`fixed inset-0 z-[9999] pointer-events-none flex items-center justify-center transition-all duration-300 ${isDraggingFile ? 'bg-black/40 backdrop-blur-sm opacity-100' : 'opacity-0'
+          }`}
+      >
+        <Chip
+          size="lg"
+          variant="primary"
+          className="bg-[rgba(19,221,209,0.15)] border border-[rgba(19,221,209,0.4)] text-[#13ddd1]"
+        >
+          <ArrowDownTrayIcon className="w-4 h-4" />
+          Drop to open
+        </Chip>
+      </div>
     </>
   );
 }

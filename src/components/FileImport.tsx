@@ -1,5 +1,6 @@
 /**
- * File import component with drag-and-drop support
+ * File import component — click to browse for a NIfTI file.
+ * Drag-and-drop is handled globally by useGlobalDropHandler.
  */
 
 import { useState } from 'react';
@@ -10,7 +11,6 @@ import { useViewerStore } from '../store/viewerStore';
 
 export function FileImport() {
   const setVolume = useViewerStore((state) => state.setVolume);
-  const [isDragging, setIsDragging] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -60,26 +60,6 @@ export function FileImport() {
     }
   };
 
-  const handleDragOver = (e: React.DragEvent) => {
-    e.preventDefault();
-    setIsDragging(true);
-  };
-
-  const handleDragLeave = (e: React.DragEvent) => {
-    e.preventDefault();
-    setIsDragging(false);
-  };
-
-  const handleDrop = (e: React.DragEvent) => {
-    e.preventDefault();
-    setIsDragging(false);
-
-    const files = Array.from(e.dataTransfer.files);
-    if (files.length > 0) {
-      handleFile(files[0]);
-    }
-  };
-
   const handleBrowseClick = async () => {
     if (isLoading) return;
 
@@ -96,15 +76,8 @@ export function FileImport() {
 
   return (
     <div
-      onDragOver={handleDragOver}
-      onDragLeave={handleDragLeave}
-      onDrop={handleDrop}
       onClick={handleBrowseClick}
-      className={`border rounded-[0.625rem] py-12 px-13 text-center transition-all duration-300 ${isLoading ? 'cursor-not-allowed' : 'cursor-pointer'
-        } ${isDragging
-          ? 'border-[rgba(19,221,209,0.55)] bg-[rgba(19,221,209,0.05)] shadow-[0_0_1.5rem_rgba(19,221,209,0.12)]'
-          : 'border-white/10 bg-white/[0.03] shadow-none'
-        }`}
+      className={`border border-white/10 bg-white/[0.03] rounded-[0.625rem] py-12 px-13 text-center transition-all duration-300 ${isLoading ? 'cursor-not-allowed' : 'cursor-pointer'}`}
     >
       {isLoading ? (
         <div>
