@@ -400,51 +400,51 @@ export function HelpModal({ isOpen, onClose }: HelpModalProps) {
     <Modal isOpen={isOpen} onOpenChange={(open: boolean) => !open && onClose()}>
       <Modal.Backdrop variant="blur" isDismissable>
         <Modal.Container>
-        <Modal.Dialog className="max-w-3xl bg-neutral-900 border border-white/20">
-          <Modal.Header className="px-6 py-4 border-b border-white/10 bg-transparent !flex-row !items-center gap-3">
-            <Modal.Icon className="bg-white/10 text-white/70">
-              <QuestionMarkCircleIcon className="size-5" />
-            </Modal.Icon>
-            <Modal.Heading className="text-white">Help</Modal.Heading>
-          </Modal.Header>
+          <Modal.Dialog className="max-w-3xl bg-neutral-900 border border-white/20 flex flex-col" style={{ height: '80vh' }}>
+            <Modal.Header className="px-6 py-4 border-b border-white/10 bg-transparent !flex-row !items-center gap-3 shrink-0">
+              <Modal.Icon className="bg-white/10 text-white/70">
+                <QuestionMarkCircleIcon className="size-5" />
+              </Modal.Icon>
+              <Modal.Heading className="text-white">Help</Modal.Heading>
+            </Modal.Header>
 
-          <Modal.Body className="px-0 py-0 bg-transparent" style={{ maxHeight: '75vh' }}>
-            <div className="flex h-full" style={{ minHeight: 0 }}>
-              {/* Sidebar */}
-              <nav className="w-48 shrink-0 border-r border-white/10 py-2 overflow-y-auto">
-                {TABS.map((tab) => (
-                  <button
-                    key={tab.id}
-                    onClick={() => setActiveTabId(tab.id)}
-                    className={`w-full flex items-center gap-2.5 px-4 py-2 text-left text-xs transition-colors ${activeTabId === tab.id
-                      ? 'bg-white/10 text-white'
-                      : 'text-white/50 hover:text-white/80 hover:bg-white/5'
-                      }`}
-                  >
-                    <span className="shrink-0">{tab.icon}</span>
-                    <span>{tab.label}</span>
-                  </button>
-                ))}
-              </nav>
+            <Modal.Body className="px-0 py-0 bg-transparent flex-1 min-h-0">
+              <div className="flex h-full">
+                {/* Sidebar */}
+                <nav className="w-48 shrink-0 border-r border-white/10 py-2 overflow-y-auto">
+                  {TABS.map((tab) => (
+                    <button
+                      key={tab.id}
+                      onClick={() => setActiveTabId(tab.id)}
+                      className={`w-full flex items-center gap-2.5 px-4 py-2 text-left text-xs transition-colors ${activeTabId === tab.id
+                        ? 'bg-white/10 text-white'
+                        : 'text-white/50 hover:text-white/80 hover:bg-white/5'
+                        }`}
+                    >
+                      <span className="shrink-0">{tab.icon}</span>
+                      <span>{tab.label}</span>
+                    </button>
+                  ))}
+                </nav>
 
-              {/* Content */}
-              <div className="flex-1 overflow-y-auto px-6 py-5">
-                {activeTab.content}
+                {/* Content */}
+                <div className="flex-1 overflow-y-auto px-6 py-5">
+                  {activeTab.content}
+                </div>
               </div>
-            </div>
-          </Modal.Body>
+            </Modal.Body>
 
-          <Modal.Footer className="px-6 py-4 flex justify-end border-t border-white/10 bg-transparent">
-            <Button
-              size="sm"
-              variant="secondary"
-              onPress={onClose}
-              className="!bg-white/10 !border-white/20 !text-white text-xs"
-            >
-              Close
-            </Button>
-          </Modal.Footer>
-        </Modal.Dialog>
+            <Modal.Footer className="px-6 py-4 flex justify-end border-t border-white/10 bg-transparent shrink-0">
+              <Button
+                size="sm"
+                variant="secondary"
+                onPress={onClose}
+                className="!bg-white/10 !border-white/20 !text-white text-xs"
+              >
+                Close
+              </Button>
+            </Modal.Footer>
+          </Modal.Dialog>
         </Modal.Container>
       </Modal.Backdrop>
     </Modal>
