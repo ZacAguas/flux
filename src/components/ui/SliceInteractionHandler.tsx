@@ -18,14 +18,17 @@ import {
 } from '../../utils/sliceInteraction';
 import { getSliceDimensions } from '../../utils/layout';
 import { calculateDistance, calculateAngle } from '../../utils/measurementUtils';
+import { extractTicCurve } from '../../utils/ticExtractor';
+import { TIC_ROI_COLORS } from '../../types/tic';
 import type { SliceOrientation } from '../../types/layout';
 import type { DistanceMeasurement, AngleMeasurement } from '../../types/measurement';
+import type { TicROI } from '../../types/tic';
 
 /** Custom cursors for measurement tools. Hotspot positions the click point. */
 const DISTANCE_CURSOR = 'url("/icons/distance-cursor.svg") 12 12, crosshair';
 const ANGLE_CURSOR = 'url("/icons/angle-cursor.svg") 12 6, crosshair';
 
-type InteractionMode = 'crosshair' | 'pan' | 'windowLevel' | 'measurement';
+type InteractionMode = 'crosshair' | 'pan' | 'windowLevel' | 'measurement' | 'tic';
 
 interface SliceInteractionHandlerProps {
   layoutMode: 'quad' | 'slices';
@@ -56,6 +59,15 @@ export function SliceInteractionHandler({
   const startMeasurement = useViewerStore((state) => state.startMeasurement);
   const addPointToMeasurement = useViewerStore((state) => state.addPointToMeasurement);
   const completeMeasurement = useViewerStore((state) => state.completeMeasurement);
+
+  // TIC state
+  const ticToolActive = useViewerStore((state) => state.ticToolActive);
+  const ticRois = useViewerStore((state) => state.ticRois);
+  const addTicRoi = useViewerStore((state) => state.addTicRoi);
+  const setTicDragPreview = useViewerStore((state) => state.setTicDragPreview);
+
+  // Stores the center voxel coordinates when TIC drag begins
+  const ticDragCenterRef = useRef<{ index1: number; index2: number } | null>(null);
 
   const [isDragging, setIsDragging] = useState(false);
   const [interactionMode, setInteractionMode] = useState<InteractionMode>('crosshair');
@@ -218,8 +230,20 @@ export function SliceInteractionHandler({
       });
       e.preventDefault(); // Prevent context menu
     } else if (e.button === 0) {
-      // Left button - check if measurement tool is active
-      if (activeTool !== 'none') {
+      // Left button - check if TIC or measurement tool is active
+      if (ticToolActive) {
+        mode = 'tic';
+        if (volume && containerRef.current) {
+          const rect = containerRef.current.getBoundingClientRect();
+          const pixelX = e.clientX - rect.left;
+          const pixelY = e.clientY - rect.top;
+          const viewport = getViewportBounds(layoutMode, orientation, canvasWidth, canvasHeight, panelHeight);
+          const cameraState = sliceCameraState[orientation];
+          const center = pixelToVoxel({ x: pixelX, y: pixelY }, orientation, volume, viewport, cameraState);
+          ticDragCenterRef.current = { index1: center.index1, index2: center.index2 };
+          setTicDragPreview({ orientation, centerIndex1: center.index1, centerIndex2: center.index2, radiusVoxels: 0 });
+        }
+      } else if (activeTool !== 'none') {
         mode = 'measurement';
         handleMeasurementClick(e.clientX, e.clientY, orientation);
       } else {
@@ -306,6 +330,24 @@ export function SliceInteractionHandler({
       handlePanDrag(e);
     } else if (interactionMode === 'windowLevel') {
       handleWindowLevelDrag(e);
+    } else if (interactionMode === 'tic') {
+      if (ticDragCenterRef.current && volume && containerRef.current) {
+        const rect = containerRef.current.getBoundingClientRect();
+        const pixelX = e.clientX - rect.left;
+        const pixelY = e.clientY - rect.top;
+        const viewport = getViewportBounds(layoutMode, activeOrientation, canvasWidth, canvasHeight, panelHeight);
+        const cameraState = sliceCameraState[activeOrientation];
+        const edge = pixelToVoxel({ x: pixelX, y: pixelY }, activeOrientation, volume, viewport, cameraState);
+        const d1 = edge.index1 - ticDragCenterRef.current.index1;
+        const d2 = edge.index2 - ticDragCenterRef.current.index2;
+        const radiusVoxels = Math.sqrt(d1 * d1 + d2 * d2);
+        setTicDragPreview({
+          orientation: activeOrientation,
+          centerIndex1: ticDragCenterRef.current.index1,
+          centerIndex2: ticDragCenterRef.current.index2,
+          radiusVoxels,
+        });
+      }
     }
     // measurement mode: no drag behavior, points are placed on click
   };
@@ -319,6 +361,40 @@ export function SliceInteractionHandler({
     // Mark dirty for window/level and crosshair (slice index) changes
     if (interactionMode === 'windowLevel' || interactionMode === 'crosshair') {
       markDirty();
+    }
+
+    // Finalize TIC ROI placement
+    if (interactionMode === 'tic' && activeOrientation && ticDragCenterRef.current && volume) {
+      const rect = containerRef.current?.getBoundingClientRect();
+      if (rect) {
+        const pixelX = e.clientX - rect.left;
+        const pixelY = e.clientY - rect.top;
+        const viewport = getViewportBounds(layoutMode, activeOrientation, canvasWidth, canvasHeight, panelHeight);
+        const cameraState = sliceCameraState[activeOrientation];
+        const edge = pixelToVoxel({ x: pixelX, y: pixelY }, activeOrientation, volume, viewport, cameraState);
+        const d1 = edge.index1 - ticDragCenterRef.current.index1;
+        const d2 = edge.index2 - ticDragCenterRef.current.index2;
+        const radiusVoxels = Math.sqrt(d1 * d1 + d2 * d2);
+
+        if (radiusVoxels >= 1) {
+          const roiIndex = ticRois.length;
+          const roi: TicROI = {
+            id: crypto.randomUUID(),
+            label: `ROI ${roiIndex + 1}`,
+            color: TIC_ROI_COLORS[roiIndex % TIC_ROI_COLORS.length],
+            orientation: activeOrientation,
+            sliceIndex: sliceIndices[activeOrientation],
+            centerIndex1: ticDragCenterRef.current.index1,
+            centerIndex2: ticDragCenterRef.current.index2,
+            radiusVoxels,
+            createdAt: Date.now(),
+          };
+          const curve = extractTicCurve(volume, roi);
+          addTicRoi(roi, curve);
+        }
+      }
+      setTicDragPreview(null);
+      ticDragCenterRef.current = null;
     }
 
     e.currentTarget.releasePointerCapture(e.pointerId);
@@ -452,6 +528,7 @@ export function SliceInteractionHandler({
     if (isDragging) {
       if (interactionMode === 'pan') return 'grabbing';
       if (interactionMode === 'windowLevel') return 'ns-resize';
+      if (interactionMode === 'tic') return 'crosshair';
       if (interactionMode === 'measurement') {
         if (activeTool === 'distance') return DISTANCE_CURSOR;
         if (activeTool === 'angle') return ANGLE_CURSOR;
@@ -461,6 +538,8 @@ export function SliceInteractionHandler({
     }
     // Show cursor preview based on Ctrl key
     if (isCtrlPressed) return 'grab';
+    // TIC tool active
+    if (ticToolActive) return 'crosshair';
     // Show tool-specific cursor for measurement tools
     if (activeTool === 'distance') return DISTANCE_CURSOR;
     if (activeTool === 'angle') return ANGLE_CURSOR;

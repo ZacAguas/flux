@@ -24,6 +24,7 @@ import type {
   ControlPanelSections,
 } from '../store/storeTypes';
 import type { Measurement } from './measurement';
+import type { TicROI } from './tic';
 
 /**
  * Reference to the original NIfTI volume file.
@@ -89,6 +90,9 @@ export interface SerializableViewerState {
   // Measurement state
   measurements: Measurement[];
   showMeasurements: boolean;
+
+  // TIC state (curves are re-derived from volume data on restore)
+  ticRois?: TicROI[];
 }
 
 /**

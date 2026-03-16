@@ -7,6 +7,7 @@
 
 import type { ViewerStore } from '../store/storeTypes';
 import type { SerializableViewerState } from '../types/session';
+import { extractTicCurve } from './ticExtractor';
 
 const CURRENT_VERSION = '1.0.0';
 
@@ -80,6 +81,9 @@ export function serializeViewerState(store: ViewerStore): SerializableViewerStat
         }
       }) as typeof store.measurements,
     showMeasurements: store.showMeasurements,
+
+    // TIC state (curves are not serialized: re-derived from volume on restore)
+    ticRois: store.ticRois.map((r) => ({ ...r })),
   };
 }
 
@@ -149,6 +153,21 @@ export function deserializeViewerState(
   }
   if (state.showMeasurements !== undefined) {
     store.setShowMeasurements(state.showMeasurements);
+  }
+
+  // TIC state:  re-derive curves from volume if available
+  if (state.ticRois && state.ticRois.length > 0) {
+    const volume = store.volume;
+    if (volume && volume.dimensions.t && volume.dimensions.t > 1) {
+      const curves: Record<string, ReturnType<typeof extractTicCurve>> = {};
+      for (const roi of state.ticRois) {
+        curves[roi.id] = extractTicCurve(volume, roi);
+      }
+      store.setTicRois(state.ticRois, curves);
+    } else {
+      // Volume not yet loaded or not 4D: store ROIs, curves will be empty
+      store.setTicRois(state.ticRois, {});
+    }
   }
 
   // NOTE: timeStep is handled separately during volume loading

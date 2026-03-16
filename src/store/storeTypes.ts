@@ -48,6 +48,7 @@ export interface ControlPanelSections {
   clippingPlanes: boolean;
   transferFunction: boolean;
   measurements: boolean;
+  ticCurves: boolean;
 }
 
 // --- Slice Interfaces ---
@@ -132,8 +133,9 @@ export interface RenderingSlice {
 
 // --- Combined Store Type ---
 
-export type ViewerStore = VolumeSlice & LayoutSlice & ViewSlice & RenderingSlice & SessionSlice & MeasurementSlice;
+export type ViewerStore = VolumeSlice & LayoutSlice & ViewSlice & RenderingSlice & SessionSlice & MeasurementSlice & TicSlice;
 
 // Import slice types
 import type { SessionSlice } from './slices/sessionSlice';
 import type { MeasurementSlice } from './slices/measurementSlice';
+import type { TicSlice } from './slices/ticSlice';
