@@ -14,6 +14,7 @@ export const createLayoutSlice: StateCreator<ViewerStore, [], [], LayoutSlice> =
     clippingPlanes: false,
     transferFunction: false,
     measurements: false,
+    ticCurves: false,
   },
   popoverOpen: false,
   helpModalOpen: false,

@@ -19,6 +19,7 @@ import {
   ChevronDownIcon,
   MapPinIcon,
   QuestionMarkCircleIcon,
+  PresentationChartLineIcon,
 } from '@heroicons/react/24/outline';
 import { SessionManager } from './SessionManager';
 import { LayoutModeButtons } from './LayoutModeButtons';
@@ -31,6 +32,7 @@ import { RenderingControls } from './RenderingControls';
 import { ClippingPlaneControls } from './ClippingPlaneControls';
 import { TransferFunctionEditor } from './TransferFunctionEditor';
 import { MeasurementControls } from './MeasurementControls';
+import { TICControls } from './TICControls';
 import { CollapsibleSection } from './CollapsibleSection';
 import { useViewerStore } from '../../store/viewerStore';
 import { useState, useRef, useEffect } from 'react';
@@ -214,6 +216,17 @@ export function ControlPanel() {
             >
               <MeasurementControls />
             </CollapsibleSection>
+
+            {is4D && (
+              <CollapsibleSection
+                id="ticCurves"
+                title="Time Intensity Curves"
+                icon={<PresentationChartLineIcon className="w-3.5 h-3.5" />}
+                className="max-w-[300px]"
+              >
+                <TICControls />
+              </CollapsibleSection>
+            )}
           </div>
         </div>
       </div>

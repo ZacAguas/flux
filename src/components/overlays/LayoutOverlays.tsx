@@ -5,6 +5,7 @@ import { SliceInteractionHandler } from '../ui/SliceInteractionHandler';
 import { Crosshairs } from '../ui/Crosshairs';
 import { MetricOverlays } from '../ui/MetricOverlays';
 import { MeasurementOverlay } from '../measurements/MeasurementOverlay';
+import { TicOverlay } from './TicOverlay';
 import { useSliceViewKeyboardShortcuts } from '../../hooks/useSliceViewKeyboardShortcuts';
 import { useMeasurementKeyboardShortcuts } from '../../hooks/useMeasurementKeyboardShortcuts';
 
@@ -75,6 +76,12 @@ function SlicesOverlays({ width, height, panelHeight, labelOffset }: OverlayProp
         canvasHeight={height}
         panelHeight={panelHeight}
       />
+      <TicOverlay
+        layoutMode="slices"
+        canvasWidth={width}
+        canvasHeight={height}
+        panelHeight={panelHeight}
+      />
       <MetricOverlays
         layoutMode="slices"
         canvasWidth={width}
@@ -131,6 +138,12 @@ function QuadOverlays({ width, height, panelHeight, labelOffset }: OverlayProps)
         panelHeight={panelHeight}
       />
       <MeasurementOverlay
+        layoutMode="quad"
+        canvasWidth={width}
+        canvasHeight={height}
+        panelHeight={panelHeight}
+      />
+      <TicOverlay
         layoutMode="quad"
         canvasWidth={width}
         canvasHeight={height}
