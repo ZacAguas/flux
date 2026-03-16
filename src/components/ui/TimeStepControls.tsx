@@ -15,7 +15,7 @@ export function TimeStepControls() {
   const setTimeStep = useViewerStore((state) => state.setTimeStep);
   const isLoadingTimeStep = useViewerStore((state) => state.isLoadingTimeStep);
 
-  const totalTimeSteps = volume!.dimensions.t;
+  const totalTimeSteps = volume!.dimensions.t ?? 1;
 
   return (
     <div className="flex flex-col gap-3">

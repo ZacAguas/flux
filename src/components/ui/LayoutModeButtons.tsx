@@ -24,15 +24,15 @@ export function LayoutModeButtons() {
           aria-label="Layout Mode"
           className="bg-transparent *:px-2.5 *:py-1.5 *:text-white/70 *:transition-all *:duration-200 *:data-[selected=true]:text-white *:rounded-md *:bg-transparent gap-1"
         >
-          <Tabs.Tab id="single" title="Single">
+          <Tabs.Tab id="single">
             <WindowIcon className="w-4 h-4" />
             <Tabs.Indicator className="bg-white/15 backdrop-blur-sm transition-all duration-300 ease-out rounded-md" />
           </Tabs.Tab>
-          <Tabs.Tab id="slices" title="Slices">
+          <Tabs.Tab id="slices">
             <ViewColumnsIcon className="w-4 h-4" />
             <Tabs.Indicator className="bg-white/15 backdrop-blur-sm transition-all duration-300 ease-out rounded-md" />
           </Tabs.Tab>
-          <Tabs.Tab id="quad" title="Quad">
+          <Tabs.Tab id="quad">
             <Squares2X2Icon className="w-4 h-4" />
             <Tabs.Indicator className="bg-white/15 backdrop-blur-sm transition-all duration-300 ease-out rounded-md" />
           </Tabs.Tab>
