@@ -22,7 +22,7 @@ export function TimePlaybackControls() {
   const [loop, setLoop] = useState(true);
   const intervalRef = useRef<number | null>(null);
 
-  const totalTimeSteps = volume!.dimensions.t;
+  const totalTimeSteps = volume!.dimensions.t ?? 1;
 
   // Playback logic
   useEffect(() => {
@@ -80,7 +80,6 @@ export function TimePlaybackControls() {
           size="sm"
           onPress={() => setIsPlaying(!isPlaying)}
           isDisabled={isLoadingTimeStep}
-          title={isPlaying ? 'Pause' : 'Play'}
           className="!bg-white/15 backdrop-blur-sm hover:!bg-white/25 text-white px-2.5 py-1 rounded-md"
         >
           {isPlaying
@@ -93,7 +92,6 @@ export function TimePlaybackControls() {
         <Button
           size="sm"
           onPress={() => setLoop(!loop)}
-          title={loop ? 'Loop: On' : 'Loop: Off'}
           className={`px-2.5 py-1 rounded-md transition-all duration-200 ${
             loop
               ? '!bg-white/15 backdrop-blur-sm text-white'
@@ -114,7 +112,6 @@ export function TimePlaybackControls() {
             setIsPlaying(false);
           }}
           isDisabled={isLoadingTimeStep || timeStep === 0}
-          title="Reset to start"
           className="!bg-white/10 backdrop-blur-sm hover:!bg-white/15 text-white px-2.5 py-1 rounded-md"
         >
           <ArrowUturnLeftIcon className="w-4 h-4" />
