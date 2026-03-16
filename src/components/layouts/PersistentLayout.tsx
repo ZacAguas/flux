@@ -4,7 +4,7 @@ import * as THREE from 'three/webgpu';
 import { useLayoutDimensions } from '../../hooks/useLayoutDimensions';
 import { useVolumeSetup } from '../../hooks/useVolumeSetup';
 import { useSliceViews } from '../../hooks/useSliceViews';
-import { useClippingPlanesInVolume } from '../../hooks/useClippingPlanesInVolume';
+import { useCropBoxInVolume } from '../../hooks/useCropBoxInVolume';
 import { InspectorControls } from '../debug/InspectorControls';
 import { ActiveRenderer } from '../renderers/LayoutRenderers';
 import { LayoutOverlays } from '../overlays/LayoutOverlays';
@@ -34,10 +34,10 @@ function SceneResources() {
     resizeCameras
   } = useSliceViews();
 
-  // 3. Setup Clipping Gizmos (Meshes)
-  // The hook creates the meshes, but ActiveRenderer 
+  // 3. Setup Crop Box (Face meshes + wireframe)
+  // The hook creates the objects, but ActiveRenderer
   // parents them to the correct scene (Default vs Local).
-  const { axialMesh, coronalMesh, sagittalMesh } = useClippingPlanesInVolume(scene);
+  const cropBoxMeshes = useCropBoxInVolume(scene);
 
   const sliceScenes = { axial: axialScene, coronal: coronalScene, sagittal: sagittalScene };
   const sliceCameras = { axial: axialCamera, coronal: coronalCamera, sagittal: sagittalCamera };
@@ -49,7 +49,7 @@ function SceneResources() {
         volumeMesh={volumeMesh}
         volumeDimensions={volumeDimensions}
         updateCameraUniforms={updateCameraUniforms}
-        clippingMeshes={{ axialMesh, coronalMesh, sagittalMesh }}
+        cropBoxMeshes={cropBoxMeshes}
         sliceScenes={sliceScenes}
         sliceCameras={sliceCameras}
         resizeCameras={resizeCameras}

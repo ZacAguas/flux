@@ -57,16 +57,12 @@ export function serializeViewerState(store: ViewerStore): SerializableViewerStat
       })),
     },
     activeTransferFunctionPreset: store.activeTransferFunctionPreset,
-    clippingPlanes: {
-      axial: { ...store.clippingPlanes.axial },
-      coronal: { ...store.clippingPlanes.coronal },
-      sagittal: { ...store.clippingPlanes.sagittal },
+    cropBox: {
+      enabled: store.cropBox.enabled,
+      axial: { ...store.cropBox.axial },
+      coronal: { ...store.cropBox.coronal },
+      sagittal: { ...store.cropBox.sagittal },
     },
-    clippingPlaneVisualization: {
-      ...store.clippingPlaneVisualization,
-      colors: { ...store.clippingPlaneVisualization.colors },
-    },
-
     // Measurement state (only complete measurements have all points defined)
     measurements: store.measurements
       .filter((m) => m.status === 'complete')
@@ -144,11 +140,8 @@ export function deserializeViewerState(
     store.applyTransferFunctionPreset(state.activeTransferFunctionPreset);
   }
 
-  // Rendering state - clipping planes
-  Object.entries(state.clippingPlanes).forEach(([orientation, plane]) => {
-    store.setClippingPlane(orientation as keyof typeof state.clippingPlanes, plane);
-  });
-  store.setClippingPlaneVisualization(state.clippingPlaneVisualization);
+  // Rendering state - crop box
+  store.setCropBox(state.cropBox);
 
   // Measurement state
   if (state.measurements) {

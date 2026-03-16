@@ -158,7 +158,7 @@ export function ControlPanel() {
 
               <CollapsibleSection
                 id="clippingPlanes"
-                title="Clipping Planes"
+                title="Crop Box"
                 icon={<ScissorsIcon className="w-3.5 h-3.5" />}
               >
                 <ClippingPlaneControls />

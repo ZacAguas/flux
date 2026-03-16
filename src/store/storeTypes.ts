@@ -2,7 +2,7 @@ import type * as THREE from 'three';
 import type { NiftiVolume } from '../types/nifti';
 import type { LayoutMode, SliceIndices, SliceCamera, SliceCameraState, WindowLevel } from '../types/layout';
 import type { RaymarchSettings, TransferFunction, TransferFunctionPoint } from '../types/volume';
-import type { ClippingPlanes, ClippingPlaneVisualization, ClippingPlane } from '../types/clipping';
+import type { CropBox, CropBoxAxis } from '../types/clipping';
 
 // --- Shared/Inner Types ---
 
@@ -114,8 +114,7 @@ export interface RenderingSlice {
   transferFunction: TransferFunction;
   transferFunctionTexture: THREE.DataTexture | null;
   activeTransferFunctionPreset: string;
-  clippingPlanes: ClippingPlanes;
-  clippingPlaneVisualization: ClippingPlaneVisualization;
+  cropBox: CropBox;
 
   setShowSlicePlanes: (show: boolean) => void;
   setSlicePlaneSettings: (settings: Partial<SlicePlaneSettings>) => void;
@@ -126,9 +125,9 @@ export interface RenderingSlice {
   removeTransferFunctionPoint: (index: number) => void;
   applyTransferFunctionPreset: (presetName: string) => void;
   setTransferFunctionTexture: (texture: THREE.DataTexture | null) => void;
-  setClippingPlane: (orientation: keyof ClippingPlanes, plane: Partial<ClippingPlane>) => void;
-  setClippingPlaneVisualization: (settings: Partial<ClippingPlaneVisualization>) => void;
-  resetClippingPlanes: () => void;
+  setCropBox: (update: Partial<CropBox>) => void;
+  setCropBoxAxis: (axis: keyof Omit<CropBox, 'enabled'>, bounds: Partial<CropBoxAxis>) => void;
+  resetCropBox: () => void;
 }
 
 // --- Combined Store Type ---

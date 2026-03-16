@@ -18,7 +18,7 @@ import {
   updateRaymarchUniforms,
   updateVolumeTexture,
   updateTransferFunctionTexture,
-  updateClippingPlaneUniforms,
+  updateCropBoxUniforms,
 } from '../shaders/volumeRaymarch';
 import { getVolumeDimensions } from '../utils/layout';
 import { generateTransferFunctionTexture } from '../utils/transferFunctionTexture';
@@ -36,7 +36,7 @@ export function useVolumeSetup() {
   const textureCache = useViewerStore((state) => state.textureCache);
   const raymarchSettings = useViewerStore((state) => state.raymarchSettings);
   const transferFunction = useViewerStore((state) => state.transferFunction);
-  const clippingPlanes = useViewerStore((state) => state.clippingPlanes);
+  const cropBox = useViewerStore((state) => state.cropBox);
   const setTransferFunctionTexture = useViewerStore((state) => state.setTransferFunctionTexture);
   const setVolumeTexture = useViewerStore((state) => state.setVolumeTexture);
   const setIsLoadingTimeStep = useViewerStore((state) => state.setIsLoadingTimeStep);
@@ -103,24 +103,8 @@ export function useVolumeSetup() {
       }
     );
 
-    // Initialize clipping plane uniforms on material creation
-    updateClippingPlaneUniforms(newMaterial, {
-      axial: {
-        enabled: clippingPlanes.axial.enabled,
-        position: clippingPlanes.axial.position,
-        inverted: clippingPlanes.axial.inverted,
-      },
-      coronal: {
-        enabled: clippingPlanes.coronal.enabled,
-        position: clippingPlanes.coronal.position,
-        inverted: clippingPlanes.coronal.inverted,
-      },
-      sagittal: {
-        enabled: clippingPlanes.sagittal.enabled,
-        position: clippingPlanes.sagittal.position,
-        inverted: clippingPlanes.sagittal.inverted,
-      },
-    });
+    // Initialize crop box uniforms on material creation
+    updateCropBoxUniforms(newMaterial, cropBox);
 
     // Update mesh uniforms
     updateRaymarchMeshUniforms(newMaterial, mesh);
@@ -135,7 +119,7 @@ export function useVolumeSetup() {
 
     // NOTE: volumeTexture removed from deps - we update it separately below
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [volume, mesh, transferFunction, raymarchSettings.stepSize, raymarchSettings.threshold, raymarchSettings.thresholdMax, setTransferFunctionTexture, clippingPlanes]);
+  }, [volume, mesh, transferFunction, raymarchSettings.stepSize, raymarchSettings.threshold, raymarchSettings.thresholdMax, setTransferFunctionTexture, cropBox]);
 
   // Update volume texture uniform when volumeTexture changes (4D time step navigation)
   // This avoids recreating the entire material, preventing memory leaks during playback
@@ -219,27 +203,11 @@ export function useVolumeSetup() {
     });
   }, [raymarchSettings]);
 
-  // Update clipping plane uniforms when clipping planes change
+  // Update crop box uniforms when crop box changes
   useEffect(() => {
     if (!materialRef.current) return;
-    updateClippingPlaneUniforms(materialRef.current, {
-      axial: {
-        enabled: clippingPlanes.axial.enabled,
-        position: clippingPlanes.axial.position,
-        inverted: clippingPlanes.axial.inverted,
-      },
-      coronal: {
-        enabled: clippingPlanes.coronal.enabled,
-        position: clippingPlanes.coronal.position,
-        inverted: clippingPlanes.coronal.inverted,
-      },
-      sagittal: {
-        enabled: clippingPlanes.sagittal.enabled,
-        position: clippingPlanes.sagittal.position,
-        inverted: clippingPlanes.sagittal.inverted,
-      },
-    });
-  }, [clippingPlanes]);
+    updateCropBoxUniforms(materialRef.current, cropBox);
+  }, [cropBox]);
 
   // Helper to update camera uniforms (call in useFrame)
   const updateCameraUniforms = (camera: THREE.Camera) => {
