@@ -86,7 +86,8 @@ export type RenderQualityPreset = 'draft' | 'standard' | 'high' | 'custom';
 export interface RaymarchSettings {
   stepSize: number; // Distance between samples (0.001-0.1)
   opacity: number; // Global opacity multiplier (0-1)
-  threshold: number; // Minimum intensity to render (0-1)
+  threshold: number; // Minimum intensity to render (lower bound, 0-1)
+  thresholdMax: number; // Maximum intensity to render (upper bound, 0-1)
   qualityPreset: RenderQualityPreset; // Current quality preset
 }
 

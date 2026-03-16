@@ -22,6 +22,7 @@ export const createRenderingSlice: StateCreator<ViewerStore, [], [], RenderingSl
     stepSize: 0.01,
     opacity: 1.0,
     threshold: 0.1,
+    thresholdMax: 1.0,
     qualityPreset: 'standard',
   },
   transferFunction: {

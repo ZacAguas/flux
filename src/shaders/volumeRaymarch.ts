@@ -110,16 +110,19 @@ export function createVolumeRaymarchMaterial(
   options: {
     stepSize?: number;
     threshold?: number;
+    thresholdMax?: number;
   } = {}
 ) {
   const {
     stepSize = 0.01,
     threshold = 0.1,
+    thresholdMax = 1.0,
   } = options;
 
   // Create uniforms
   const stepSizeUniform = uniform(stepSize);
   const thresholdUniform = uniform(threshold);
+  const thresholdMaxUniform = uniform(thresholdMax);
   // Inverse of the mesh's world matrix. Transforms world coordinates to local object space
   // Important for positioning rays correctly relative to the possibly scaled/rotated volume
   const inverseModelMatrixUniform = uniform(new THREE.Matrix4());
@@ -228,8 +231,8 @@ export function createVolumeRaymarchMaterial(
             // Sample volume texture
             const intensity = volumeTextureNode.sample(samplePos).r;
 
-            // Apply threshold
-            If(intensity.greaterThanEqual(thresholdUniform), () => {
+            // Apply intensity window (lower and upper threshold)
+            If(intensity.greaterThanEqual(thresholdUniform).and(intensity.lessThanEqual(thresholdMaxUniform)), () => {
               // Apply transfer function (texture lookup)
               const sample = transferFunction(intensity);
 
@@ -262,6 +265,7 @@ export function createVolumeRaymarchMaterial(
   (material as any).uniforms = {
     stepSize: stepSizeUniform,
     threshold: thresholdUniform,
+    thresholdMax: thresholdMaxUniform,
     volumeTexture: volumeTextureNode,
     transferFunctionTexture: transferFunctionTextureNode,
     inverseModelMatrix: inverseModelMatrixUniform,
@@ -285,6 +289,7 @@ export function updateRaymarchUniforms(
   params: {
     stepSize?: number;
     threshold?: number;
+    thresholdMax?: number;
   }
 ) {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -295,6 +300,9 @@ export function updateRaymarchUniforms(
   }
   if (params.threshold !== undefined) {
     uniforms.threshold.value = params.threshold;
+  }
+  if (params.thresholdMax !== undefined) {
+    uniforms.thresholdMax.value = params.thresholdMax;
   }
 }
 
