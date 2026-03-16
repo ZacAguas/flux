@@ -27,6 +27,7 @@ import {
   any,
 } from 'three/tsl';
 import * as THREE from 'three/webgpu';
+import type { CropBox } from '../types/clipping';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type TSLNode = any;
@@ -51,36 +52,6 @@ const intersectBox = (rayOrigin: THREE.VarNode, rayDir: THREE.VarNode) => {
   const tFar = min(min(t2.x, t2.y), t2.z);
 
   return vec3(tNear, tFar, 0.0);
-};
-
-/**
- * Test if a sample position is clipped by any enabled clipping plane
- * Returns true if the position should be clipped (discarded)
- */
-const isClipped = (
-  samplePos: TSLNode,
-  clippingAxial: TSLNode,
-  clippingCoronal: TSLNode,
-  clippingSagittal: TSLNode,
-  clippingEnabled: TSLNode,
-  clippingInverted: TSLNode
-) => {
-  // Test each plane: position < planePos means "behind" plane (clipped)
-  // If inverted, flip to clip the opposite side (position > planePos)
-
-  const axialDist = samplePos.z.sub(clippingAxial.w);
-  const axialSign = clippingInverted.x.greaterThan(0.5).select(float(-1.0), float(1.0));
-  const axialClipped = clippingEnabled.x.greaterThan(0.5).and(axialDist.mul(axialSign).lessThan(0.0));
-
-  const coronalDist = samplePos.y.sub(clippingCoronal.w);
-  const coronalSign = clippingInverted.y.greaterThan(0.5).select(float(-1.0), float(1.0));
-  const coronalClipped = clippingEnabled.y.greaterThan(0.5).and(coronalDist.mul(coronalSign).lessThan(0.0));
-
-  const sagittalDist = samplePos.x.sub(clippingSagittal.w);
-  const sagittalSign = clippingInverted.z.greaterThan(0.5).select(float(-1.0), float(1.0));
-  const sagittalClipped = clippingEnabled.z.greaterThan(0.5).and(sagittalDist.mul(sagittalSign).lessThan(0.0));
-
-  return axialClipped.or(coronalClipped).or(sagittalClipped);
 };
 
 /**
@@ -131,14 +102,11 @@ export function createVolumeRaymarchMaterial(
   // Stores the camera's world direction, used for orthographic ray generation as rays are parallel
   const cameraDirUniform = uniform(new THREE.Vector3(0, 0, -1));
 
-  // Clipping plane uniforms
-  // Format: vec4(normalX, normalY, normalZ, distance)
-  // For axis-aligned planes: normal is unit vector, distance is position [0,1]
-  const clippingPlaneAxialUniform = uniform(new THREE.Vector4(0, 0, 1, 0.5));
-  const clippingPlaneCoronalUniform = uniform(new THREE.Vector4(0, 1, 0, 0.5));
-  const clippingPlaneSagittalUniform = uniform(new THREE.Vector4(1, 0, 0, 0.5));
-  const clippingEnabledUniform = uniform(new THREE.Vector3(0, 0, 0)); // x=axial, y=coronal, z=sagittal
-  const clippingInvertedUniform = uniform(new THREE.Vector3(0, 0, 0)); // x=axial, y=coronal, z=sagittal
+  // Crop box uniforms
+  // cropBoxMin/Max: vec3 where x=sagittal, y=coronal, z=axial (normalized [0,1])
+  const cropBoxEnabledUniform = uniform(0.0);
+  const cropBoxMinUniform = uniform(new THREE.Vector3(0.0, 0.0, 0.0));
+  const cropBoxMaxUniform = uniform(new THREE.Vector3(1.0, 1.0, 1.0));
 
   // Create texture nodes
   const volumeTextureNode = texture3D(volumeTexture);
@@ -217,17 +185,13 @@ export function createVolumeRaymarchMaterial(
         );
 
         If(outsideBounds.not(), () => {
-          // Check clipping planes
-          const clipped = isClipped(
-            samplePos,
-            clippingPlaneAxialUniform,
-            clippingPlaneCoronalUniform,
-            clippingPlaneSagittalUniform,
-            clippingEnabledUniform,
-            clippingInvertedUniform
+          // Crop box AABB test: discard samples outside the crop region
+          // samplePos.x = sagittal, .y = coronal, .z = axial (normalized [0,1])
+          const croppedOut = cropBoxEnabledUniform.greaterThan(0.5).and(
+            any(samplePos.lessThan(cropBoxMinUniform)).or(any(samplePos.greaterThan(cropBoxMaxUniform)))
           );
 
-          If(clipped.not(), () => {
+          If(croppedOut.not(), () => {
             // Sample volume texture
             const intensity = volumeTextureNode.sample(samplePos).r;
 
@@ -271,11 +235,9 @@ export function createVolumeRaymarchMaterial(
     inverseModelMatrix: inverseModelMatrixUniform,
     isOrtho: isOrthoUniform,
     cameraWorldDirection: cameraDirUniform,
-    clippingPlaneAxial: clippingPlaneAxialUniform,
-    clippingPlaneCoronal: clippingPlaneCoronalUniform,
-    clippingPlaneSagittal: clippingPlaneSagittalUniform,
-    clippingEnabled: clippingEnabledUniform,
-    clippingInverted: clippingInvertedUniform,
+    cropBoxEnabled: cropBoxEnabledUniform,
+    cropBoxMin: cropBoxMinUniform,
+    cropBoxMax: cropBoxMaxUniform,
   };
 
   return material;
@@ -387,49 +349,34 @@ export function updateRaymarchMeshUniforms(
 }
 
 /**
- * Update clipping plane uniforms
+ * Update crop box uniforms
+ * Coordinate mapping: min/max.x = sagittal, .y = coronal, .z = axial
  * @param material The raymarching material
- * @param planes Clipping plane configurations
+ * @param cropBox Crop box configuration
  */
-export function updateClippingPlaneUniforms(
+export function updateCropBoxUniforms(
   material: THREE.MeshBasicNodeMaterial,
-  planes: {
-    axial?: { enabled: boolean; position: number; inverted: boolean };
-    coronal?: { enabled: boolean; position: number; inverted: boolean };
-    sagittal?: { enabled: boolean; position: number; inverted: boolean };
-  }
+  cropBox: CropBox
 ) {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const uniforms = (material as any).uniforms;
   if (!uniforms) return;
 
-  const enabled = new THREE.Vector3(
-    planes.axial?.enabled ? 1.0 : 0.0,
-    planes.coronal?.enabled ? 1.0 : 0.0,
-    planes.sagittal?.enabled ? 1.0 : 0.0
-  );
-
-  const inverted = new THREE.Vector3(
-    planes.axial?.inverted ? 1.0 : 0.0,
-    planes.coronal?.inverted ? 1.0 : 0.0,
-    planes.sagittal?.inverted ? 1.0 : 0.0
-  );
-
-  if (uniforms.clippingEnabled) {
-    uniforms.clippingEnabled.value.copy(enabled);
+  if (uniforms.cropBoxEnabled) {
+    uniforms.cropBoxEnabled.value = cropBox.enabled ? 1.0 : 0.0;
   }
-
-  if (uniforms.clippingInverted) {
-    uniforms.clippingInverted.value.copy(inverted);
+  if (uniforms.cropBoxMin) {
+    uniforms.cropBoxMin.value.set(
+      cropBox.sagittal.min,
+      cropBox.coronal.min,
+      cropBox.axial.min,
+    );
   }
-
-  if (planes.axial && uniforms.clippingPlaneAxial) {
-    uniforms.clippingPlaneAxial.value.w = planes.axial.position;
-  }
-  if (planes.coronal && uniforms.clippingPlaneCoronal) {
-    uniforms.clippingPlaneCoronal.value.w = planes.coronal.position;
-  }
-  if (planes.sagittal && uniforms.clippingPlaneSagittal) {
-    uniforms.clippingPlaneSagittal.value.w = planes.sagittal.position;
+  if (uniforms.cropBoxMax) {
+    uniforms.cropBoxMax.value.set(
+      cropBox.sagittal.max,
+      cropBox.coronal.max,
+      cropBox.axial.max,
+    );
   }
 }

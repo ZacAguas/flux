@@ -2,6 +2,13 @@ import type { StateCreator } from 'zustand';
 import type { ViewerStore, RenderingSlice } from '../storeTypes';
 import { getPresetByName } from '../../data/transferFunctionPresets';
 
+const DEFAULT_CROP_BOX = {
+  enabled: false,
+  axial:    { min: 0.0, max: 1.0 },
+  coronal:  { min: 0.0, max: 1.0 },
+  sagittal: { min: 0.0, max: 1.0 },
+} as const;
+
 export const createRenderingSlice: StateCreator<ViewerStore, [], [], RenderingSlice> = (set, get) => ({
   showSlicePlanes: false,
   slicePlaneSettings: {
@@ -34,20 +41,7 @@ export const createRenderingSlice: StateCreator<ViewerStore, [], [], RenderingSl
   },
   transferFunctionTexture: null,
   activeTransferFunctionPreset: 'default',
-  clippingPlanes: {
-    axial: { enabled: false, position: 0.5, inverted: false },
-    coronal: { enabled: false, position: 0.5, inverted: false },
-    sagittal: { enabled: false, position: 0.5, inverted: false },
-  },
-  clippingPlaneVisualization: {
-    showPlanes: true,
-    opacity: 0.3,
-    colors: {
-      axial: '#0080FF',
-      coronal: '#00FF00',
-      sagittal: '#FF0000',
-    },
-  },
+  cropBox: { ...DEFAULT_CROP_BOX },
 
   setShowSlicePlanes: (show) => set({ showSlicePlanes: show }),
 
@@ -128,35 +122,32 @@ export const createRenderingSlice: StateCreator<ViewerStore, [], [], RenderingSl
     set({ transferFunctionTexture: texture });
   },
 
-  setClippingPlane: (orientation, planeUpdate) =>
+  setCropBox: (update) =>
     set((state) => ({
-      clippingPlanes: {
-        ...state.clippingPlanes,
-        [orientation]: {
-          ...state.clippingPlanes[orientation],
-          ...planeUpdate,
-        },
+      cropBox: {
+        ...state.cropBox,
+        ...update,
       },
     })),
 
-  setClippingPlaneVisualization: (newSettings) =>
-    set((state) => ({
-      clippingPlaneVisualization: {
-        ...state.clippingPlaneVisualization,
-        ...newSettings,
-        colors: {
-          ...state.clippingPlaneVisualization.colors,
-          ...(newSettings.colors || {}),
+  setCropBoxAxis: (axis, bounds) =>
+    set((state) => {
+      const current = state.cropBox[axis];
+      const newMin = bounds.min !== undefined ? Math.max(0, Math.min(bounds.min, current.max - 0.01)) : current.min;
+      const newMax = bounds.max !== undefined ? Math.min(1, Math.max(bounds.max, current.min + 0.01)) : current.max;
+      // Enforce min <= max - 0.01
+      const clampedMin = Math.min(newMin, newMax - 0.01);
+      const clampedMax = Math.max(newMax, newMin + 0.01);
+      return {
+        cropBox: {
+          ...state.cropBox,
+          [axis]: { min: clampedMin, max: clampedMax },
         },
-      },
-    })),
+      };
+    }),
 
-  resetClippingPlanes: () =>
+  resetCropBox: () =>
     set({
-      clippingPlanes: {
-        axial: { enabled: false, position: 0.5, inverted: false },
-        coronal: { enabled: false, position: 0.5, inverted: false },
-        sagittal: { enabled: false, position: 0.5, inverted: false },
-      },
+      cropBox: { ...DEFAULT_CROP_BOX },
     }),
 });

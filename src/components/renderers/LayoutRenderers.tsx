@@ -5,7 +5,7 @@ import { OrbitControls as StdOrbitControls } from 'three/examples/jsm/controls/O
 import * as THREE from 'three/webgpu';
 import { useViewerStore } from '../../store/viewerStore';
 import { useLayoutContext } from '../../context/LayoutContext';
-import { ClippingPlaneGizmos } from '../ClippingPlaneGizmos';
+import { CropBoxGizmos } from '../CropBoxGizmos';
 import { useSlicePlanesInVolume } from '../../hooks/useSlicePlanesInVolume';
 
 interface VolumeDimensions {
@@ -20,11 +20,15 @@ interface LayoutRendererProps {
   volumeDimensions: VolumeDimensions | null;
   updateCameraUniforms: (camera: THREE.Camera) => void;
 
-  // Clipping Planes (for Gizmos)
-  clippingMeshes: {
-    axialMesh: THREE.Mesh | undefined;
-    coronalMesh: THREE.Mesh | undefined;
-    sagittalMesh: THREE.Mesh | undefined;
+  // Crop Box objects (gizmo anchors + wireframe)
+  cropBoxMeshes: {
+    axialMin: THREE.Object3D | undefined;
+    axialMax: THREE.Object3D | undefined;
+    coronalMin: THREE.Object3D | undefined;
+    coronalMax: THREE.Object3D | undefined;
+    sagittalMin: THREE.Object3D | undefined;
+    sagittalMax: THREE.Object3D | undefined;
+    wireframe: THREE.LineSegments | undefined;
   };
 
   // Slice Resources
@@ -44,7 +48,7 @@ interface LayoutRendererProps {
 // -----------------------------------------------------------------------------
 // Single Renderer
 // -----------------------------------------------------------------------------
-function SingleRenderer({ volumeMesh, volumeDimensions, updateCameraUniforms, clippingMeshes }: LayoutRendererProps) {
+function SingleRenderer({ volumeMesh, volumeDimensions, updateCameraUniforms, cropBoxMeshes }: LayoutRendererProps) {
   const { scene, gl, size, camera } = useThree();
   const volumeCameraState = useViewerStore((state) => state.volumeCameraState);
   const setVolumeCameraState = useViewerStore((state) => state.setVolumeCameraState);
@@ -72,24 +76,31 @@ function SingleRenderer({ volumeMesh, volumeDimensions, updateCameraUniforms, cl
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []); // Run once on mount
 
-  // Re-parent mesh and clipping gizmos to default scene
+  // Re-parent mesh and crop box objects to default scene
   useEffect(() => {
     if (volumeMesh) scene.add(volumeMesh);
 
-    // Add Clipping Gizmos
-    if (clippingMeshes.axialMesh) scene.add(clippingMeshes.axialMesh);
-    if (clippingMeshes.coronalMesh) scene.add(clippingMeshes.coronalMesh);
-    if (clippingMeshes.sagittalMesh) scene.add(clippingMeshes.sagittalMesh);
+    // Add crop box anchor objects and wireframe
+    const objects = [
+      cropBoxMeshes.axialMin,
+      cropBoxMeshes.axialMax,
+      cropBoxMeshes.coronalMin,
+      cropBoxMeshes.coronalMax,
+      cropBoxMeshes.sagittalMin,
+      cropBoxMeshes.sagittalMax,
+      cropBoxMeshes.wireframe,
+    ];
+    for (const obj of objects) {
+      if (obj) scene.add(obj);
+    }
 
     return () => {
       if (volumeMesh) scene.remove(volumeMesh);
-
-      // Remove Clipping Gizmos
-      if (clippingMeshes.axialMesh) scene.remove(clippingMeshes.axialMesh);
-      if (clippingMeshes.coronalMesh) scene.remove(clippingMeshes.coronalMesh);
-      if (clippingMeshes.sagittalMesh) scene.remove(clippingMeshes.sagittalMesh);
+      for (const obj of objects) {
+        if (obj) scene.remove(obj);
+      }
     };
-  }, [volumeMesh, clippingMeshes, scene]);
+  }, [volumeMesh, cropBoxMeshes, scene]);
 
   // Reset GL state when entering this mode or resizing
   // This fixes the issue where switching from Quad/Slices leaves the viewport "stuck"
@@ -107,10 +118,13 @@ function SingleRenderer({ volumeMesh, volumeDimensions, updateCameraUniforms, cl
 
   return (
     <>
-      <ClippingPlaneGizmos
-        axialMesh={clippingMeshes.axialMesh}
-        coronalMesh={clippingMeshes.coronalMesh}
-        sagittalMesh={clippingMeshes.sagittalMesh}
+      <CropBoxGizmos
+        axialMin={cropBoxMeshes.axialMin}
+        axialMax={cropBoxMeshes.axialMax}
+        coronalMin={cropBoxMeshes.coronalMin}
+        coronalMax={cropBoxMeshes.coronalMax}
+        sagittalMin={cropBoxMeshes.sagittalMin}
+        sagittalMax={cropBoxMeshes.sagittalMax}
       />
       <OrbitControls
         ref={controlsRef}
@@ -183,7 +197,7 @@ function SlicesRenderer({ sliceScenes, sliceCameras, resizeCameras }: LayoutRend
 function QuadRenderer(props: LayoutRendererProps) {
   const {
     sliceScenes, sliceCameras, resizeCameras,
-    volumeMesh, updateCameraUniforms, clippingMeshes
+    volumeMesh, updateCameraUniforms, cropBoxMeshes
   } = props;
 
   const { gl, size } = useThree();
@@ -199,28 +213,35 @@ function QuadRenderer(props: LayoutRendererProps) {
 
   useSlicePlanesInVolume(volumeSceneRef.current);
 
-  // Re-parent mesh and clipping gizmos to local volume scene
+  // Re-parent mesh and crop box objects to local volume scene
   useEffect(() => {
     const scene = volumeSceneRef.current;
 
     // Add Volume
     if (volumeMesh) scene.add(volumeMesh);
 
-    // Add Clipping Gizmos
-    if (clippingMeshes.axialMesh) scene.add(clippingMeshes.axialMesh);
-    if (clippingMeshes.coronalMesh) scene.add(clippingMeshes.coronalMesh);
-    if (clippingMeshes.sagittalMesh) scene.add(clippingMeshes.sagittalMesh);
+    // Add crop box anchor objects and wireframe
+    const objects = [
+      cropBoxMeshes.axialMin,
+      cropBoxMeshes.axialMax,
+      cropBoxMeshes.coronalMin,
+      cropBoxMeshes.coronalMax,
+      cropBoxMeshes.sagittalMin,
+      cropBoxMeshes.sagittalMax,
+      cropBoxMeshes.wireframe,
+    ];
+    for (const obj of objects) {
+      if (obj) scene.add(obj);
+    }
 
     return () => {
       // Remove Volume
       if (volumeMesh) scene.remove(volumeMesh);
-
-      // Remove Clipping Gizmos
-      if (clippingMeshes.axialMesh) scene.remove(clippingMeshes.axialMesh);
-      if (clippingMeshes.coronalMesh) scene.remove(clippingMeshes.coronalMesh);
-      if (clippingMeshes.sagittalMesh) scene.remove(clippingMeshes.sagittalMesh);
+      for (const obj of objects) {
+        if (obj) scene.remove(obj);
+      }
     };
-  }, [volumeMesh, clippingMeshes]);
+  }, [volumeMesh, cropBoxMeshes]);
 
   // Setup OrbitControls attached to the specific viewport DIV
   useEffect(() => {
@@ -271,7 +292,7 @@ function QuadRenderer(props: LayoutRendererProps) {
 
     // Match R3F default orthographic camera behavior:
     // Frustum units = Screen pixels
-    // This ensures that "zoom" has the same meaning (pixels per unit) 
+    // This ensures that "zoom" has the same meaning (pixels per unit)
     // in both Single (R3F default) and Quad (Manual) views.
     volCam.left = -halfWidth / 2;
     volCam.right = halfWidth / 2;

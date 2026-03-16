@@ -17,8 +17,7 @@ export function useStateChangeTracking() {
     transferFunction: useViewerStore.getState().transferFunction,
     activePreset: useViewerStore.getState().activeTransferFunctionPreset,
     raymarchSettings: useViewerStore.getState().raymarchSettings,
-    clippingPlanes: useViewerStore.getState().clippingPlanes,
-    clippingVisualization: useViewerStore.getState().clippingPlaneVisualization,
+    cropBox: useViewerStore.getState().cropBox,
     showSlicePlanes: useViewerStore.getState().showSlicePlanes,
     slicePlaneSettings: useViewerStore.getState().slicePlaneSettings,
     showCrosshairs: useViewerStore.getState().showCrosshairs,
@@ -42,8 +41,7 @@ export function useStateChangeTracking() {
       checkChange(state.transferFunction, 'transferFunction');
       checkChange(state.activeTransferFunctionPreset, 'activePreset');
       checkChange(state.raymarchSettings, 'raymarchSettings');
-      checkChange(state.clippingPlanes, 'clippingPlanes');
-      checkChange(state.clippingPlaneVisualization, 'clippingVisualization');
+      checkChange(state.cropBox, 'cropBox');
       checkChange(state.showSlicePlanes, 'showSlicePlanes');
       checkChange(state.slicePlaneSettings, 'slicePlaneSettings');
       checkChange(state.showCrosshairs, 'showCrosshairs');

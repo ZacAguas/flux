@@ -16,10 +16,7 @@ import type {
   RaymarchSettings,
   TransferFunction,
 } from './volume';
-import type {
-  ClippingPlanes,
-  ClippingPlaneVisualization,
-} from './clipping';
+import type { CropBox } from './clipping';
 import type {
   VolumeCameraState,
   CrosshairSettings,
@@ -87,8 +84,7 @@ export interface SerializableViewerState {
   raymarchSettings: RaymarchSettings;
   transferFunction: TransferFunction;
   activeTransferFunctionPreset: string;
-  clippingPlanes: ClippingPlanes;
-  clippingPlaneVisualization: ClippingPlaneVisualization;
+  cropBox: CropBox;
 
   // Measurement state
   measurements: Measurement[];
