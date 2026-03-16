@@ -99,6 +99,7 @@ export function useVolumeSetup() {
       {
         stepSize: raymarchSettings.stepSize,
         threshold: raymarchSettings.threshold,
+        thresholdMax: raymarchSettings.thresholdMax,
       }
     );
 
@@ -134,7 +135,7 @@ export function useVolumeSetup() {
 
     // NOTE: volumeTexture removed from deps - we update it separately below
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [volume, mesh, transferFunction, raymarchSettings.stepSize, raymarchSettings.threshold, setTransferFunctionTexture, clippingPlanes]);
+  }, [volume, mesh, transferFunction, raymarchSettings.stepSize, raymarchSettings.threshold, raymarchSettings.thresholdMax, setTransferFunctionTexture, clippingPlanes]);
 
   // Update volume texture uniform when volumeTexture changes (4D time step navigation)
   // This avoids recreating the entire material, preventing memory leaks during playback
@@ -214,6 +215,7 @@ export function useVolumeSetup() {
     updateRaymarchUniforms(materialRef.current, {
       stepSize: raymarchSettings.stepSize,
       threshold: raymarchSettings.threshold,
+      thresholdMax: raymarchSettings.thresholdMax,
     });
   }, [raymarchSettings]);
 

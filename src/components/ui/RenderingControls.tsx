@@ -35,7 +35,7 @@ export function RenderingControls() {
   };
 
   // Handle manual slider changes - switch to custom preset
-  const handleManualChange = (key: 'stepSize' | 'threshold', value: number) => {
+  const handleManualChange = (key: 'stepSize', value: number) => {
     setRaymarchSettings({
       [key]: value,
       qualityPreset: 'custom',
@@ -97,11 +97,14 @@ export function RenderingControls() {
         </Slider.Track>
       </Slider>
 
-      {/* Threshold Slider */}
+      {/* Threshold Range Slider */}
       <Slider
-        value={raymarchSettings.threshold}
+        value={[raymarchSettings.threshold, raymarchSettings.thresholdMax]}
         isDisabled={isDisabled}
-        onChange={(value) => handleManualChange('threshold', value as number)}
+        onChange={(value) => {
+          const [min, max] = value as number[];
+          setRaymarchSettings({ threshold: min, thresholdMax: max, qualityPreset: 'custom' });
+        }}
         minValue={0}
         maxValue={1}
         step={0.01}
@@ -109,11 +112,14 @@ export function RenderingControls() {
       >
         <Label className="text-white/50 text-xs font-medium">Threshold</Label>
         <Slider.Output className="text-xs">
-          {({ state }) => Number(state.getThumbValueLabel(0)).toFixed(2)}
+          {({ state }) =>
+            `${Number(state.getThumbValueLabel(0)).toFixed(2)} \u2013 ${Number(state.getThumbValueLabel(1)).toFixed(2)}`
+          }
         </Slider.Output>
         <Slider.Track className="bg-white/15 backdrop-blur-sm rounded-md">
           <Slider.Fill />
-          <Slider.Thumb />
+          <Slider.Thumb index={0} />
+          <Slider.Thumb index={1} />
         </Slider.Track>
       </Slider>
     </div>
