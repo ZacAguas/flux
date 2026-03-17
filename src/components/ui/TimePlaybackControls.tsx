@@ -73,14 +73,14 @@ export function TimePlaybackControls() {
 
   // Only show for 4D volumes
   return (
-    <div className="flex flex-col gap-2">
-      <div className="flex items-center gap-2">
+    <div className="flex flex-col gap-2 min-w-0">
+      <div className="flex items-center gap-1 w-full">
         {/* Play/Pause Button */}
         <Button
           size="sm"
           onPress={() => setIsPlaying(!isPlaying)}
           isDisabled={isLoadingTimeStep}
-          className="!bg-white/15 backdrop-blur-sm hover:!bg-white/25 text-white px-2.5 py-1 rounded-md"
+          className="flex-1 !justify-center !bg-white/15 backdrop-blur-sm hover:!bg-white/25 text-white !px-0 py-1 rounded-md"
         >
           {isPlaying
             ? <PauseIcon className="w-4 h-4" />
@@ -92,7 +92,7 @@ export function TimePlaybackControls() {
         <Button
           size="sm"
           onPress={() => setLoop(!loop)}
-          className={`px-2.5 py-1 rounded-md transition-all duration-200 ${
+          className={`flex-1 !justify-center !px-0 py-1 rounded-md transition-all duration-200 ${
             loop
               ? '!bg-white/15 backdrop-blur-sm text-white'
               : '!bg-transparent text-white/50 hover:text-white/70'
@@ -112,7 +112,7 @@ export function TimePlaybackControls() {
             setIsPlaying(false);
           }}
           isDisabled={isLoadingTimeStep || timeStep === 0}
-          className="!bg-white/10 backdrop-blur-sm hover:!bg-white/15 text-white px-2.5 py-1 rounded-md"
+          className="flex-1 !justify-center !bg-white/10 backdrop-blur-sm hover:!bg-white/15 text-white !px-0 py-1 rounded-md"
         >
           <ArrowUturnLeftIcon className="w-4 h-4" />
         </Button>
@@ -125,7 +125,7 @@ export function TimePlaybackControls() {
         minValue={1}
         maxValue={30}
         step={1}
-        className="w-full"
+        className="w-full min-w-0"
       >
         <Label className="text-white/50 text-xs font-medium">Speed (FPS)</Label>
         <Slider.Output className="text-xs" />
