@@ -13,6 +13,7 @@ import {
   CursorArrowRaysIcon,
   FilmIcon,
   PhotoIcon,
+  PresentationChartLineIcon,
   QuestionMarkCircleIcon,
   RocketLaunchIcon,
   ScissorsIcon,
@@ -287,6 +288,52 @@ const TABS: Tab[] = [
             <li>Press <Kbd className="text-[10px] text-white/70 bg-white/5 backdrop-blur-sm rounded-md px-2 py-1"><Kbd.Content>Esc</Kbd.Content></Kbd> to cancel an in-progress measurement.</li>
             <li>Select a measurement and press <Kbd className="text-[10px] text-white/70 bg-white/5 backdrop-blur-sm rounded-md px-2 py-1"><Kbd.Content>Delete</Kbd.Content></Kbd> to remove it.</li>
             <li>All measurements are saved with the session.</li>
+          </ul>
+        </div>
+      </div>
+    ),
+  },
+  {
+    id: 'tic',
+    label: 'Time Intensity Curves',
+    icon: <PresentationChartLineIcon className="w-4 h-4" />,
+    content: (
+      <div className="space-y-4">
+        <h3 className="text-base font-semibold text-white">Time Intensity Curves (4D)</h3>
+        <p className="text-sm text-white/70">
+          Time Intensity Curves plot the mean voxel intensity inside a circular region of interest (ROI) across every time step in a 4D volume. This is a standard tool in dynamic contrast-enhanced (DCE) imaging for characterising how signal changes over time at a specific anatomical location.
+        </p>
+        <p className="text-sm text-white/70">
+          The Time Intensity Curves section is only available when a 4D volume is loaded.
+        </p>
+        <div className="space-y-2">
+          <h4 className="text-sm font-medium text-white/90">Placing a ROI</h4>
+          <ol className="list-decimal list-inside space-y-1 text-sm text-white/70">
+            <li>Open the Time Intensity Curves section in the control panel.</li>
+            <li>Click <span className="text-white/90">Place ROI</span> to activate the tool.</li>
+            <li>Click and drag on any slice view to draw a circular ROI. The circle preview updates in real time as you drag.</li>
+            <li>Release to confirm. The curve appears in the chart immediately.</li>
+          </ol>
+        </div>
+        <div className="space-y-2">
+          <h4 className="text-sm font-medium text-white/90">Multiple ROIs</h4>
+          <p className="text-sm text-white/70">
+            The tool stays active after each placement. Drag again to add another ROI. Each ROI is assigned a distinct color and labelled sequentially. All curves are overlaid on the same chart for comparison.
+          </p>
+        </div>
+        <div className="space-y-2">
+          <h4 className="text-sm font-medium text-white/90">Chart</h4>
+          <ul className="list-disc list-inside space-y-1 text-sm text-white/70">
+            <li><span className="text-white/90">X axis:</span> Time in seconds if the volume includes a repetition time (TR), otherwise the 0-based time step index.</li>
+            <li><span className="text-white/90">Y axis:</span> Raw mean voxel intensity inside the ROI (arbitrary units for MRI).</li>
+          </ul>
+        </div>
+        <div className="space-y-2">
+          <h4 className="text-sm font-medium text-white/90">Managing ROIs</h4>
+          <ul className="list-disc list-inside space-y-1 text-sm text-white/70">
+            <li>Click <span className="text-white/90">X</span> next to a ROI in the list to delete it.</li>
+            <li>Click <span className="text-white/90">Clear All</span> to remove all ROIs at once.</li>
+            <li>ROIs are saved with the session and restored automatically on next load.</li>
           </ul>
         </div>
       </div>
