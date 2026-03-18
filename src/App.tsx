@@ -20,6 +20,7 @@ import { useAutoSave } from './hooks/useAutoSave';
 import { useAutoSaveRestore } from './hooks/useAutoSaveRestore';
 import { initializeSessionDB } from './utils/sessionStorage';
 import { Analytics } from '@vercel/analytics/react';
+import { SpeedInsights } from '@vercel/speed-insights/react';
 
 declare module '@react-three/fiber' {
   // eslint-disable-next-line @typescript-eslint/no-empty-object-type
@@ -61,8 +62,9 @@ function App() {
 
   return (
     <>
-      {/* Vercel analytics */}
+      {/* Vercel */}
       <Analytics />
+      <SpeedInsights />
 
       {volume ? (
         <>
