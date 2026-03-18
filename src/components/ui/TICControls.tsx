@@ -8,8 +8,12 @@
  */
 
 import { Button } from '@heroui/react';
+import { ArrowsPointingOutIcon, ArrowUturnLeftIcon } from '@heroicons/react/24/outline';
+import { useState, useRef } from 'react';
 import { useViewerStore } from '../../store/viewerStore';
 import { TICChart } from './TICChart';
+import type { TICChartHandle } from './TICChart';
+import { TICChartModal } from './TICChartModal';
 
 const ROIIcon = (
   <svg width={14} height={14} viewBox="0 0 24 24" fill="none">
@@ -19,6 +23,9 @@ const ROIIcon = (
 );
 
 export function TICControls() {
+  const [chartModalOpen, setChartModalOpen] = useState(false);
+  const [isChartZoomed, setIsChartZoomed] = useState(false);
+  const chartRef = useRef<TICChartHandle>(null);
   const volume = useViewerStore((state) => state.volume);
   const ticToolActive = useViewerStore((state) => state.ticToolActive);
   const setTicToolActive = useViewerStore((state) => state.setTicToolActive);
@@ -105,9 +112,45 @@ export function TICControls() {
       {/* Chart */}
       {ticRois.length > 0 && (
         <div className="border-t border-white/10 pt-2">
-          <TICChart rois={ticRois} curves={ticCurves} />
+          <div className="flex items-center justify-between mb-1">
+            <span className="text-xs text-white/60">Chart</span>
+            <div className="flex items-center gap-1">
+              <Button
+                size="sm"
+                variant="secondary"
+                isDisabled={!isChartZoomed}
+                onPress={() => chartRef.current?.reset()}
+                className="!px-1.5 !py-1 !min-w-6 !h-6 text-white/50 hover:text-white/80"
+                aria-label="Reset zoom"
+              >
+                <ArrowUturnLeftIcon className="w-3 h-3" />
+              </Button>
+              <Button
+                size="sm"
+                variant="secondary"
+                onPress={() => setChartModalOpen(true)}
+                className="!px-1.5 !py-1 !min-w-6 !h-6 text-white/50 hover:text-white/80"
+                aria-label="Expand chart"
+              >
+                <ArrowsPointingOutIcon className="w-3 h-3" />
+              </Button>
+            </div>
+          </div>
+          <TICChart
+            ref={chartRef}
+            rois={ticRois}
+            curves={ticCurves}
+            onZoomChange={setIsChartZoomed}
+          />
         </div>
       )}
+
+      <TICChartModal
+        isOpen={chartModalOpen}
+        onClose={() => setChartModalOpen(false)}
+        rois={ticRois}
+        curves={ticCurves}
+      />
 
       {/* Empty state */}
       {ticRois.length === 0 && !ticToolActive && (
