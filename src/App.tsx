@@ -19,6 +19,7 @@ import { useGlobalDropHandler } from './hooks/useGlobalDropHandler';
 import { useAutoSave } from './hooks/useAutoSave';
 import { useAutoSaveRestore } from './hooks/useAutoSaveRestore';
 import { initializeSessionDB } from './utils/sessionStorage';
+import { Analytics } from '@vercel/analytics/react';
 
 declare module '@react-three/fiber' {
   // eslint-disable-next-line @typescript-eslint/no-empty-object-type
@@ -60,6 +61,9 @@ function App() {
 
   return (
     <>
+      {/* Vercel analytics */}
+      <Analytics />
+
       {volume ? (
         <>
           <LayoutContextProvider>
