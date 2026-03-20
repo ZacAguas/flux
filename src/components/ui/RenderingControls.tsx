@@ -6,7 +6,7 @@
  * Connected to Zustand store for state management.
  */
 
-import { Slider, Label, Tabs } from '@heroui/react';
+import { Slider, Label, Switch, Tabs } from '@heroui/react';
 import { useViewerStore } from '../../store/viewerStore';
 import type { RenderQualityPreset } from '../../types/volume';
 
@@ -96,6 +96,27 @@ export function RenderingControls() {
           <Slider.Thumb />
         </Slider.Track>
       </Slider>
+
+      {/* Shading Toggle */}
+      <div className="flex items-center justify-between gap-2">
+        <Label className="text-white/50 text-xs font-medium">Shading</Label>
+        <Switch
+          size="sm"
+          isSelected={raymarchSettings.shadingEnabled}
+          isDisabled={isDisabled}
+          onChange={(e) => setRaymarchSettings({ shadingEnabled: e })}
+        >
+          {({ isSelected }) => (
+            <>
+              <Switch.Control
+                className={`backdrop-blur-sm rounded-full ${isSelected ? '' : 'bg-white/15'}`}
+              >
+                <Switch.Thumb />
+              </Switch.Control>
+            </>
+          )}
+        </Switch>
+      </div>
 
       {/* Threshold Range Slider */}
       <Slider

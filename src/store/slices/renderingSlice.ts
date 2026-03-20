@@ -4,8 +4,8 @@ import { getPresetByName } from '../../data/transferFunctionPresets';
 
 const DEFAULT_CROP_BOX = {
   enabled: false,
-  axial:    { min: 0.0, max: 1.0 },
-  coronal:  { min: 0.0, max: 1.0 },
+  axial: { min: 0.0, max: 1.0 },
+  coronal: { min: 0.0, max: 1.0 },
   sagittal: { min: 0.0, max: 1.0 },
 } as const;
 
@@ -31,6 +31,7 @@ export const createRenderingSlice: StateCreator<ViewerStore, [], [], RenderingSl
     threshold: 0.1,
     thresholdMax: 1.0,
     qualityPreset: 'standard',
+    shadingEnabled: true,
   },
   transferFunction: {
     points: [

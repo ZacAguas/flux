@@ -89,6 +89,7 @@ export interface RaymarchSettings {
   threshold: number; // Minimum intensity to render (lower bound, 0-1)
   thresholdMax: number; // Maximum intensity to render (upper bound, 0-1)
   qualityPreset: RenderQualityPreset; // Current quality preset
+  shadingEnabled: boolean; // Blinn-Phong shading on/off (requires gradient texture)
 }
 
 /**

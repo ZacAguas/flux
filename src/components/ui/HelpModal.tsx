@@ -181,6 +181,12 @@ const TABS: Tab[] = [
           </p>
         </div>
         <div className="space-y-2">
+          <h4 className="text-sm font-medium text-white/90">Shading</h4>
+          <p className="text-sm text-white/70">
+            Toggles whether or not volume shading is applied (Blinn-Phong). NOTE: requires WebGPU.
+          </p>
+        </div>
+        <div className="space-y-2">
           <h4 className="text-sm font-medium text-white/90">Threshold</h4>
           <p className="text-sm text-white/70">
             Sets the minimum opacity threshold for early ray termination. Rays stop accumulating once this threshold is reached, improving performance.
