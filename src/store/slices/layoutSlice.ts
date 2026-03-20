@@ -4,7 +4,7 @@ import type { ViewerStore, LayoutSlice, ControlPanelSections } from '../storeTyp
 export const createLayoutSlice: StateCreator<ViewerStore, [], [], LayoutSlice> = (set, get) => ({
   layoutMode: 'single',
   controlPanelOpen: true,
-  controlPanelPinned: true,
+  controlPanelPinned: false,
   controlPanelContentHeight: 0,
   controlPanelSections: {
     sliceNavigation: true,
