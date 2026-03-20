@@ -25,6 +25,8 @@ import {
   max,
   min,
   any,
+  dot,
+  select,
 } from 'three/tsl';
 import * as THREE from 'three/webgpu';
 import type { CropBox } from '../types/clipping';
@@ -82,18 +84,23 @@ export function createVolumeRaymarchMaterial(
     stepSize?: number;
     threshold?: number;
     thresholdMax?: number;
+    gradientTexture?: THREE.Storage3DTexture;
+    shadingEnabled?: boolean;
   } = {}
 ) {
   const {
     stepSize = 0.01,
     threshold = 0.1,
     thresholdMax = 1.0,
+    gradientTexture,
   } = options;
 
   // Create uniforms
   const stepSizeUniform = uniform(stepSize);
   const thresholdUniform = uniform(threshold);
   const thresholdMaxUniform = uniform(thresholdMax);
+  // 1.0 = shading on, 0.0 = shading off. Float so it can be mixed in the shader
+  const shadingEnabledUniform = uniform(options.shadingEnabled !== false ? 1.0 : 0.0);
   // Inverse of the mesh's world matrix. Transforms world coordinates to local object space
   // Important for positioning rays correctly relative to the possibly scaled/rotated volume
   const inverseModelMatrixUniform = uniform(new THREE.Matrix4());
@@ -111,6 +118,9 @@ export function createVolumeRaymarchMaterial(
   // Create texture nodes
   const volumeTextureNode = texture3D(volumeTexture);
   const transferFunctionTextureNode = texture(transferFunctionTexture);
+  // Gradient texture is optional - shading is disabled when not provided
+  // NOTE: null uvNode defers UV binding to .sample(). Mip level 0 explicit for Storage3DTexture
+  const gradientTextureNode = gradientTexture ? texture3D(gradientTexture, null, 0) : null;
 
   // Create transfer function with texture node
   const transferFunction = createTransferFunction(transferFunctionTextureNode);
@@ -200,10 +210,43 @@ export function createVolumeRaymarchMaterial(
               // Apply transfer function (texture lookup)
               const sample = transferFunction(intensity);
 
+              // Blinn-Phong shading using pre-computed gradient texture
+              // Head-light model: L = V = -rayDir, so halfway vector H = -rayDir
+              // This means specular = diffuse^shininess: no extra computation needed
+              // NOTE: Both gradient and rayDir are in the same texture/local space
+              const litColor = (() => {
+                if (!gradientTextureNode) return sample.rgb;
+
+                const gradientSample = gradientTextureNode.sample(samplePos);
+                const surfaceNormal = gradientSample.rgb; // Already normalized
+                const gradientMagnitude = gradientSample.a;
+
+                // Only apply shading where there is a meaningful gradient (boundaries/surfaces)
+                // Flat regions (magnitude near 0) get full ambient to avoid dark noise
+                const shadingStrength = gradientMagnitude.mul(8.0).min(1.0);
+
+                // Head-light: L = V = -rayDir, so dot(N, L) = dot(N, -rayDir)
+                const diffuse = dot(surfaceNormal, rayDir.negate()).max(float(0.0));
+
+                // Blinn-Phong: H = normalize(L + V) = -rayDir (head-light), so specular = diffuse^shininess
+                const specular = diffuse.pow(float(32.0));
+
+                // Ambient + diffuse + specular
+                const ambient = float(0.2);
+                const lighting = ambient.add(diffuse.mul(float(0.7))).add(specular.mul(float(0.1)));
+
+                // Blend between unlit (flat regions) and lit (boundaries)
+                const blendedLighting = float(1.0).mix(lighting, shadingStrength);
+                const shadedColor = sample.rgb.mul(blendedLighting);
+
+                // Select between unlit and shaded based on shadingEnabled uniform
+                return select(shadingEnabledUniform.greaterThan(0.5), shadedColor, sample.rgb);
+              })();
+
               // Front-to-back compositing
               const alpha = sample.a.mul(float(1.0).sub(accumulatedAlpha));
               accumulatedColor.assign(
-                accumulatedColor.add(sample.rgb.mul(alpha))
+                accumulatedColor.add(litColor.mul(alpha))
               );
               accumulatedAlpha.assign(accumulatedAlpha.add(alpha));
             });
@@ -230,8 +273,10 @@ export function createVolumeRaymarchMaterial(
     stepSize: stepSizeUniform,
     threshold: thresholdUniform,
     thresholdMax: thresholdMaxUniform,
+    shadingEnabled: shadingEnabledUniform,
     volumeTexture: volumeTextureNode,
     transferFunctionTexture: transferFunctionTextureNode,
+    gradientTexture: gradientTextureNode,
     inverseModelMatrix: inverseModelMatrixUniform,
     isOrtho: isOrthoUniform,
     cameraWorldDirection: cameraDirUniform,
@@ -252,6 +297,7 @@ export function updateRaymarchUniforms(
     stepSize?: number;
     threshold?: number;
     thresholdMax?: number;
+    shadingEnabled?: boolean;
   }
 ) {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -265,6 +311,9 @@ export function updateRaymarchUniforms(
   }
   if (params.thresholdMax !== undefined) {
     uniforms.thresholdMax.value = params.thresholdMax;
+  }
+  if (params.shadingEnabled !== undefined) {
+    uniforms.shadingEnabled.value = params.shadingEnabled ? 1.0 : 0.0;
   }
 }
 
@@ -281,6 +330,21 @@ export function updateVolumeTexture(
 
   if (uniforms.volumeTexture) {
     uniforms.volumeTexture.value = texture;
+  }
+}
+
+/**
+ * Update gradient texture (call when volume changes)
+ */
+export function updateGradientTexture(
+  material: THREE.MeshBasicNodeMaterial,
+  gradientTexture: THREE.Storage3DTexture
+) {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const uniforms = (material as any).uniforms;
+
+  if (uniforms.gradientTexture) {
+    uniforms.gradientTexture.value = gradientTexture;
   }
 }
 

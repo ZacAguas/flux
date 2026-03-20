@@ -34,8 +34,12 @@ export function TimeStepControls() {
             <div className="w-3 h-3 border-2 border-white/30 border-t-white/70 rounded-full animate-spin" />
           )}
         </div>
-        <Slider.Output className="text-xs">
-          {({ state }) => `${state.getThumbValueLabel(0)} / ${totalTimeSteps - 1}`}
+        <Slider.Output className="text-xs tabular-nums">
+          {({ state }) => {
+            const total = totalTimeSteps - 1;
+            const pad = String(total).length;
+            return `${state.getThumbValueLabel(0).padStart(pad, '0')} / ${total}`;
+          }}
         </Slider.Output>
         <Slider.Track className="bg-white/15 backdrop-blur-sm rounded-md">
           <Slider.Fill />

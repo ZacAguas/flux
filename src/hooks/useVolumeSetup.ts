@@ -10,6 +10,7 @@
 
 import { useEffect, useRef, useState } from 'react';
 import * as THREE from 'three/webgpu';
+import { useThree } from '@react-three/fiber';
 import { useViewerStore } from '../store/viewerStore';
 import {
   createVolumeRaymarchMaterial,
@@ -23,6 +24,7 @@ import {
 import { getVolumeDimensions } from '../utils/layout';
 import { generateTransferFunctionTexture } from '../utils/transferFunctionTexture';
 import { createVolumeTexture, calculateTextureMemory } from '../utils/volumeTextureConverter';
+import { computeGradientTexture } from '../utils/gradientTexture';
 
 /**
  * Custom hook to setup and manage the volume raymarching mesh and material.
@@ -42,7 +44,10 @@ export function useVolumeSetup() {
   const setIsLoadingTimeStep = useViewerStore((state) => state.setIsLoadingTimeStep);
   const addTextureToCache = useViewerStore((state) => state.addTextureToCache);
 
+  const { gl } = useThree();
+
   const materialRef = useRef<THREE.MeshBasicNodeMaterial | undefined>(undefined);
+  const [gradientTexture, setGradientTexture] = useState<THREE.Storage3DTexture | null>(null);
   const [mesh, setMesh] = useState<THREE.Mesh | null>(null);
   const isGeneratingRef = useRef<boolean>(false);
   const bufferPoolRef = useRef<Float32Array | null>(null);
@@ -79,6 +84,43 @@ export function useVolumeSetup() {
     };
   }, [volume]); // Only depend on volume, not volumeTexture (buffer persists across time steps)
 
+  // Compute gradient texture when volume changes (WebGPU compute shader, runs on GPU)
+  // NOTE: Uses the current volumeTexture's normalized data (t=0 for 4D volumes).
+  // TODO: cache/recalculate gradient texture for t>0 (important for non-static geometry)
+  useEffect(() => {
+    if (!volume) return;
+
+    // Access current texture directly from store (not subscribed) to avoid
+    // recomputing gradient on every volumeTexture change (e.g. 4D time steps)
+    const currentTexture = useViewerStore.getState().volumeTexture;
+    if (!currentTexture) return;
+
+    const { x: width, y: height, z: depth } = volume.dimensions;
+
+    let cancelled = false;
+    let gradTex: THREE.Storage3DTexture | null = null;
+
+    computeGradientTexture(gl as THREE.WebGPURenderer, currentTexture, width, height, depth)
+      .then((tex) => {
+        gradTex = tex;
+        if (cancelled) {
+          tex.dispose();
+        } else {
+          setGradientTexture(tex);
+        }
+      })
+      .catch((err) => console.error('Failed to compute gradient texture', err));
+
+    return () => {
+      cancelled = true;
+      // If async has already resolved, dispose immediately. Otherwise the .then() handler disposes
+      if (gradTex) {
+        gradTex.dispose();
+      }
+      setGradientTexture(null);
+    };
+  }, [volume, gl]);
+
   // Create/update material separately
   useEffect(() => {
     if (!volumeTexture || !volume || !mesh) return;
@@ -100,6 +142,8 @@ export function useVolumeSetup() {
         stepSize: raymarchSettings.stepSize,
         threshold: raymarchSettings.threshold,
         thresholdMax: raymarchSettings.thresholdMax,
+        gradientTexture: gradientTexture ?? undefined,
+        shadingEnabled: raymarchSettings.shadingEnabled,
       }
     );
 
@@ -119,7 +163,7 @@ export function useVolumeSetup() {
 
     // NOTE: volumeTexture removed from deps - we update it separately below
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [volume, mesh, transferFunction, raymarchSettings.stepSize, raymarchSettings.threshold, raymarchSettings.thresholdMax, setTransferFunctionTexture, cropBox]);
+  }, [volume, mesh, transferFunction, raymarchSettings.stepSize, raymarchSettings.threshold, raymarchSettings.thresholdMax, setTransferFunctionTexture, cropBox, gradientTexture]);
 
   // Update volume texture uniform when volumeTexture changes (4D time step navigation)
   // This avoids recreating the entire material, preventing memory leaks during playback
@@ -200,6 +244,7 @@ export function useVolumeSetup() {
       stepSize: raymarchSettings.stepSize,
       threshold: raymarchSettings.threshold,
       thresholdMax: raymarchSettings.thresholdMax,
+      shadingEnabled: raymarchSettings.shadingEnabled,
     });
   }, [raymarchSettings]);
 
