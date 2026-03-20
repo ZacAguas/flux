@@ -144,6 +144,8 @@ export function useVolumeSetup() {
         thresholdMax: raymarchSettings.thresholdMax,
         gradientTexture: gradientTexture ?? undefined,
         shadingEnabled: raymarchSettings.shadingEnabled,
+        ambientStrength: raymarchSettings.ambientStrength,
+        diffuseStrength: raymarchSettings.diffuseStrength,
       }
     );
 
@@ -245,6 +247,8 @@ export function useVolumeSetup() {
       threshold: raymarchSettings.threshold,
       thresholdMax: raymarchSettings.thresholdMax,
       shadingEnabled: raymarchSettings.shadingEnabled,
+      ambientStrength: raymarchSettings.ambientStrength,
+      diffuseStrength: raymarchSettings.diffuseStrength,
     });
   }, [raymarchSettings]);
 

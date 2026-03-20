@@ -118,6 +118,50 @@ export function RenderingControls() {
         </Switch>
       </div>
 
+      {/* Shading Coefficients (visible when shading is enabled) */}
+      {raymarchSettings.shadingEnabled && (
+        <>
+          <Slider
+            value={raymarchSettings.ambientStrength}
+            isDisabled={isDisabled}
+            onChange={(value) => setRaymarchSettings({ ambientStrength: value as number })}
+            minValue={0}
+            maxValue={1}
+            step={0.01}
+            className="w-full"
+          >
+            <Label className="text-white/50 text-xs font-medium">Ambient</Label>
+            <Slider.Output className="text-xs">
+              {({ state }) => Number(state.getThumbValueLabel(0)).toFixed(2)}
+            </Slider.Output>
+            <Slider.Track className="bg-white/15 backdrop-blur-sm rounded-md">
+              <Slider.Fill />
+              <Slider.Thumb />
+            </Slider.Track>
+          </Slider>
+
+          <Slider
+            value={raymarchSettings.diffuseStrength}
+            isDisabled={isDisabled}
+            onChange={(value) => setRaymarchSettings({ diffuseStrength: value as number })}
+            minValue={0}
+            maxValue={1}
+            step={0.01}
+            className="w-full"
+          >
+            <Label className="text-white/50 text-xs font-medium">Diffuse</Label>
+            <Slider.Output className="text-xs">
+              {({ state }) => Number(state.getThumbValueLabel(0)).toFixed(2)}
+            </Slider.Output>
+            <Slider.Track className="bg-white/15 backdrop-blur-sm rounded-md">
+              <Slider.Fill />
+              <Slider.Thumb />
+            </Slider.Track>
+          </Slider>
+
+        </>
+      )}
+
       {/* Threshold Range Slider */}
       <Slider
         value={[raymarchSettings.threshold, raymarchSettings.thresholdMax]}

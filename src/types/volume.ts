@@ -90,6 +90,8 @@ export interface RaymarchSettings {
   thresholdMax: number; // Maximum intensity to render (upper bound, 0-1)
   qualityPreset: RenderQualityPreset; // Current quality preset
   shadingEnabled: boolean; // Blinn-Phong shading on/off (requires gradient texture)
+  ambientStrength: number; // Ambient light coefficient (0-1)
+  diffuseStrength: number; // Diffuse light coefficient (0-1)
 }
 
 /**
