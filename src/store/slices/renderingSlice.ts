@@ -32,6 +32,8 @@ export const createRenderingSlice: StateCreator<ViewerStore, [], [], RenderingSl
     thresholdMax: 1.0,
     qualityPreset: 'standard',
     shadingEnabled: true,
+    ambientStrength: 0.2,
+    diffuseStrength: 0.7,
   },
   transferFunction: {
     points: [

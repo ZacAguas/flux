@@ -27,6 +27,8 @@ import {
   any,
   dot,
   select,
+  fract,
+  sin,
 } from 'three/tsl';
 import * as THREE from 'three/webgpu';
 import type { CropBox } from '../types/clipping';
@@ -86,6 +88,8 @@ export function createVolumeRaymarchMaterial(
     thresholdMax?: number;
     gradientTexture?: THREE.Storage3DTexture;
     shadingEnabled?: boolean;
+    ambientStrength?: number;
+    diffuseStrength?: number;
   } = {}
 ) {
   const {
@@ -93,6 +97,8 @@ export function createVolumeRaymarchMaterial(
     threshold = 0.1,
     thresholdMax = 1.0,
     gradientTexture,
+    ambientStrength = 0.2,
+    diffuseStrength = 0.7,
   } = options;
 
   // Create uniforms
@@ -101,6 +107,8 @@ export function createVolumeRaymarchMaterial(
   const thresholdMaxUniform = uniform(thresholdMax);
   // 1.0 = shading on, 0.0 = shading off. Float so it can be mixed in the shader
   const shadingEnabledUniform = uniform(options.shadingEnabled !== false ? 1.0 : 0.0);
+  const ambientStrengthUniform = uniform(ambientStrength);
+  const diffuseStrengthUniform = uniform(diffuseStrength);
   // Inverse of the mesh's world matrix. Transforms world coordinates to local object space
   // Important for positioning rays correctly relative to the possibly scaled/rotated volume
   const inverseModelMatrixUniform = uniform(new THREE.Matrix4());
@@ -164,8 +172,14 @@ export function createVolumeRaymarchMaterial(
 
     // Intersect ray with bounding box
     const intersection = intersectBox(rayOrigin, rayDir);
-    const tNear = max(intersection.x, float(0.0));
     const tFar = intersection.y;
+
+    // Per-pixel jitter: offset tNear by a fraction of one step using a deterministic screen space hash
+    // NOTE: This randomises the phase of each ray's sampling grid, breaking the periodic
+    // interference (moire) between the ray step grid and the voxel grid
+    // See: https://www.metal.graphics/chapter6-randomness-noise
+    const jitter = fract(sin(dot(positionWorld.xy, vec2(12.9898, 78.233))).mul(43758.5453));
+    const tNear = max(intersection.x, float(0.0)).add(jitter.mul(stepSizeUniform));
 
     // Initialize accumulation
     const accumulatedColor = vec3(0.0, 0.0, 0.0).toVar();
@@ -211,8 +225,7 @@ export function createVolumeRaymarchMaterial(
               const sample = transferFunction(intensity);
 
               // Blinn-Phong shading using pre-computed gradient texture
-              // Head-light model: L = V = -rayDir, so halfway vector H = -rayDir
-              // This means specular = diffuse^shininess: no extra computation needed
+              // Head-light model: L = V = -rayDir, so H = -rayDir and dot(N, H) = dot(N, L) = diffuse
               // NOTE: Both gradient and rayDir are in the same texture/local space
               const litColor = (() => {
                 if (!gradientTextureNode) return sample.rgb;
@@ -221,25 +234,23 @@ export function createVolumeRaymarchMaterial(
                 const surfaceNormal = gradientSample.rgb; // Already normalized
                 const gradientMagnitude = gradientSample.a;
 
-                // Only apply shading where there is a meaningful gradient (boundaries/surfaces)
-                // Flat regions (magnitude near 0) get full ambient to avoid dark noise
+                // Scale diffuse/specular contribution by gradient magnitude so flat regions only receive ambient light
                 const shadingStrength = gradientMagnitude.mul(8.0).min(1.0);
 
-                // Head-light: L = V = -rayDir, so dot(N, L) = dot(N, -rayDir)
+                // Head-light: dot(N, L) = dot(N, -rayDir)
                 const diffuse = dot(surfaceNormal, rayDir.negate()).max(float(0.0));
 
-                // Blinn-Phong: H = normalize(L + V) = -rayDir (head-light), so specular = diffuse^shininess
-                const specular = diffuse.pow(float(32.0));
+                // Specular: diffuse^2 used instead of high-exponent pow() to give a broad highlight
+                const specular = diffuse.mul(diffuse);
 
-                // Ambient + diffuse + specular
-                const ambient = float(0.2);
-                const lighting = ambient.add(diffuse.mul(float(0.7))).add(specular.mul(float(0.1)));
+                // Ambient applied uniformly: diffuse and specular are gated by shadingStrength
+                // so only regions with meaningful gradients (boundaries/surfaces) receive them
+                const lighting = ambientStrengthUniform
+                  .add(diffuse.mul(diffuseStrengthUniform).mul(shadingStrength))
+                  .add(specular.mul(float(0.1)).mul(shadingStrength));
 
-                // Blend between unlit (flat regions) and lit (boundaries)
-                const blendedLighting = float(1.0).mix(lighting, shadingStrength);
-                const shadedColor = sample.rgb.mul(blendedLighting);
+                const shadedColor = sample.rgb.mul(lighting);
 
-                // Select between unlit and shaded based on shadingEnabled uniform
                 return select(shadingEnabledUniform.greaterThan(0.5), shadedColor, sample.rgb);
               })();
 
@@ -274,6 +285,8 @@ export function createVolumeRaymarchMaterial(
     threshold: thresholdUniform,
     thresholdMax: thresholdMaxUniform,
     shadingEnabled: shadingEnabledUniform,
+    ambientStrength: ambientStrengthUniform,
+    diffuseStrength: diffuseStrengthUniform,
     volumeTexture: volumeTextureNode,
     transferFunctionTexture: transferFunctionTextureNode,
     gradientTexture: gradientTextureNode,
@@ -298,6 +311,8 @@ export function updateRaymarchUniforms(
     threshold?: number;
     thresholdMax?: number;
     shadingEnabled?: boolean;
+    ambientStrength?: number;
+    diffuseStrength?: number;
   }
 ) {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -314,6 +329,12 @@ export function updateRaymarchUniforms(
   }
   if (params.shadingEnabled !== undefined) {
     uniforms.shadingEnabled.value = params.shadingEnabled ? 1.0 : 0.0;
+  }
+  if (params.ambientStrength !== undefined) {
+    uniforms.ambientStrength.value = params.ambientStrength;
+  }
+  if (params.diffuseStrength !== undefined) {
+    uniforms.diffuseStrength.value = params.diffuseStrength;
   }
 }
 
