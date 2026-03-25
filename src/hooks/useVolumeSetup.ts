@@ -100,7 +100,7 @@ export function useVolumeSetup() {
     let cancelled = false;
     let gradTex: THREE.Storage3DTexture | null = null;
 
-    computeGradientTexture(gl as THREE.WebGPURenderer, currentTexture, width, height, depth)
+    computeGradientTexture(gl as unknown as THREE.WebGPURenderer, currentTexture, width, height, depth)
       .then((tex) => {
         gradTex = tex;
         if (cancelled) {
