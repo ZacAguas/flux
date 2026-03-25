@@ -47,23 +47,21 @@ The gradient is computed once when a volume loads (using t=0 for 4D data) and re
 
 ## Blinn-Phong Lighting
 
-The shading model is **Blinn-Phong** with a head-light: the light source is placed at the camera position, so the light direction L and view direction V are both equal to `-rayDir`.
+The shading model is **Blinn-Phong** with a fixed world-space directional light pointing top-front-right `normalize(1, 1, 1)`. This is independent of camera position, so surfaces remain consistently lit as the user orbits the volume.
 
-This simplifies the halfway vector:
-
-```
-H = normalize(L + V) = normalize(-rayDir + -rayDir) = -rayDir
-```
-
-So the Blinn-Phong specular term collapses to:
+The world-space direction is transformed into local texture space (the same space as the pre-computed gradient normals and `rayDir`) using the inverse model matrix each sample:
 
 ```
-diffuse  = max(dot(N, -rayDir), 0)
-specular = diffuse ^ shininess          (since dot(N, H) = dot(N, -rayDir) = diffuse)
-lighting = ambient + diffuse * 0.7 + specular * 0.1
+lightDir = normalize(inverseModelMatrix * vec4(0.577, 0.577, 0.577, 0.0))
+viewDir  = -rayDir
+H        = normalize(lightDir + viewDir)
+
+diffuse  = max(dot(N, lightDir), 0)
+specular = max(dot(N, H), 0) ^ 16
+lighting = ambient + diffuse * Kd * shadingStrength + specular * 0.1 * shadingStrength
 ```
 
-Shininess is set to 32, giving a moderately tight highlight. Lower values (8-16) give softer, broader highlights; higher values (64+) give sharp, mirror-like ones.
+`ambient` and `Kd` (diffuse strength) are runtime uniforms exposed as sliders. Specular strength and shininess are fixed (0.1 and 16 respectively).
 
 ### Why Blinn-Phong over Phong?
 
@@ -75,12 +73,12 @@ Applying lighting uniformly would darken flat regions (where the gradient is nea
 
 ```
 shadingStrength = clamp(magnitude * 8.0, 0.0, 1.0)
-blendedLighting = mix(1.0, lighting, shadingStrength)
-shadedColor = transferFunctionColor * blendedLighting
+lighting = ambient + diffuse * Kd * shadingStrength + specular * 0.1 * shadingStrength
+shadedColor = transferFunctionColor * lighting
 ```
 
-- Where magnitude is near zero (homogeneous tissue, background): `shadingStrength = 0`, `blendedLighting = 1.0` — sample is fully unlit, no darkening
-- Where magnitude is high (vessel walls, tissue boundaries): `shadingStrength = 1.0`, full Blinn-Phong lighting applies
+- Where magnitude is near zero (homogeneous tissue, background): `shadingStrength = 0` — only ambient applies, no darkening from diffuse/specular
+- Where magnitude is high (vessel walls, tissue boundaries): `shadingStrength = 1.0`, full diffuse and specular terms apply
 
 The factor of 8.0 means the shading is fully active once the central-difference magnitude reaches 0.125 (an 12.5% intensity change across two voxels).
 
@@ -92,7 +90,7 @@ Shading is controlled at runtime by a `shadingEnabled` uniform (0.0 or 1.0) with
 finalColor = select(shadingEnabled > 0.5, shadedColor, transferFunctionColor)
 ```
 
-When disabled, the raw transfer function colour is used. The toggle is exposed in the rendering controls panel.
+When disabled, the raw transfer function colour is used. The rendering controls panel exposes the toggle, and ambient and diffuse strength sliders when shading is on.
 
 ## Coordinate Space
 
