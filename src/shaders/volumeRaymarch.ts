@@ -225,8 +225,8 @@ export function createVolumeRaymarchMaterial(
               const sample = transferFunction(intensity);
 
               // Blinn-Phong shading using pre-computed gradient texture
-              // Head-light model: L = V = -rayDir, so H = -rayDir and dot(N, H) = dot(N, L) = diffuse
-              // NOTE: Both gradient and rayDir are in the same texture/local space
+              // Fixed world-space directional light: top-front-right (1,1,1) normalized
+              // Transformed to local texture space via the inverse model matrix (same space as gradient/rayDir)
               const litColor = (() => {
                 if (!gradientTextureNode) return sample.rgb;
 
@@ -237,11 +237,17 @@ export function createVolumeRaymarchMaterial(
                 // Scale diffuse/specular contribution by gradient magnitude so flat regions only receive ambient light
                 const shadingStrength = gradientMagnitude.mul(8.0).min(1.0);
 
-                // Head-light: dot(N, L) = dot(N, -rayDir)
-                const diffuse = dot(surfaceNormal, rayDir.negate()).max(float(0.0));
+                // Transform fixed world-space light direction to local texture space
+                // (0.577, 0.577, 0.577) = normalize(1, 1, 1): top (+Y), front (+Z), right (+X)
+                const lightDir = normalize(inverseModelMatrixUniform.mul(vec4(float(0.577), float(0.577), float(0.577), float(0.0))).xyz);
+                const viewDir = rayDir.negate();
 
-                // Specular: diffuse^2 used instead of high-exponent pow() to give a broad highlight
-                const specular = diffuse.mul(diffuse);
+                // Diffuse: Lambert term
+                const diffuse = dot(surfaceNormal, lightDir).max(float(0.0));
+
+                // Specular: Blinn-Phong halfway vector
+                const halfVec = normalize(lightDir.add(viewDir));
+                const specular = dot(surfaceNormal, halfVec).max(float(0.0)).pow(float(16.0));
 
                 // Ambient applied uniformly: diffuse and specular are gated by shadingStrength
                 // so only regions with meaningful gradients (boundaries/surfaces) receive them
