@@ -1,8 +1,9 @@
 import type * as THREE from 'three';
 import type { NiftiVolume } from '../types/nifti';
 import type { LayoutMode, SliceIndices, SliceCamera, SliceCameraState, WindowLevel } from '../types/layout';
-import type { RaymarchSettings, TransferFunction, TransferFunctionPoint } from '../types/volume';
+import type { RaymarchSettings, TransferFunction, TransferFunctionPoint, TransferFunctionPointData } from '../types/volume';
 import type { CropBox, CropBoxAxis } from '../types/clipping';
+import type { SectionId } from '../utils/uiLayout';
 
 // --- Shared/Inner Types ---
 
@@ -40,17 +41,6 @@ export interface SlicePlaneSettings {
   };
 }
 
-export interface ControlPanelSections {
-  sliceNavigation: boolean;
-  playback: boolean;
-  display: boolean;
-  volumeRendering: boolean;
-  clippingPlanes: boolean;
-  transferFunction: boolean;
-  measurements: boolean;
-  ticCurves: boolean;
-}
-
 // --- Slice Interfaces ---
 
 export interface VolumeSlice {
@@ -71,21 +61,17 @@ export interface VolumeSlice {
 
 export interface LayoutSlice {
   layoutMode: LayoutMode;
-  controlPanelOpen: boolean;
-  controlPanelPinned: boolean;
-  controlPanelContentHeight: number;
-  controlPanelSections: ControlPanelSections;
   popoverOpen: boolean;
   helpModalOpen: boolean;
+  activeSections: SectionId[];
+  sidePanelPinned: boolean;
 
   setLayoutMode: (mode: LayoutMode) => void;
-  setControlPanelOpen: (open: boolean) => void;
-  setControlPanelPinned: (isPinned: boolean) => void;
-  setControlPanelContentHeight: (height: number) => void;
-  setControlPanelSectionExpanded: (sectionId: string, expanded: boolean) => void;
   setPopoverOpen: (open: boolean) => void;
   setHelpModalOpen: (open: boolean) => void;
-  toggleAllSections: (expanded: boolean) => void;
+  setActiveSections: (sections: SectionId[]) => void;
+  toggleSection: (id: SectionId) => void;
+  setSidePanelPinned: (pinned: boolean) => void;
 }
 
 export interface ViewSlice {
@@ -122,7 +108,7 @@ export interface RenderingSlice {
   setRaymarchSettings: (settings: Partial<RaymarchSettings>) => void;
   setTransferFunction: (tf: TransferFunction) => void;
   updateTransferFunctionPoint: (index: number, point: Partial<TransferFunctionPoint>) => void;
-  addTransferFunctionPoint: (point: TransferFunctionPoint) => void;
+  addTransferFunctionPoint: (point: TransferFunctionPointData) => void;
   removeTransferFunctionPoint: (index: number) => void;
   applyTransferFunctionPreset: (presetName: string) => void;
   setTransferFunctionTexture: (texture: THREE.DataTexture | null) => void;

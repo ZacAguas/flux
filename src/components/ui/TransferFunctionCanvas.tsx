@@ -61,8 +61,10 @@ export function TransferFunctionCanvas({
     if (draggedPointIndex === null || !svgRef.current) return;
 
     const svgRect = svgRef.current.getBoundingClientRect();
-    const x = e.clientX - svgRect.left;
-    const y = e.clientY - svgRect.top;
+    const scaleX = CANVAS_WIDTH / svgRect.width;
+    const scaleY = CANVAS_HEIGHT / svgRect.height;
+    const x = (e.clientX - svgRect.left) * scaleX;
+    const y = (e.clientY - svgRect.top) * scaleY;
 
     // Convert screen coordinates to data values
     let newValue = xScale.invert(x);
@@ -87,7 +89,8 @@ export function TransferFunctionCanvas({
     if (!svgRef.current) return;
 
     const svgRect = svgRef.current.getBoundingClientRect();
-    const x = e.clientX - svgRect.left;
+    const scaleX = CANVAS_WIDTH / svgRect.width;
+    const x = (e.clientX - svgRect.left) * scaleX;
 
     // Convert screen coordinates to data values
     const clickValue = Math.max(0, Math.min(1, xScale.invert(x)));
@@ -150,8 +153,9 @@ export function TransferFunctionCanvas({
     <div className="flex flex-col gap-2">
       <svg
         ref={svgRef}
-        width={CANVAS_WIDTH}
-        height={CANVAS_HEIGHT}
+        viewBox={`0 0 ${CANVAS_WIDTH} ${CANVAS_HEIGHT}`}
+        width="100%"
+        style={{ display: 'block', aspectRatio: `${CANVAS_WIDTH} / ${CANVAS_HEIGHT}` }}
         className="bg-white/5 rounded border border-white/20"
         onMouseMove={handleMouseMove}
         onMouseUp={handleMouseUp}
@@ -161,9 +165,9 @@ export function TransferFunctionCanvas({
         {/* Define linear gradient for color strip */}
         <defs>
           <LinearGradient id="transfer-function-gradient" from="#000" to="#fff">
-            {sortedPoints.map((point, i) => (
+            {sortedPoints.map((point) => (
               <stop
-                key={i}
+                key={point.id}
                 offset={`${point.value * 100}%`}
                 stopColor={`rgb(${point.color.r}, ${point.color.g}, ${point.color.b})`}
               />
@@ -187,7 +191,7 @@ export function TransferFunctionCanvas({
           const isDragging = index === draggedPointIndex;
 
           return (
-            <g key={index}>
+            <g key={point.id}>
               {/* Point circle */}
               <circle
                 cx={xScale(point.value)}

@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import { Canvas, useThree } from '@react-three/fiber';
 import * as THREE from 'three/webgpu';
-import { useLayoutDimensions } from '../../hooks/useLayoutDimensions';
 import { useVolumeSetup } from '../../hooks/useVolumeSetup';
 import { useSliceViews } from '../../hooks/useSliceViews';
 import { useCropBoxInVolume } from '../../hooks/useCropBoxInVolume';
@@ -66,7 +65,6 @@ function SceneResources() {
  * 3. Handles drag-and-drop (Canvas blocks document-level handlers)
  */
 export function PersistentLayout() {
-  const { panelHeight } = useLayoutDimensions();
   const [isDraggingFile, setIsDraggingFile] = useState(false);
 
   // Store state and actions
@@ -149,11 +147,7 @@ export function PersistentLayout() {
 
   return (
     <div
-      style={{
-        width: '100vw',
-        height: '100vh',
-        position: 'relative',
-      }}
+      style={{ width: '100%', height: '100%', position: 'relative' }}
       onDragEnter={handleDragEnter}
     >
       <Canvas
@@ -161,11 +155,10 @@ export function PersistentLayout() {
         camera={{ zoom: 100, position: [0, 0, 5] }}
         style={{
           position: 'absolute',
-          top: `${panelHeight}px`,
+          top: 0,
           left: 0,
           width: '100%',
-          height: `calc(100% - ${panelHeight}px)`,
-          transition: 'top 300ms cubic-bezier(0.4, 0, 0.2, 1), height 300ms cubic-bezier(0.4, 0, 0.2, 1)',
+          height: '100%',
         }}
         gl={async (props) => {
           // eslint-disable-next-line @typescript-eslint/no-explicit-any

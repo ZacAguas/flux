@@ -22,8 +22,6 @@ export function serializeViewerState(store: ViewerStore): SerializableViewerStat
 
     // Layout state
     layoutMode: store.layoutMode,
-    controlPanelPinned: store.controlPanelPinned,
-    controlPanelSections: { ...store.controlPanelSections },
 
     // View state
     sliceIndices: { ...store.sliceIndices },
@@ -100,12 +98,6 @@ export function deserializeViewerState(
 ): void {
   // Layout state
   store.setLayoutMode(state.layoutMode);
-  store.setControlPanelPinned(state.controlPanelPinned);
-
-  // Restore control panel sections
-  Object.entries(state.controlPanelSections).forEach(([sectionId, expanded]) => {
-    store.setControlPanelSectionExpanded(sectionId, expanded);
-  });
 
   // View state - slices
   Object.entries(state.sliceIndices).forEach(([orientation, index]) => {

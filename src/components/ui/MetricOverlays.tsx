@@ -16,7 +16,6 @@ interface MetricOverlaysProps {
   layoutMode: 'single' | 'quad' | 'slices';
   canvasWidth: number;
   canvasHeight: number;
-  panelHeight: number;
 }
 
 // Helper: Calculate physical position from voxel index

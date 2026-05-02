@@ -7,9 +7,10 @@
  * - Hook integration
  */
 
-import { useEffect } from 'react';
-import { FileMenu } from './FileMenu';
+import { useEffect, useState } from 'react';
+import type { ReactNode } from 'react';
 import { UnsavedChangesModal } from './UnsavedChangesModal';
+import { SessionActionsContext } from '../../context/SessionActionsContext';
 import { SessionPickerModal } from './SessionPickerModal';
 import { SaveSessionModal } from './SaveSessionModal';
 import { SessionErrorModal } from './SessionErrorModal';
@@ -21,8 +22,9 @@ import { useViewerStore } from '../../store/viewerStore';
 import { exportSessionToJSON } from '../../utils/sessionStorage';
 import { importSessionFromJSON } from '../../utils/sessionStorage';
 import { serializeViewerState, getCurrentVersion } from '../../utils/stateSerializer';
+import type { SessionError } from '../../types/session';
 
-export function SessionManager() {
+export function SessionManager({ children }: { children?: ReactNode }) {
   const volumeFileMetadata = useViewerStore((state) => state.volumeFileMetadata);
 
   // Modal state from store (shared with drag-and-drop)
@@ -31,6 +33,8 @@ export function SessionManager() {
   const pendingNewVolumeFileHandle = useViewerStore((state) => state.pendingNewVolumeFileHandle);
   const setShowNewVolumeUnsavedModal = useViewerStore((state) => state.setShowNewVolumeUnsavedModal);
   const setPendingNewVolumeFile = useViewerStore((state) => state.setPendingNewVolumeFile);
+
+  const [exportError, setExportError] = useState<SessionError | null>(null);
 
   // Hooks
   const newVolume = useNewVolume();
@@ -135,7 +139,11 @@ export function SessionManager() {
       const fileName = `session-${volumeFileMetadata.fileName.replace(/\.(nii|nii\.gz)$/i, '')}-${Date.now()}`;
       exportSessionToJSON(session, fileName);
     } catch (error) {
-      console.error('Failed to export session:', error);
+      setExportError({
+        type: 'serialization-error',
+        message: 'Failed to export session. Please try again.',
+        details: error instanceof Error ? error.message : String(error),
+      });
     }
   };
 
@@ -204,17 +212,18 @@ export function SessionManager() {
     loadSession.handleDontSave();
   };
 
+  const actions = {
+    onNewVolume: handleNewVolume,
+    onSaveSession: handleSaveSession,
+    onSaveSessionAs: handleSaveSessionAs,
+    onLoadSession: handleLoadSession,
+    onExportSession: handleExportSession,
+    onImportSession: handleImportSession,
+  };
+
   return (
-    <>
-      {/* File Menu */}
-      <FileMenu
-        onNewVolume={handleNewVolume}
-        onSaveSession={handleSaveSession}
-        onSaveSessionAs={handleSaveSessionAs}
-        onLoadSession={handleLoadSession}
-        onExportSession={handleExportSession}
-        onImportSession={handleImportSession}
-      />
+    <SessionActionsContext.Provider value={actions}>
+      {children}
 
       {/* Unsaved Changes Modal (New Volume - shared with drag-and-drop) */}
       <UnsavedChangesModal
@@ -258,6 +267,13 @@ export function SessionManager() {
         onForceLoad={loadSession.handleForceLoad}
       />
 
+      {/* Export Error Modal */}
+      <SessionErrorModal
+        isOpen={exportError !== null}
+        error={exportError}
+        onClose={() => setExportError(null)}
+      />
+
       {/* Permission Request Modal */}
       <PermissionRequestModal
         isOpen={loadSession.showPermissionModal}
@@ -266,6 +282,6 @@ export function SessionManager() {
         onSelectDifferentFile={loadSession.handleSelectDifferentFile}
         onCancel={loadSession.closePermissionModal}
       />
-    </>
+    </SessionActionsContext.Provider>
   );
 }

@@ -8,6 +8,7 @@ import type * as THREE from 'three';
  * Transfer function control point
  */
 export interface TransferFunctionPoint {
+  id: string;
   value: number; // Intensity value (normalized 0-1)
   color: { r: number; g: number; b: number }; // RGB (0-255)
   opacity: number; // Alpha (0-1)
@@ -22,12 +23,14 @@ export interface TransferFunction {
 }
 
 /**
- * Transfer function preset
+ * Transfer function preset (points don't carry IDs — assigned on application)
  */
+export type TransferFunctionPointData = Omit<TransferFunctionPoint, 'id'>;
+
 export interface TransferFunctionPreset {
   name: string;
   description: string;
-  points: TransferFunctionPoint[];
+  points: TransferFunctionPointData[];
 }
 
 /**

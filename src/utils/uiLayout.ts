@@ -1,0 +1,35 @@
+import { useState, useEffect } from 'react';
+
+export type Breakpoint = 'mobile' | 'tablet' | 'desktop';
+export type SectionId = 'file' | 'volume' | 'crop' | 'slices' | 'playback' | 'display' | 'transfer' | 'measure';
+
+export const RAIL_WIDTH    = 48;
+export const PANEL_WIDTH   = 272;
+export const MOBILE_BAR_H  = 60;
+export const BP_TABLET     = 680;
+export const BP_DESKTOP    = 1100;
+export const ACCENT_COLOR  = '#13ddd1';
+
+export function inject4D<T>(base: T[], insert: T, is4D: boolean, at: number): T[] {
+  if (!is4D) return base;
+  return [...base.slice(0, at), insert, ...base.slice(at)];
+}
+
+export function getBreakpoint(): Breakpoint {
+  const w = window.innerWidth;
+  if (w < BP_TABLET)  return 'mobile';
+  if (w < BP_DESKTOP) return 'tablet';
+  return 'desktop';
+}
+
+export function useBreakpoint(): Breakpoint {
+  const [bp, setBp] = useState<Breakpoint>(getBreakpoint);
+
+  useEffect(() => {
+    const update = () => setBp(getBreakpoint());
+    window.addEventListener('resize', update);
+    return () => window.removeEventListener('resize', update);
+  }, []);
+
+  return bp;
+}
