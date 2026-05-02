@@ -377,7 +377,6 @@ export function getViewportBounds(
   orientation: SliceOrientation,
   canvasWidth: number,
   canvasHeight: number,
-  panelHeight: number
 ): ViewportBounds {
   if (layoutMode === 'quad') {
     const halfWidth = canvasWidth / 2;
@@ -385,16 +384,11 @@ export function getViewportBounds(
 
     switch (orientation) {
       case 'axial':
-        return { x: 0, y: panelHeight, width: halfWidth, height: halfHeight };
+        return { x: 0, y: 0, width: halfWidth, height: halfHeight };
       case 'coronal':
-        return { x: halfWidth, y: panelHeight, width: halfWidth, height: halfHeight };
+        return { x: halfWidth, y: 0, width: halfWidth, height: halfHeight };
       case 'sagittal':
-        return {
-          x: 0,
-          y: panelHeight + halfHeight,
-          width: halfWidth,
-          height: halfHeight,
-        };
+        return { x: 0, y: halfHeight, width: halfWidth, height: halfHeight };
       default:
         throw new Error(`Invalid orientation: ${orientation}`);
     }
@@ -403,58 +397,13 @@ export function getViewportBounds(
 
     switch (orientation) {
       case 'axial':
-        return { x: 0, y: panelHeight, width: thirdWidth, height: canvasHeight };
+        return { x: 0, y: 0, width: thirdWidth, height: canvasHeight };
       case 'coronal':
-        return { x: thirdWidth, y: panelHeight, width: thirdWidth, height: canvasHeight };
+        return { x: thirdWidth, y: 0, width: thirdWidth, height: canvasHeight };
       case 'sagittal':
-        return {
-          x: thirdWidth * 2,
-          y: panelHeight,
-          width: thirdWidth,
-          height: canvasHeight,
-        };
+        return { x: thirdWidth * 2, y: 0, width: thirdWidth, height: canvasHeight };
       default:
         throw new Error(`Invalid orientation: ${orientation}`);
     }
-  }
-}
-
-/**
- * Determine which slice view was clicked based on pixel position
- */
-export function getOrientationFromPixel(
-  pixelX: number,
-  pixelY: number,
-  layoutMode: 'quad' | 'slices',
-  canvasWidth: number,
-  canvasHeight: number,
-  panelHeight: number
-): SliceOrientation | null {
-  // Adjust Y for panel height
-  const canvasY = pixelY - panelHeight;
-
-  // Check if outside canvas bounds
-  if (pixelX < 0 || pixelX >= canvasWidth || canvasY < 0 || canvasY >= canvasHeight) {
-    return null;
-  }
-
-  if (layoutMode === 'quad') {
-    const halfWidth = canvasWidth / 2;
-    const halfHeight = canvasHeight / 2;
-
-    const isLeft = pixelX < halfWidth;
-    const isTop = canvasY < halfHeight;
-
-    if (isTop && isLeft) return 'axial';
-    if (isTop && !isLeft) return 'coronal';
-    if (!isTop && isLeft) return 'sagittal';
-    // Bottom-right is volume view (3D), not a slice
-    return null;
-  } else {
-    const thirdWidth = canvasWidth / 3;
-
-    if (pixelX < thirdWidth) return 'axial';
-    if (pixelX < thirdWidth * 2) return 'coronal';
-    return 'sagittal';
   }
 }

@@ -14,7 +14,6 @@ interface TicOverlayProps {
   layoutMode: 'quad' | 'slices';
   canvasWidth: number;
   canvasHeight: number;
-  panelHeight: number;
 }
 
 interface ViewportTicRoisProps {
@@ -168,7 +167,6 @@ export function TicOverlay({
   layoutMode,
   canvasWidth,
   canvasHeight,
-  panelHeight,
 }: TicOverlayProps) {
   const volume = useViewerStore((state) => state.volume);
   const ticRois = useViewerStore((state) => state.ticRois);
@@ -186,7 +184,7 @@ export function TicOverlay({
         <ViewportTicRois
           key={orientation}
           orientation={orientation}
-          viewport={getViewportBounds(layoutMode, orientation, canvasWidth, canvasHeight, panelHeight)}
+          viewport={getViewportBounds(layoutMode, orientation, canvasWidth, canvasHeight)}
           rois={ticRois}
           currentSliceIndex={sliceIndices[orientation]}
           preview={ticDragPreview}

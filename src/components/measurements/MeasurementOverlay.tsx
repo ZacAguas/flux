@@ -17,7 +17,6 @@ interface MeasurementOverlayProps {
   layoutMode: 'quad' | 'slices';
   canvasWidth: number;
   canvasHeight: number;
-  panelHeight: number;
 }
 
 interface ViewportOverlayProps {
@@ -114,7 +113,6 @@ export function MeasurementOverlay({
   layoutMode,
   canvasWidth,
   canvasHeight,
-  panelHeight,
 }: MeasurementOverlayProps) {
   const volume = useViewerStore((state) => state.volume);
   const measurements = useViewerStore((state) => state.measurements);
@@ -127,7 +125,7 @@ export function MeasurementOverlay({
   // Calculate viewports for each orientation
   const orientations: SliceOrientation[] = ['axial', 'coronal', 'sagittal'];
   const viewports = orientations.map((orientation) =>
-    getViewportBounds(layoutMode, orientation, canvasWidth, canvasHeight, panelHeight)
+    getViewportBounds(layoutMode, orientation, canvasWidth, canvasHeight)
   );
 
   return (

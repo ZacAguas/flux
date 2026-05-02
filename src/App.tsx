@@ -7,7 +7,11 @@ import './App.css';
 import { SplashScreen } from './components/SplashScreen';
 import { PersistentLayout } from './components/layouts/PersistentLayout';
 import { LayoutContextProvider } from './context/LayoutContext';
-import { ControlPanel } from './components/ui/ControlPanel';
+import { SessionManager } from './components/ui/SessionManager';
+import { IconRail } from './components/ui/IconRail';
+import { SidePanel } from './components/ui/SidePanel';
+import { MobileBar } from './components/ui/MobileBar';
+import { MobileSheet } from './components/ui/MobileSheet';
 import { AutoSaveRestoreModal } from './components/ui/AutoSaveRestoreModal';
 import { PermissionRequestModal } from './components/ui/PermissionRequestModal';
 import { SessionErrorModal } from './components/ui/SessionErrorModal';
@@ -19,6 +23,7 @@ import { useGlobalDropHandler } from './hooks/useGlobalDropHandler';
 import { useAutoSave } from './hooks/useAutoSave';
 import { useAutoSaveRestore } from './hooks/useAutoSaveRestore';
 import { initializeSessionDB } from './utils/sessionStorage';
+import { useBreakpoint } from './utils/uiLayout';
 import { Analytics } from '@vercel/analytics/react';
 import { SpeedInsights } from '@vercel/speed-insights/react';
 
@@ -30,54 +35,83 @@ declare module '@react-three/fiber' {
 extend(THREE as any);
 
 
+function ViewerLayout() {
+  const helpModalOpen = useViewerStore((state) => state.helpModalOpen);
+  const setHelpModalOpen = useViewerStore((state) => state.setHelpModalOpen);
+  const bp = useBreakpoint();
+
+  return (
+    <>
+      {bp === 'mobile' ? (
+        <div className="relative w-screen h-screen">
+          <div className="absolute inset-0 bottom-[60px]">
+            <PersistentLayout />
+          </div>
+          <MobileSheet />
+          <MobileBar />
+        </div>
+      ) : bp === 'tablet' ? (
+        <div className="relative flex w-screen h-screen">
+          <IconRail />
+          <div className="flex-1 min-w-0">
+            <PersistentLayout />
+          </div>
+          <SidePanel overlayMode />
+        </div>
+      ) : (
+        <div className="flex w-screen h-screen">
+          <IconRail />
+          <SidePanel />
+          <div className="flex-1 min-w-0">
+            <PersistentLayout />
+          </div>
+        </div>
+      )}
+
+      <HelpModal isOpen={helpModalOpen} onClose={() => setHelpModalOpen(false)} />
+    </>
+  );
+}
+
 function App() {
   const volume = useViewerStore((state) => state.volume);
   const volumeFileMetadata = useViewerStore((state) => state.volumeFileMetadata);
   const currentSessionName = useViewerStore((state) => state.currentSessionName);
-  const helpModalOpen = useViewerStore((state) => state.helpModalOpen);
-  const setHelpModalOpen = useViewerStore((state) => state.setHelpModalOpen);
 
-  // Sync document title: prefer session name, fall back to filename
   useEffect(() => {
     const label = currentSessionName
       ?? volumeFileMetadata?.fileName?.replace(/\.nii(\.gz)?$/i, '');
     document.title = label ? `${label} — Flux` : 'Flux';
   }, [currentSessionName, volumeFileMetadata]);
 
-  // Initialize IndexedDB on mount
   useEffect(() => {
     initializeSessionDB().catch(err => {
       console.error('Failed to initialize session database:', err);
     });
   }, []);
 
-  // Enable state tracking, auto-save, and global drop handler when volume is loaded
   useStateChangeTracking();
   useBeforeUnload();
   const { isDraggingFile } = useGlobalDropHandler();
   useAutoSave();
 
-  // Auto-save restore flow
   const autoSaveRestore = useAutoSaveRestore();
 
   return (
     <>
-      {/* Vercel */}
       <Analytics />
       <SpeedInsights />
 
       {volume ? (
-        <>
-          <LayoutContextProvider>
-            <PersistentLayout />
-          </LayoutContextProvider>
-          <ControlPanel />
-        </>
+        <LayoutContextProvider>
+          <SessionManager>
+            <ViewerLayout />
+          </SessionManager>
+        </LayoutContextProvider>
       ) : (
         <SplashScreen />
       )}
 
-      {/* Auto-Save Restore Modal */}
       <AutoSaveRestoreModal
         isOpen={autoSaveRestore.showRestoreModal}
         timestamp={autoSaveRestore.autoSaveTimestamp}
@@ -87,7 +121,6 @@ function App() {
         onDismiss={autoSaveRestore.handleDismiss}
       />
 
-      {/* Permission Request Modal (for auto-save restore) */}
       <PermissionRequestModal
         isOpen={autoSaveRestore.showPermissionModal}
         fileName={autoSaveRestore.autoSaveFileName}
@@ -96,7 +129,6 @@ function App() {
         onCancel={autoSaveRestore.handleCancelPermission}
       />
 
-      {/* Session Error Modal (for auto-save restore) */}
       <SessionErrorModal
         isOpen={autoSaveRestore.showErrorModal}
         error={autoSaveRestore.error}
@@ -105,13 +137,10 @@ function App() {
         onForceLoad={autoSaveRestore.handleForceLoad}
       />
 
-      {/* Help Modal */}
-      <HelpModal isOpen={helpModalOpen} onClose={() => setHelpModalOpen(false)} />
-
-      {/* Global drag-over indicator */}
       <div
-        className={`fixed inset-0 z-[9999] pointer-events-none flex items-center justify-center transition-all duration-300 ${isDraggingFile ? 'bg-black/40 backdrop-blur-sm opacity-100' : 'opacity-0'
-          }`}
+        className={`fixed inset-0 z-[9999] pointer-events-none flex items-center justify-center transition-all duration-300 ${
+          isDraggingFile ? 'bg-black/40 backdrop-blur-sm opacity-100' : 'opacity-0'
+        }`}
       >
         <Chip
           size="lg"

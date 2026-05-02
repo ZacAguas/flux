@@ -34,14 +34,12 @@ interface SliceInteractionHandlerProps {
   layoutMode: 'quad' | 'slices';
   canvasWidth: number;
   canvasHeight: number;
-  panelHeight: number;
 }
 
 export function SliceInteractionHandler({
   layoutMode,
   canvasWidth,
   canvasHeight,
-  panelHeight,
 }: SliceInteractionHandlerProps) {
   const volume = useViewerStore((state) => state.volume);
   const sliceCameraState = useViewerStore((state) => state.sliceCameraState);
@@ -122,13 +120,7 @@ export function SliceInteractionHandler({
     const pixelX = clientX - rect.left;
     const pixelY = clientY - rect.top;
 
-    const viewport = getViewportBounds(
-      layoutMode,
-      orientation,
-      canvasWidth,
-      canvasHeight,
-      panelHeight
-    );
+    const viewport = getViewportBounds(layoutMode, orientation, canvasWidth, canvasHeight);
 
     const cameraState = sliceCameraState[orientation];
     const result = pixelToVoxelIndices(pixelX, pixelY, orientation, volume, viewport, cameraState);
@@ -152,13 +144,7 @@ export function SliceInteractionHandler({
     const pixelX = clientX - rect.left;
     const pixelY = clientY - rect.top;
 
-    const viewport = getViewportBounds(
-      layoutMode,
-      orientation,
-      canvasWidth,
-      canvasHeight,
-      panelHeight
-    );
+    const viewport = getViewportBounds(layoutMode, orientation, canvasWidth, canvasHeight);
 
     const cameraState = sliceCameraState[orientation];
     const point = pixelToVoxel({ x: pixelX, y: pixelY }, orientation, volume, viewport, cameraState);
@@ -237,7 +223,7 @@ export function SliceInteractionHandler({
           const rect = containerRef.current.getBoundingClientRect();
           const pixelX = e.clientX - rect.left;
           const pixelY = e.clientY - rect.top;
-          const viewport = getViewportBounds(layoutMode, orientation, canvasWidth, canvasHeight, panelHeight);
+          const viewport = getViewportBounds(layoutMode, orientation, canvasWidth, canvasHeight);
           const cameraState = sliceCameraState[orientation];
           const center = pixelToVoxel({ x: pixelX, y: pixelY }, orientation, volume, viewport, cameraState);
           ticDragCenterRef.current = { index1: center.index1, index2: center.index2 };
@@ -263,13 +249,7 @@ export function SliceInteractionHandler({
   const handlePanDrag = (e: React.PointerEvent<HTMLDivElement>) => {
     if (!activeOrientation || !dragStartPosition || !dragStartCameraState) return;
 
-    const viewport = getViewportBounds(
-      layoutMode,
-      activeOrientation,
-      canvasWidth,
-      canvasHeight,
-      panelHeight
-    );
+    const viewport = getViewportBounds(layoutMode, activeOrientation, canvasWidth, canvasHeight);
 
     // Calculate pixel delta
     const deltaX = e.clientX - dragStartPosition.x;
@@ -335,7 +315,7 @@ export function SliceInteractionHandler({
         const rect = containerRef.current.getBoundingClientRect();
         const pixelX = e.clientX - rect.left;
         const pixelY = e.clientY - rect.top;
-        const viewport = getViewportBounds(layoutMode, activeOrientation, canvasWidth, canvasHeight, panelHeight);
+        const viewport = getViewportBounds(layoutMode, activeOrientation, canvasWidth, canvasHeight);
         const cameraState = sliceCameraState[activeOrientation];
         const edge = pixelToVoxel({ x: pixelX, y: pixelY }, activeOrientation, volume, viewport, cameraState);
         const d1 = edge.index1 - ticDragCenterRef.current.index1;
@@ -369,7 +349,7 @@ export function SliceInteractionHandler({
       if (rect) {
         const pixelX = e.clientX - rect.left;
         const pixelY = e.clientY - rect.top;
-        const viewport = getViewportBounds(layoutMode, activeOrientation, canvasWidth, canvasHeight, panelHeight);
+        const viewport = getViewportBounds(layoutMode, activeOrientation, canvasWidth, canvasHeight);
         const cameraState = sliceCameraState[activeOrientation];
         const edge = pixelToVoxel({ x: pixelX, y: pixelY }, activeOrientation, volume, viewport, cameraState);
         const d1 = edge.index1 - ticDragCenterRef.current.index1;
@@ -422,13 +402,7 @@ export function SliceInteractionHandler({
     const pixelX = e.clientX - rect.left;
     const pixelY = e.clientY - rect.top;
 
-    const viewport = getViewportBounds(
-      layoutMode,
-      orientation,
-      canvasWidth,
-      canvasHeight,
-      panelHeight
-    );
+    const viewport = getViewportBounds(layoutMode, orientation, canvasWidth, canvasHeight);
 
     // Calculate zoom delta (exponential zoom feels more natural)
     const zoomDelta = Math.pow(1.1, -e.deltaY / 100);
@@ -501,27 +475,9 @@ export function SliceInteractionHandler({
   if (!volume) return null;
 
   // Calculate viewport positions for overlay divs
-  const axialViewport = getViewportBounds(
-    layoutMode,
-    'axial',
-    canvasWidth,
-    canvasHeight,
-    panelHeight
-  );
-  const coronalViewport = getViewportBounds(
-    layoutMode,
-    'coronal',
-    canvasWidth,
-    canvasHeight,
-    panelHeight
-  );
-  const sagittalViewport = getViewportBounds(
-    layoutMode,
-    'sagittal',
-    canvasWidth,
-    canvasHeight,
-    panelHeight
-  );
+  const axialViewport    = getViewportBounds(layoutMode, 'axial',    canvasWidth, canvasHeight);
+  const coronalViewport  = getViewportBounds(layoutMode, 'coronal',  canvasWidth, canvasHeight);
+  const sagittalViewport = getViewportBounds(layoutMode, 'sagittal', canvasWidth, canvasHeight);
 
   // Determine cursor based on current mode and modifiers
   const getCursor = (): string => {

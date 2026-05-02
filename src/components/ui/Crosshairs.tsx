@@ -15,7 +15,6 @@ interface CrosshairsProps {
   layoutMode: 'quad' | 'slices';
   canvasWidth: number;
   canvasHeight: number;
-  panelHeight: number;
 }
 
 type SliceOrientation = 'axial' | 'coronal' | 'sagittal';
@@ -27,7 +26,7 @@ interface ViewportStyle {
   height: number;
 }
 
-export function Crosshairs({ layoutMode, canvasWidth, canvasHeight, panelHeight }: CrosshairsProps) {
+export function Crosshairs({ layoutMode, canvasWidth, canvasHeight }: CrosshairsProps) {
   const volume = useViewerStore((state) => state.volume);
   const sliceIndices = useViewerStore((state) => state.sliceIndices);
   const sliceCameraState = useViewerStore((state) => state.sliceCameraState);
@@ -47,21 +46,21 @@ export function Crosshairs({ layoutMode, canvasWidth, canvasHeight, panelHeight 
       const halfHeight = canvasHeight / 2;
       switch (orientation) {
         case 'axial':
-          return { left: 0, top: panelHeight, width: halfWidth, height: halfHeight };
+          return { left: 0, top: 0, width: halfWidth, height: halfHeight };
         case 'coronal':
-          return { left: halfWidth, top: panelHeight, width: halfWidth, height: halfHeight };
+          return { left: halfWidth, top: 0, width: halfWidth, height: halfHeight };
         case 'sagittal':
-          return { left: 0, top: panelHeight + halfHeight, width: halfWidth, height: halfHeight };
+          return { left: 0, top: halfHeight, width: halfWidth, height: halfHeight };
       }
     } else {
       const thirdWidth = canvasWidth / 3;
       switch (orientation) {
         case 'axial':
-          return { left: 0, top: panelHeight, width: thirdWidth, height: canvasHeight };
+          return { left: 0, top: 0, width: thirdWidth, height: canvasHeight };
         case 'coronal':
-          return { left: thirdWidth, top: panelHeight, width: thirdWidth, height: canvasHeight };
+          return { left: thirdWidth, top: 0, width: thirdWidth, height: canvasHeight };
         case 'sagittal':
-          return { left: thirdWidth * 2, top: panelHeight, width: thirdWidth, height: canvasHeight };
+          return { left: thirdWidth * 2, top: 0, width: thirdWidth, height: canvasHeight };
       }
     }
   };
@@ -78,25 +77,25 @@ export function Crosshairs({ layoutMode, canvasWidth, canvasHeight, panelHeight 
 
       setPositions({
         axial: calculateCrosshairPositions('axial', sliceIndices, volume,
-          { x: 0, y: panelHeight, width: halfWidth, height: halfHeight }, sliceCameraState.axial),
+          { x: 0, y: 0, width: halfWidth, height: halfHeight }, sliceCameraState.axial),
         coronal: calculateCrosshairPositions('coronal', sliceIndices, volume,
-          { x: halfWidth, y: panelHeight, width: halfWidth, height: halfHeight }, sliceCameraState.coronal),
+          { x: halfWidth, y: 0, width: halfWidth, height: halfHeight }, sliceCameraState.coronal),
         sagittal: calculateCrosshairPositions('sagittal', sliceIndices, volume,
-          { x: 0, y: panelHeight + halfHeight, width: halfWidth, height: halfHeight }, sliceCameraState.sagittal),
+          { x: 0, y: halfHeight, width: halfWidth, height: halfHeight }, sliceCameraState.sagittal),
       });
     } else if (layoutMode === 'slices') {
       const thirdWidth = canvasWidth / 3;
 
       setPositions({
         axial: calculateCrosshairPositions('axial', sliceIndices, volume,
-          { x: 0, y: panelHeight, width: thirdWidth, height: canvasHeight }, sliceCameraState.axial),
+          { x: 0, y: 0, width: thirdWidth, height: canvasHeight }, sliceCameraState.axial),
         coronal: calculateCrosshairPositions('coronal', sliceIndices, volume,
-          { x: thirdWidth, y: panelHeight, width: thirdWidth, height: canvasHeight }, sliceCameraState.coronal),
+          { x: thirdWidth, y: 0, width: thirdWidth, height: canvasHeight }, sliceCameraState.coronal),
         sagittal: calculateCrosshairPositions('sagittal', sliceIndices, volume,
-          { x: thirdWidth * 2, y: panelHeight, width: thirdWidth, height: canvasHeight }, sliceCameraState.sagittal),
+          { x: thirdWidth * 2, y: 0, width: thirdWidth, height: canvasHeight }, sliceCameraState.sagittal),
       });
     }
-  }, [volume, sliceIndices, sliceCameraState, showCrosshairs, layoutMode, canvasWidth, canvasHeight, panelHeight]);
+  }, [volume, sliceIndices, sliceCameraState, showCrosshairs, layoutMode, canvasWidth, canvasHeight]);
 
   if (!showCrosshairs || !volume) return null;
 

@@ -37,8 +37,8 @@ export const createRenderingSlice: StateCreator<ViewerStore, [], [], RenderingSl
   },
   transferFunction: {
     points: [
-      { value: 0.0, color: { r: 0, g: 0, b: 0 }, opacity: 0.0 },
-      { value: 1.0, color: { r: 255, g: 255, b: 255 }, opacity: 1.0 },
+      { id: crypto.randomUUID(), value: 0.0, color: { r: 0, g: 0, b: 0 }, opacity: 0.0 },
+      { id: crypto.randomUUID(), value: 1.0, color: { r: 255, g: 255, b: 255 }, opacity: 1.0 },
     ],
     range: { min: 0, max: 1 },
   },
@@ -86,7 +86,7 @@ export const createRenderingSlice: StateCreator<ViewerStore, [], [], RenderingSl
 
   addTransferFunctionPoint: (point) =>
     set((state) => {
-      const newPoints = [...state.transferFunction.points, point].sort(
+      const newPoints = [...state.transferFunction.points, { id: crypto.randomUUID(), ...point }].sort(
         (a, b) => a.value - b.value
       );
       return {
@@ -109,7 +109,7 @@ export const createRenderingSlice: StateCreator<ViewerStore, [], [], RenderingSl
     if (preset) {
       set({
         transferFunction: {
-          points: preset.points,
+          points: preset.points.map(p => ({ id: crypto.randomUUID(), ...p })),
           range: { min: 0, max: 1 },
         },
         activeTransferFunctionPreset: presetName,

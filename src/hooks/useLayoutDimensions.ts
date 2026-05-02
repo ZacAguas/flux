@@ -1,50 +1,39 @@
 /**
  * Layout Dimensions Hook
  *
- * Manages the responsive dimensions of the layout area.
- * Handles:
- * - Window resize events
- * - Control panel state (open/pinned) to adjust available height
+ * Returns the actual pixel dimensions of the canvas area (PersistentLayout container),
+ * accounting for the icon rail, side panel, and mobile bottom bar.
  */
 
 import { useState, useEffect } from 'react';
 import { useViewerStore } from '../store/viewerStore';
+import { useBreakpoint, getBreakpoint, RAIL_WIDTH, PANEL_WIDTH, MOBILE_BAR_H } from '../utils/uiLayout';
+import type { Breakpoint } from '../utils/uiLayout';
 
-/**
- * Custom hook to get the current available dimensions for the viewer canvas.
- *
- * @returns Object containing current dimensions, panel height (layout offset), and raw panel state.
- */
+function computeDimensions(bp: Breakpoint, panelOpen: boolean) {
+  const railW  = bp === 'mobile' ? 0 : RAIL_WIDTH;
+  // On tablet the panel overlays the canvas, so doesn't reduce width
+  const panelW = bp === 'desktop' && panelOpen ? PANEL_WIDTH : 0;
+  const barH   = bp === 'mobile' ? MOBILE_BAR_H : 0;
+  return {
+    width:  window.innerWidth  - railW - panelW,
+    height: window.innerHeight - barH,
+  };
+}
+
 export function useLayoutDimensions() {
-  const controlPanelOpen = useViewerStore((state) => state.controlPanelOpen);
-  const controlPanelPinned = useViewerStore((state) => state.controlPanelPinned);
-  const controlPanelContentHeight = useViewerStore((state) => state.controlPanelContentHeight);
+  const panelOpen = useViewerStore((state) => state.activeSections.length > 0);
 
-  // panelHeight is the effective layout offset for the Canvas.
-  // It is 0 if the panel is unpinned (floating) or closed.
-  const panelHeight = controlPanelOpen && controlPanelPinned ? controlPanelContentHeight : 0;
-
-  const [dimensions, setDimensions] = useState({
-    width: window.innerWidth,
-    height: window.innerHeight - panelHeight
-  });
+  // useBreakpoint owns the bp state and the resize listener for breakpoint changes
+  const bp = useBreakpoint();
+  const [dimensions, setDimensions] = useState(() => computeDimensions(bp, panelOpen));
 
   useEffect(() => {
-    const updateDimensions = () => {
-      const height = window.innerHeight - panelHeight;
-      const width = window.innerWidth;
-      setDimensions({ width, height });
-    };
+    const update = () => setDimensions(computeDimensions(getBreakpoint(), panelOpen));
+    update(); // sync when panelOpen changes
+    window.addEventListener('resize', update);
+    return () => window.removeEventListener('resize', update);
+  }, [panelOpen]);
 
-    updateDimensions();
-    window.addEventListener('resize', updateDimensions);
-    return () => window.removeEventListener('resize', updateDimensions);
-  }, [panelHeight]);
-
-  return {
-    dimensions,
-    panelHeight,
-    controlPanelContentHeight,
-    controlPanelOpen
-  };
+  return { dimensions, bp };
 }

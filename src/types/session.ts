@@ -21,7 +21,6 @@ import type {
   VolumeCameraState,
   CrosshairSettings,
   SlicePlaneSettings,
-  ControlPanelSections,
 } from '../store/storeTypes';
 import type { Measurement } from './measurement';
 import type { TicROI } from './tic';
@@ -67,8 +66,6 @@ export interface SerializableViewerState {
 
   // Layout state
   layoutMode: LayoutMode;
-  controlPanelPinned: boolean;
-  controlPanelSections: ControlPanelSections;
 
   // View state
   sliceIndices: SliceIndices;

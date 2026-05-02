@@ -12,22 +12,19 @@ import { useMeasurementKeyboardShortcuts } from '../../hooks/useMeasurementKeybo
 interface OverlayProps {
   width: number;
   height: number;
-  panelHeight: number;
-  labelOffset: number;
 }
 
-function SingleOverlays({ width, height, panelHeight, labelOffset }: OverlayProps) {
+function SingleOverlays({ width, height }: OverlayProps) {
   return (
     <>
       <div style={{
         position: 'absolute',
-        top: `${labelOffset + 10}px`,
+        top: '10px',
         left: '10px',
         color: 'white',
         fontSize: '14px',
         fontWeight: 'bold',
         pointerEvents: 'none',
-        transition: 'top 300ms cubic-bezier(0.4, 0, 0.2, 1)',
       }}>
         3D Volume
       </div>
@@ -35,13 +32,12 @@ function SingleOverlays({ width, height, panelHeight, labelOffset }: OverlayProp
         layoutMode="single"
         canvasWidth={width}
         canvasHeight={height}
-        panelHeight={panelHeight}
       />
     </>
   );
 }
 
-function SlicesOverlays({ width, height, panelHeight, labelOffset }: OverlayProps) {
+function SlicesOverlays({ width, height }: OverlayProps) {
   // Enable keyboard shortcuts
   useSliceViewKeyboardShortcuts();
   useMeasurementKeyboardShortcuts();
@@ -52,47 +48,42 @@ function SlicesOverlays({ width, height, panelHeight, labelOffset }: OverlayProp
         layoutMode="slices"
         canvasWidth={width}
         canvasHeight={height}
-        panelHeight={panelHeight}
       />
 
       {/* Labels */}
-      <div style={{ position: 'absolute', top: `${labelOffset + 10}px`, left: '10px', color: 'white', fontSize: '14px', fontWeight: 'bold', pointerEvents: 'none', transition: 'top 300ms cubic-bezier(0.4, 0, 0.2, 1)' }}>Axial</div>
-      <div style={{ position: 'absolute', top: `${labelOffset + 10}px`, left: '33.33%', marginLeft: '10px', color: 'white', fontSize: '14px', fontWeight: 'bold', pointerEvents: 'none', transition: 'top 300ms cubic-bezier(0.4, 0, 0.2, 1)' }}>Coronal</div>
-      <div style={{ position: 'absolute', top: `${labelOffset + 10}px`, left: '66.66%', marginLeft: '10px', color: 'white', fontSize: '14px', fontWeight: 'bold', pointerEvents: 'none', transition: 'top 300ms cubic-bezier(0.4, 0, 0.2, 1)' }}>Sagittal</div>
+      <div style={{ position: 'absolute', top: '10px', left: '10px', color: 'white', fontSize: '14px', fontWeight: 'bold', pointerEvents: 'none' }}>Axial</div>
+      <div style={{ position: 'absolute', top: '10px', left: '33.33%', marginLeft: '10px', color: 'white', fontSize: '14px', fontWeight: 'bold', pointerEvents: 'none' }}>Coronal</div>
+      <div style={{ position: 'absolute', top: '10px', left: '66.66%', marginLeft: '10px', color: 'white', fontSize: '14px', fontWeight: 'bold', pointerEvents: 'none' }}>Sagittal</div>
 
       {/* Dividers */}
-      <div style={{ position: 'absolute', top: `${panelHeight}px`, bottom: 0, left: '33.33%', width: '2px', backgroundColor: '#333', pointerEvents: 'none', transition: 'top 300ms cubic-bezier(0.4, 0, 0.2, 1)' }} />
-      <div style={{ position: 'absolute', top: `${panelHeight}px`, bottom: 0, left: '66.66%', width: '2px', backgroundColor: '#333', pointerEvents: 'none', transition: 'top 300ms cubic-bezier(0.4, 0, 0.2, 1)' }} />
+      <div style={{ position: 'absolute', top: 0, bottom: 0, left: '33.33%', width: '2px', backgroundColor: '#333', pointerEvents: 'none' }} />
+      <div style={{ position: 'absolute', top: 0, bottom: 0, left: '66.66%', width: '2px', backgroundColor: '#333', pointerEvents: 'none' }} />
 
       <Crosshairs
         layoutMode="slices"
         canvasWidth={width}
         canvasHeight={height}
-        panelHeight={panelHeight}
       />
       <MeasurementOverlay
         layoutMode="slices"
         canvasWidth={width}
         canvasHeight={height}
-        panelHeight={panelHeight}
       />
       <TicOverlay
         layoutMode="slices"
         canvasWidth={width}
         canvasHeight={height}
-        panelHeight={panelHeight}
       />
       <MetricOverlays
         layoutMode="slices"
         canvasWidth={width}
         canvasHeight={height}
-        panelHeight={panelHeight}
       />
     </>
   );
 }
 
-function QuadOverlays({ width, height, panelHeight, labelOffset }: OverlayProps) {
+function QuadOverlays({ width, height }: OverlayProps) {
   const { volumeViewportRef } = useLayoutContext();
   useSliceViewKeyboardShortcuts();
   useMeasurementKeyboardShortcuts();
@@ -105,12 +96,11 @@ function QuadOverlays({ width, height, panelHeight, labelOffset }: OverlayProps)
         style={{
           position: 'absolute',
           left: '50%',
-          top: `calc(50% + ${panelHeight / 2}px)`,
+          top: '50%',
           width: '50%',
           height: '50%',
           pointerEvents: 'auto',
           zIndex: 1,
-          transition: 'top 300ms cubic-bezier(0.4, 0, 0.2, 1)',
         }}
       />
 
@@ -118,42 +108,37 @@ function QuadOverlays({ width, height, panelHeight, labelOffset }: OverlayProps)
         layoutMode="quad"
         canvasWidth={width}
         canvasHeight={height}
-        panelHeight={panelHeight}
       />
 
       {/* Labels */}
-      <div style={{ position: 'absolute', top: `${labelOffset + 10}px`, left: '10px', color: 'white', fontSize: '14px', fontWeight: 'bold', pointerEvents: 'none', transition: 'top 300ms cubic-bezier(0.4, 0, 0.2, 1)' }}>Axial</div>
-      <div style={{ position: 'absolute', top: `${labelOffset + 10}px`, right: '10px', color: 'white', fontSize: '14px', fontWeight: 'bold', pointerEvents: 'none', transition: 'top 300ms cubic-bezier(0.4, 0, 0.2, 1)' }}>Coronal</div>
-      <div style={{ position: 'absolute', top: `calc(50% + ${panelHeight / 2}px)`, left: '10px', marginTop: '10px', color: 'white', fontSize: '14px', fontWeight: 'bold', pointerEvents: 'none', transition: 'top 300ms cubic-bezier(0.4, 0, 0.2, 1)' }}>Sagittal</div>
-      <div style={{ position: 'absolute', top: `calc(50% + ${panelHeight / 2}px)`, right: '10px', marginTop: '10px', color: 'white', fontSize: '14px', fontWeight: 'bold', pointerEvents: 'none', transition: 'top 300ms cubic-bezier(0.4, 0, 0.2, 1)' }}>3D Volume</div>
+      <div style={{ position: 'absolute', top: '10px', left: '10px', color: 'white', fontSize: '14px', fontWeight: 'bold', pointerEvents: 'none' }}>Axial</div>
+      <div style={{ position: 'absolute', top: '10px', right: '10px', color: 'white', fontSize: '14px', fontWeight: 'bold', pointerEvents: 'none' }}>Coronal</div>
+      <div style={{ position: 'absolute', top: '50%', left: '10px', marginTop: '10px', color: 'white', fontSize: '14px', fontWeight: 'bold', pointerEvents: 'none' }}>Sagittal</div>
+      <div style={{ position: 'absolute', top: '50%', right: '10px', marginTop: '10px', color: 'white', fontSize: '14px', fontWeight: 'bold', pointerEvents: 'none' }}>3D Volume</div>
 
       {/* Grid Lines */}
-      <div style={{ position: 'absolute', top: `calc(50% + ${panelHeight / 2}px)`, left: 0, right: 0, height: '2px', backgroundColor: '#333', pointerEvents: 'none', transition: 'top 300ms cubic-bezier(0.4, 0, 0.2, 1)' }} />
-      <div style={{ position: 'absolute', top: `${panelHeight}px`, bottom: 0, left: '50%', width: '2px', backgroundColor: '#333', pointerEvents: 'none', transition: 'top 300ms cubic-bezier(0.4, 0, 0.2, 1)' }} />
+      <div style={{ position: 'absolute', top: '50%', left: 0, right: 0, height: '2px', backgroundColor: '#333', pointerEvents: 'none' }} />
+      <div style={{ position: 'absolute', top: 0, bottom: 0, left: '50%', width: '2px', backgroundColor: '#333', pointerEvents: 'none' }} />
 
       <Crosshairs
         layoutMode="quad"
         canvasWidth={width}
         canvasHeight={height}
-        panelHeight={panelHeight}
       />
       <MeasurementOverlay
         layoutMode="quad"
         canvasWidth={width}
         canvasHeight={height}
-        panelHeight={panelHeight}
       />
       <TicOverlay
         layoutMode="quad"
         canvasWidth={width}
         canvasHeight={height}
-        panelHeight={panelHeight}
       />
       <MetricOverlays
         layoutMode="quad"
         canvasWidth={width}
         canvasHeight={height}
-        panelHeight={panelHeight}
       />
     </>
   );
@@ -161,14 +146,11 @@ function QuadOverlays({ width, height, panelHeight, labelOffset }: OverlayProps)
 
 export function LayoutOverlays() {
   const layoutMode = useViewerStore((state) => state.layoutMode);
-  const { dimensions, panelHeight, controlPanelContentHeight, controlPanelOpen } = useLayoutDimensions();
-  const labelOffset = controlPanelOpen ? controlPanelContentHeight : 0;
+  const { dimensions } = useLayoutDimensions();
 
   const props = {
     width: dimensions.width,
     height: dimensions.height,
-    panelHeight,
-    labelOffset
   };
 
   if (layoutMode === 'single') return <SingleOverlays {...props} />;
