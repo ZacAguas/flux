@@ -8,6 +8,7 @@ import {
 import { useViewerStore } from '../../store/viewerStore';
 import { getSectionContent, getSectionLabel } from './sectionContent';
 import { PANEL_WIDTH, ACCENT_COLOR } from '../../utils/uiLayout';
+import type { SectionId } from '../../utils/uiLayout';
 
 
 interface SidePanelProps {
@@ -16,7 +17,7 @@ interface SidePanelProps {
 }
 
 export function SidePanel({ overlayMode, onBackdropClick }: SidePanelProps) {
-  const activeSections    = useViewerStore((state) => state.activeSections);
+  const activeSections = useViewerStore((state) => state.activeSections);
   const setActiveSections = useViewerStore((state) => state.setActiveSections);
   const setSidePanelPinned = useViewerStore((state) => state.setSidePanelPinned);
 
@@ -63,32 +64,32 @@ interface PanelContentsProps {
 }
 
 function PanelContents({ showPin }: PanelContentsProps) {
-  const activeSections     = useViewerStore((state) => state.activeSections);
-  const setActiveSections  = useViewerStore((state) => state.setActiveSections);
-  const sidePanelPinned    = useViewerStore((state) => state.sidePanelPinned);
+  const activeSections = useViewerStore((state) => state.activeSections);
+  const setActiveSections = useViewerStore((state) => state.setActiveSections);
+  const sidePanelPinned = useViewerStore((state) => state.sidePanelPinned);
   const setSidePanelPinned = useViewerStore((state) => state.setSidePanelPinned);
   const volume = useViewerStore((state) => state.volume);
-  const is4D   = Boolean(volume?.dimensions.t && volume.dimensions.t > 1);
+  const is4D = Boolean(volume?.dimensions.t && volume.dimensions.t > 1);
 
-  const [collapsedSections, setCollapsedSections] = useState<Set<string>>(new Set());
+  const [collapsedSections, setCollapsedSections] = useState<Set<SectionId>>(new Set());
 
   // Pointer-events based drag-to-reorder.
   // dragOverId drives the highlight; dragOverRef gives the pointerup handler a
   // synchronous read of the current value without a stale closure.
-  const [dragOverId, setDragOverId] = useState<string | null>(null);
-  const dragOverRef = useRef<string | null>(null);
-  const sectionEls  = useRef<Map<string, HTMLDivElement>>(new Map());
+  const [dragOverId, setDragOverId] = useState<SectionId | null>(null);
+  const dragOverRef = useRef<SectionId | null>(null);
+  const sectionEls = useRef<Map<SectionId, HTMLDivElement>>(new Map());
 
   const closeAll = () => {
     setActiveSections([]);
     setSidePanelPinned(false);
   };
 
-  const closeOne = (id: string) => {
+  const closeOne = (id: SectionId) => {
     setActiveSections(activeSections.filter(s => s !== id));
   };
 
-  const toggleCollapse = (id: string) => {
+  const toggleCollapse = (id: SectionId) => {
     setCollapsedSections(prev => {
       const next = new Set(prev);
       if (next.has(id)) next.delete(id); else next.add(id);
@@ -96,12 +97,12 @@ function PanelContents({ showPin }: PanelContentsProps) {
     });
   };
 
-  const setOver = (id: string | null) => {
+  const setOver = (id: SectionId | null) => {
     dragOverRef.current = id;
     setDragOverId(id);
   };
 
-  const findIdAtY = (y: number, excludeId: string): string | null => {
+  const findIdAtY = (y: number, excludeId: SectionId): SectionId | null => {
     for (const [id, el] of sectionEls.current) {
       if (id === excludeId) continue;
       const r = el.getBoundingClientRect();
@@ -120,11 +121,10 @@ function PanelContents({ showPin }: PanelContentsProps) {
             <button
               onClick={() => setSidePanelPinned(!sidePanelPinned)}
               title={sidePanelPinned ? 'Unpin' : 'Pin open'}
-              className={`!p-0 !border-0 w-6 h-6 flex items-center justify-center rounded transition-colors ${
-                sidePanelPinned
+              className={`!p-0 !border-0 w-6 h-6 flex items-center justify-center rounded transition-colors ${sidePanelPinned
                   ? 'bg-[rgba(19,221,209,0.1)]'
                   : 'text-white/30 hover:text-white/60 hover:bg-white/8'
-              }`}
+                }`}
               style={sidePanelPinned ? { color: ACCENT_COLOR } : undefined}
             >
               <MapPinIcon className="w-3.5 h-3.5" />
