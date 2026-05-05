@@ -50,7 +50,7 @@ export function MobileBar() {
 
   const activeId = activeSections[0] ?? null;
 
-  const handleSelect = (id: string) => {
+  const handleSelect = (id: SectionId) => {
     setActiveSections(activeId === id ? [] : [id]);
   };
 
