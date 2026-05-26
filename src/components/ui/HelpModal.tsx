@@ -1,7 +1,8 @@
 /**
  * Help Modal
  *
- * Tabbed reference guide covering all major features of the application.
+ * Tabbed reference guide. Uses a sidebar on desktop and a scrollable
+ * horizontal tab bar on mobile.
  */
 
 import {
@@ -19,8 +20,11 @@ import {
   ScissorsIcon,
   Squares2X2Icon,
 } from '@heroicons/react/24/outline';
-import { Button, Kbd, Modal } from '@heroui/react';
+import { Button, Kbd } from '@heroui/react';
+import { AnimatePresence, motion } from 'motion/react';
 import { useState } from 'react';
+import { AppModal, ModalHeader, ModalIcon, ModalTitle, ModalFooter } from './AppModal';
+import { useBreakpoint } from '../../utils/uiLayout';
 
 interface HelpModalProps {
   isOpen: boolean;
@@ -141,9 +145,6 @@ const TABS: Tab[] = [
         </div>
         <div className="space-y-2">
           <h4 className="text-sm font-medium text-white/90">Window / Level (Contrast)</h4>
-          <p className="text-sm text-white/70">
-            Window and Level controls adjust the contrast and brightness of slice views:
-          </p>
           <ul className="list-disc list-inside space-y-1 text-sm text-white/70">
             <li><span className="text-white/90">Window:</span> Controls the range of intensities displayed. A narrower window increases contrast.</li>
             <li><span className="text-white/90">Level:</span> Sets the center intensity value. Adjusting this shifts the displayed range up or down.</li>
@@ -177,7 +178,7 @@ const TABS: Tab[] = [
         <div className="space-y-2">
           <h4 className="text-sm font-medium text-white/90">Step Size</h4>
           <p className="text-sm text-white/70">
-            Controls how far apart samples are taken along each ray. Smaller step sizes produce more accurate results but increase rendering cost. The quality preset sets a sensible default.
+            Controls how far apart samples are taken along each ray. Smaller step sizes produce more accurate results but increase rendering cost.
           </p>
         </div>
         <div className="space-y-2">
@@ -208,7 +209,7 @@ const TABS: Tab[] = [
         <div className="space-y-2">
           <h4 className="text-sm font-medium text-white/90">Presets</h4>
           <p className="text-sm text-white/70">
-            Select from built-in presets such as CT-Bone, CT-AAA, and MRI-Default. Presets provide a good starting point for common imaging modalities.
+            Select from built-in presets such as CT-Bone, CT-AAA, and MRI-Default.
           </p>
         </div>
         <div className="space-y-2">
@@ -217,14 +218,8 @@ const TABS: Tab[] = [
             <li><span className="text-white/90">Add a point:</span> Double-click on an empty area of the editor.</li>
             <li><span className="text-white/90">Move a point:</span> Click and drag an existing control point.</li>
             <li><span className="text-white/90">Change color:</span> Click the color swatch on a control point.</li>
-            <li><span className="text-white/90">Remove a point:</span> <Kbd className="text-[10px] text-white/70 bg-white/5 backdrop-blur-sm rounded-md px-2 py-1"><Kbd.Abbr keyValue="alt" /></Kbd> + click a control point (minimum 2 points required).</li>
+            <li><span className="text-white/90">Remove a point:</span> <Kbd className="text-[10px] text-white/70 bg-white/5 backdrop-blur-sm rounded-md px-2 py-1"><Kbd.Abbr keyValue="alt" /></Kbd> + click (minimum 2 points required).</li>
           </ul>
-        </div>
-        <div className="space-y-2">
-          <h4 className="text-sm font-medium text-white/90">Opacity Curve</h4>
-          <p className="text-sm text-white/70">
-            The vertical position of a control point sets its opacity (0 = fully transparent, 1 = fully opaque). The horizontal position corresponds to the normalized intensity value.
-          </p>
         </div>
       </div>
     ),
@@ -242,25 +237,19 @@ const TABS: Tab[] = [
         <div className="space-y-2">
           <h4 className="text-sm font-medium text-white/90">Enabling a Plane</h4>
           <p className="text-sm text-white/70">
-            Toggle the checkbox next to the X, Y, or Z axis to enable that clipping plane. Once enabled, use the position slider to move the cut through the volume.
+            Toggle the checkbox next to the X, Y, or Z axis. Once enabled, use the position slider to move the cut.
           </p>
         </div>
         <div className="space-y-2">
           <h4 className="text-sm font-medium text-white/90">Invert</h4>
           <p className="text-sm text-white/70">
-            The Invert toggle flips which side of the plane is clipped. Use this to switch between removing the front half or the back half of the volume.
+            Flips which side of the plane is clipped.
           </p>
         </div>
         <div className="space-y-2">
           <h4 className="text-sm font-medium text-white/90">Gizmos</h4>
           <p className="text-sm text-white/70">
-            Enable gizmos to display interactive handles in the 3D view, letting you drag clipping planes directly with the mouse.
-          </p>
-        </div>
-        <div className="space-y-2">
-          <h4 className="text-sm font-medium text-white/90">Reset</h4>
-          <p className="text-sm text-white/70">
-            The Reset button disables all clipping planes and resets their positions to the center of the volume.
+            Enable gizmos to display interactive handles in the 3D view.
           </p>
         </div>
       </div>
@@ -274,26 +263,25 @@ const TABS: Tab[] = [
       <div className="space-y-4">
         <h3 className="text-base font-semibold text-white">Measurements</h3>
         <p className="text-sm text-white/70">
-          The Measurements section lets you place distance and angle markers directly on slice views.
+          Place distance and angle markers directly on slice views.
         </p>
         <div className="space-y-2">
           <h4 className="text-sm font-medium text-white/90">Distance Tool</h4>
           <p className="text-sm text-white/70">
-            Press <Kbd className="text-[10px] text-white/70 bg-white/5 backdrop-blur-sm rounded-md px-2 py-1"><Kbd.Content>D</Kbd.Content></Kbd> or click the Distance button. Click two points on a slice to place the measurement. The result is shown in millimetres.
+            Press <Kbd className="text-[10px] text-white/70 bg-white/5 backdrop-blur-sm rounded-md px-2 py-1"><Kbd.Content>D</Kbd.Content></Kbd> or click Distance. Click two points to measure in millimetres.
           </p>
         </div>
         <div className="space-y-2">
           <h4 className="text-sm font-medium text-white/90">Angle Tool</h4>
           <p className="text-sm text-white/70">
-            Press <Kbd className="text-[10px] text-white/70 bg-white/5 backdrop-blur-sm rounded-md px-2 py-1"><Kbd.Content>A</Kbd.Content></Kbd> or click the Angle button. Click three points to define the angle vertex and two arms. The result is shown in degrees.
+            Press <Kbd className="text-[10px] text-white/70 bg-white/5 backdrop-blur-sm rounded-md px-2 py-1"><Kbd.Content>A</Kbd.Content></Kbd> or click Angle. Click three points to measure degrees.
           </p>
         </div>
         <div className="space-y-2">
           <h4 className="text-sm font-medium text-white/90">Managing Measurements</h4>
           <ul className="list-disc list-inside space-y-1 text-sm text-white/70">
-            <li>Press <Kbd className="text-[10px] text-white/70 bg-white/5 backdrop-blur-sm rounded-md px-2 py-1"><Kbd.Content>Esc</Kbd.Content></Kbd> to cancel an in-progress measurement.</li>
-            <li>Select a measurement and press <Kbd className="text-[10px] text-white/70 bg-white/5 backdrop-blur-sm rounded-md px-2 py-1"><Kbd.Content>Delete</Kbd.Content></Kbd> to remove it.</li>
-            <li>All measurements are saved with the session.</li>
+            <li>Press <Kbd className="text-[10px] text-white/70 bg-white/5 backdrop-blur-sm rounded-md px-2 py-1"><Kbd.Content>Esc</Kbd.Content></Kbd> to cancel in-progress.</li>
+            <li>Select and press <Kbd className="text-[10px] text-white/70 bg-white/5 backdrop-blur-sm rounded-md px-2 py-1"><Kbd.Content>Delete</Kbd.Content></Kbd> to remove.</li>
           </ul>
         </div>
       </div>
@@ -307,39 +295,22 @@ const TABS: Tab[] = [
       <div className="space-y-4">
         <h3 className="text-base font-semibold text-white">Time Intensity Curves (4D)</h3>
         <p className="text-sm text-white/70">
-          Time Intensity Curves plot the mean voxel intensity inside a circular region of interest (ROI) across every time step in a 4D volume. This is a standard tool in dynamic contrast-enhanced (DCE) imaging for characterising how signal changes over time at a specific anatomical location.
-        </p>
-        <p className="text-sm text-white/70">
-          The Time Intensity Curves section is only available when a 4D volume is loaded.
+          Plots mean voxel intensity inside a circular ROI across every time step.
+          Available only when a 4D volume is loaded.
         </p>
         <div className="space-y-2">
           <h4 className="text-sm font-medium text-white/90">Placing a ROI</h4>
           <ol className="list-decimal list-inside space-y-1 text-sm text-white/70">
-            <li>Open the Time Intensity Curves section in the control panel.</li>
-            <li>Click <span className="text-white/90">Place ROI</span> to activate the tool.</li>
-            <li>Click and drag on any slice view to draw a circular ROI. The circle preview updates in real time as you drag.</li>
-            <li>Release to confirm. The curve appears in the chart immediately.</li>
+            <li>Open the Time Intensity Curves section and click Place ROI.</li>
+            <li>Click and drag on any slice view to draw a circular ROI.</li>
+            <li>Release to confirm — the curve appears immediately.</li>
           </ol>
         </div>
         <div className="space-y-2">
-          <h4 className="text-sm font-medium text-white/90">Multiple ROIs</h4>
-          <p className="text-sm text-white/70">
-            The tool stays active after each placement. Drag again to add another ROI. Each ROI is assigned a distinct color and labelled sequentially. All curves are overlaid on the same chart for comparison.
-          </p>
-        </div>
-        <div className="space-y-2">
-          <h4 className="text-sm font-medium text-white/90">Chart</h4>
+          <h4 className="text-sm font-medium text-white/90">Chart axes</h4>
           <ul className="list-disc list-inside space-y-1 text-sm text-white/70">
-            <li><span className="text-white/90">X axis:</span> Time in seconds if the volume includes a repetition time (TR), otherwise the 0-based time step index.</li>
-            <li><span className="text-white/90">Y axis:</span> Raw mean voxel intensity inside the ROI (arbitrary units for MRI).</li>
-          </ul>
-        </div>
-        <div className="space-y-2">
-          <h4 className="text-sm font-medium text-white/90">Managing ROIs</h4>
-          <ul className="list-disc list-inside space-y-1 text-sm text-white/70">
-            <li>Click <span className="text-white/90">X</span> next to a ROI in the list to delete it.</li>
-            <li>Click <span className="text-white/90">Clear All</span> to remove all ROIs at once.</li>
-            <li>ROIs are saved with the session and restored automatically on next load.</li>
+            <li><span className="text-white/90">X:</span> Time in seconds (or step index if TR is absent).</li>
+            <li><span className="text-white/90">Y:</span> Raw mean voxel intensity inside the ROI.</li>
           </ul>
         </div>
       </div>
@@ -353,15 +324,15 @@ const TABS: Tab[] = [
       <div className="space-y-4">
         <h3 className="text-base font-semibold text-white">Playback (4D)</h3>
         <p className="text-sm text-white/70">
-          The Playback section appears automatically when a 4D NIfTI file is loaded (such as dynamic MRIs/fMRIs).
+          Appears automatically when a 4D NIfTI file is loaded.
         </p>
         <div className="space-y-2">
           <h4 className="text-sm font-medium text-white/90">Controls</h4>
           <ul className="list-disc list-inside space-y-1 text-sm text-white/70">
             <li><span className="text-white/90">Play / Pause:</span> Start or stop automatic time step progression.</li>
-            <li><span className="text-white/90">Loop:</span> Toggle looping so playback restarts from the first frame after the last.</li>
+            <li><span className="text-white/90">Loop:</span> Restart from the first frame after the last.</li>
             <li><span className="text-white/90">FPS:</span> Set the playback speed in frames per second.</li>
-            <li><span className="text-white/90">Time Slider:</span> Scrub to any specific time step manually.</li>
+            <li><span className="text-white/90">Time Slider:</span> Scrub to any specific time step.</li>
           </ul>
         </div>
       </div>
@@ -375,31 +346,25 @@ const TABS: Tab[] = [
       <div className="space-y-4">
         <h3 className="text-base font-semibold text-white">Sessions</h3>
         <p className="text-sm text-white/70">
-          Sessions let you save and restore the complete viewer state: loaded volume, camera position, transfer function, clipping planes, measurements, and display settings.
+          Save and restore the complete viewer state: volume, camera, transfer function, clipping planes, measurements, and display settings.
         </p>
         <div className="space-y-2">
           <h4 className="text-sm font-medium text-white/90">Saving</h4>
           <ul className="list-disc list-inside space-y-1 text-sm text-white/70">
-            <li><span className="text-white/90">Save</span> (<Kbd className="text-[10px] text-white/70 bg-white/5 backdrop-blur-sm rounded-md px-2 py-1"><Kbd.Abbr keyValue="command" /><Kbd.Content>S</Kbd.Content></Kbd>): Overwrite the current session, or prompt for a name if this is the first save.</li>
-            <li><span className="text-white/90">Save As</span> (<Kbd className="text-[10px] text-white/70 bg-white/5 backdrop-blur-sm rounded-md px-2 py-1"><Kbd.Abbr keyValue="shift" /><Kbd.Abbr keyValue="command" /><Kbd.Content>S</Kbd.Content></Kbd>): Save to a new session with a custom name.</li>
-          </ul>
-        </div>
-        <div className="space-y-2">
-          <h4 className="text-sm font-medium text-white/90">Loading</h4>
-          <ul className="list-disc list-inside space-y-1 text-sm text-white/70">
-            <li><span className="text-white/90">Load</span> (<Kbd className="text-[10px] text-white/70 bg-white/5 backdrop-blur-sm rounded-md px-2 py-1"><Kbd.Abbr keyValue="command" /><Kbd.Content>O</Kbd.Content></Kbd>): Browse and restore a previously saved session locally.</li>
+            <li><span className="text-white/90">Save</span> (<Kbd className="text-[10px] text-white/70 bg-white/5 backdrop-blur-sm rounded-md px-2 py-1"><Kbd.Abbr keyValue="command" /><Kbd.Content>S</Kbd.Content></Kbd>): Overwrite or name on first save.</li>
+            <li><span className="text-white/90">Save As</span> (<Kbd className="text-[10px] text-white/70 bg-white/5 backdrop-blur-sm rounded-md px-2 py-1"><Kbd.Abbr keyValue="shift" /><Kbd.Abbr keyValue="command" /><Kbd.Content>S</Kbd.Content></Kbd>): Save to a new named session.</li>
           </ul>
         </div>
         <div className="space-y-2">
           <h4 className="text-sm font-medium text-white/90">Import / Export</h4>
           <p className="text-sm text-white/70">
-            Export a session to a portable <code className="bg-white/10 px-1 rounded text-xs">.flux</code> file that can be shared or backed up. Import a <code className="bg-white/10 px-1 rounded text-xs">.flux</code> file to restore a session on any machine.
+            Export to a portable <code className="bg-white/10 px-1 rounded text-xs">.flux</code> file. Import to restore on any machine.
           </p>
         </div>
         <div className="space-y-2">
           <h4 className="text-sm font-medium text-white/90">Auto-Save</h4>
           <p className="text-sm text-white/70">
-            Flux automatically saves your state periodically. If the page is closed unexpectedly, you will be offered the option to restore the last auto-saved state on next launch.
+            Flux auto-saves periodically. If closed unexpectedly, you will be offered a restore prompt on next launch.
           </p>
         </div>
       </div>
@@ -446,60 +411,134 @@ const TABS: Tab[] = [
 
 export function HelpModal({ isOpen, onClose }: HelpModalProps) {
   const [activeTabId, setActiveTabId] = useState(TABS[0].id);
+  const [prevTabId, setPrevTabId] = useState(TABS[0].id);
+  const bp = useBreakpoint();
+  const isMobile = bp === 'mobile';
 
   const activeTab = TABS.find((t) => t.id === activeTabId) ?? TABS[0];
+  const activeIdx = TABS.findIndex((t) => t.id === activeTabId);
+  const prevIdx = TABS.findIndex((t) => t.id === prevTabId);
+  const direction = activeIdx >= prevIdx ? 1 : -1;
+
+  const switchTab = (id: string) => {
+    setPrevTabId(activeTabId);
+    setActiveTabId(id);
+  };
 
   return (
-    <Modal isOpen={isOpen} onOpenChange={(open: boolean) => !open && onClose()}>
-      <Modal.Backdrop variant="blur" isDismissable>
-        <Modal.Container>
-          <Modal.Dialog className="max-w-3xl bg-neutral-900 border border-white/20 flex flex-col" style={{ height: '80vh' }}>
-            <Modal.Header className="px-6 py-4 border-b border-white/10 bg-transparent !flex-row !items-center gap-3 shrink-0">
-              <Modal.Icon className="bg-white/10 text-white/70">
-                <QuestionMarkCircleIcon className="size-5" />
-              </Modal.Icon>
-              <Modal.Heading className="text-white">Help</Modal.Heading>
-            </Modal.Header>
+    <AppModal
+      isOpen={isOpen}
+      onClose={onClose}
+      maxWidth="max-w-3xl"
+      heightClass={isMobile ? undefined : 'h-[80vh]'}
+      showClose
+    >
+      <ModalHeader>
+        <ModalIcon className="bg-white/10 text-white/70">
+          <QuestionMarkCircleIcon className="size-4" />
+        </ModalIcon>
+        <ModalTitle>Help</ModalTitle>
+      </ModalHeader>
 
-            <Modal.Body className="px-0 py-0 bg-transparent flex-1 min-h-0">
-              <div className="flex h-full">
-                {/* Sidebar */}
-                <nav className="w-48 shrink-0 border-r border-white/10 py-2 overflow-y-auto">
-                  {TABS.map((tab) => (
-                    <button
-                      key={tab.id}
-                      onClick={() => setActiveTabId(tab.id)}
-                      className={`w-full flex items-center gap-2.5 px-4 py-2 text-left text-xs transition-colors ${activeTabId === tab.id
-                        ? 'bg-white/10 text-white'
-                        : 'text-white/50 hover:text-white/80 hover:bg-white/5'
-                        }`}
-                    >
-                      <span className="shrink-0">{tab.icon}</span>
-                      <span>{tab.label}</span>
-                    </button>
-                  ))}
-                </nav>
+      {/* Body — sidebar layout on desktop, stacked on mobile */}
+      <div className="flex flex-1 min-h-0 overflow-hidden">
+        {isMobile ? (
+          /* Mobile: horizontal scrolling tab strip */
+          <div className="flex flex-col min-h-0 w-full">
+            <div
+              className="flex overflow-x-auto border-b border-white/10 shrink-0"
+              style={{ scrollbarWidth: 'none' }}
+            >
+              {TABS.map((tab) => (
+                <button
+                  key={tab.id}
+                  onClick={() => switchTab(tab.id)}
+                  className={`flex-shrink-0 flex items-center gap-1.5 px-4 py-3 text-xs whitespace-nowrap border-b-2 transition-colors ${
+                    activeTabId === tab.id
+                      ? 'border-[#13ddd1] text-white'
+                      : 'border-transparent text-white/45 hover:text-white/70'
+                  }`}
+                >
+                  <span className="shrink-0">{tab.icon}</span>
+                  <span>{tab.label}</span>
+                </button>
+              ))}
+            </div>
 
-                {/* Content */}
-                <div className="flex-1 overflow-y-auto px-6 py-5">
+            <div className="flex-1 overflow-hidden relative">
+              <AnimatePresence mode="wait" custom={direction}>
+                <motion.div
+                  key={activeTabId}
+                  custom={direction}
+                  variants={{
+                    enter: (d: number) => ({ x: d * 32, opacity: 0 }),
+                    center: { x: 0, opacity: 1 },
+                    exit: (d: number) => ({ x: d * -24, opacity: 0 }),
+                  }}
+                  initial="enter"
+                  animate="center"
+                  exit="exit"
+                  transition={{ type: 'spring', stiffness: 480, damping: 42 }}
+                  className="absolute inset-0 overflow-y-auto px-5 py-5"
+                  style={{ scrollbarWidth: 'thin' }}
+                >
                   {activeTab.content}
-                </div>
-              </div>
-            </Modal.Body>
+                </motion.div>
+              </AnimatePresence>
+            </div>
+          </div>
+        ) : (
+          /* Desktop: sidebar + content */
+          <>
+            <nav className="w-48 shrink-0 border-r border-white/10 py-2 overflow-y-auto" style={{ scrollbarWidth: 'thin' }}>
+              {TABS.map((tab) => (
+                <motion.button
+                  key={tab.id}
+                  onClick={() => switchTab(tab.id)}
+                  className={`w-full flex items-center gap-2.5 px-4 py-2 text-left text-xs transition-colors ${
+                    activeTabId === tab.id
+                      ? 'bg-white/10 text-white'
+                      : 'text-white/50 hover:text-white/80 hover:bg-white/5'
+                  }`}
+                  whileTap={{ scale: 0.97 }}
+                >
+                  <span className="shrink-0">{tab.icon}</span>
+                  <span>{tab.label}</span>
+                </motion.button>
+              ))}
+            </nav>
 
-            <Modal.Footer className="px-6 py-4 flex justify-end border-t border-white/10 bg-transparent shrink-0">
-              <Button
-                size="sm"
-                variant="secondary"
-                onPress={onClose}
-                className="!bg-white/10 !border-white/20 !text-white text-xs"
-              >
-                Close
-              </Button>
-            </Modal.Footer>
-          </Modal.Dialog>
-        </Modal.Container>
-      </Modal.Backdrop>
-    </Modal>
+            <div className="flex-1 overflow-hidden relative">
+              <AnimatePresence mode="wait" custom={direction}>
+                <motion.div
+                  key={activeTabId}
+                  custom={direction}
+                  variants={{
+                    enter: (d: number) => ({ y: d * 12, opacity: 0 }),
+                    center: { y: 0, opacity: 1 },
+                    exit: (d: number) => ({ y: d * -8, opacity: 0 }),
+                  }}
+                  initial="enter"
+                  animate="center"
+                  exit="exit"
+                  transition={{ type: 'spring', stiffness: 500, damping: 38 }}
+                  className="absolute inset-0 overflow-y-auto px-6 py-5"
+                  style={{ scrollbarWidth: 'thin' }}
+                >
+                  {activeTab.content}
+                </motion.div>
+              </AnimatePresence>
+            </div>
+          </>
+        )}
+      </div>
+
+      <ModalFooter>
+        <Button size="sm" variant="secondary" onPress={onClose}
+          className="!bg-white/10 !border-white/20 !text-white text-xs">
+          Close
+        </Button>
+      </ModalFooter>
+    </AppModal>
   );
 }

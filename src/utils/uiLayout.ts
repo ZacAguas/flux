@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import type { NiftiVolume } from '../types/nifti';
 
 export type Breakpoint = 'mobile' | 'tablet' | 'desktop';
 export type SectionId = 'file' | 'volume' | 'crop' | 'slices' | 'playback' | 'display' | 'transfer' | 'measure';
@@ -22,13 +23,21 @@ export function getBreakpoint(): Breakpoint {
   return 'desktop';
 }
 
+export function selectIs4D(state: { volume: NiftiVolume | null }): boolean {
+  return Boolean(state.volume?.dimensions.t && state.volume.dimensions.t > 1);
+}
+
 export function useBreakpoint(): Breakpoint {
   const [bp, setBp] = useState<Breakpoint>(getBreakpoint);
 
   useEffect(() => {
-    const update = () => setBp(getBreakpoint());
+    let id: ReturnType<typeof setTimeout>;
+    const update = () => {
+      clearTimeout(id);
+      id = setTimeout(() => setBp(getBreakpoint()), 80);
+    };
     window.addEventListener('resize', update);
-    return () => window.removeEventListener('resize', update);
+    return () => { window.removeEventListener('resize', update); clearTimeout(id); };
   }, []);
 
   return bp;

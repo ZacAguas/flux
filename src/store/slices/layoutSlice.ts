@@ -8,7 +8,6 @@ const RAIL_ORDER: readonly SectionId[] = ['file', 'volume', 'crop', 'slices', 'p
 export const createLayoutSlice: StateCreator<ViewerStore, [], [], LayoutSlice> = (set, get) => ({
   layoutMode: 'single',
   activeSections: ['slices'],
-  sidePanelPinned: false,
   popoverOpen: false,
   helpModalOpen: false,
 
@@ -31,5 +30,4 @@ export const createLayoutSlice: StateCreator<ViewerStore, [], [], LayoutSlice> =
     }
   },
 
-  setSidePanelPinned: (pinned) => set({ sidePanelPinned: pinned }),
 });

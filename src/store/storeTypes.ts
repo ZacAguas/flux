@@ -64,14 +64,12 @@ export interface LayoutSlice {
   popoverOpen: boolean;
   helpModalOpen: boolean;
   activeSections: SectionId[];
-  sidePanelPinned: boolean;
 
   setLayoutMode: (mode: LayoutMode) => void;
   setPopoverOpen: (open: boolean) => void;
   setHelpModalOpen: (open: boolean) => void;
   setActiveSections: (sections: SectionId[]) => void;
   toggleSection: (id: SectionId) => void;
-  setSidePanelPinned: (pinned: boolean) => void;
 }
 
 export interface ViewSlice {
