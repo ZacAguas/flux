@@ -10,6 +10,7 @@ export const MOBILE_BAR_H  = 60;
 export const BP_TABLET     = 680;
 export const BP_DESKTOP    = 1100;
 export const ACCENT_COLOR  = '#13ddd1';
+export const springWidth   = { type: 'spring' as const, stiffness: 420, damping: 38, mass: 0.7 };
 
 export function inject4D<T>(base: T[], insert: T, is4D: boolean, at: number): T[] {
   if (!is4D) return base;

@@ -25,7 +25,7 @@ import { useGlobalDropHandler } from './hooks/useGlobalDropHandler';
 import { useAutoSave } from './hooks/useAutoSave';
 import { useAutoSaveRestore } from './hooks/useAutoSaveRestore';
 import { initializeSessionDB } from './utils/sessionStorage';
-import { useBreakpoint } from './utils/uiLayout';
+import { useBreakpoint, PANEL_WIDTH, springWidth } from './utils/uiLayout';
 import { Analytics } from '@vercel/analytics/react';
 import { SpeedInsights } from '@vercel/speed-insights/react';
 
@@ -39,6 +39,8 @@ extend(THREE as any);
 
 function ViewerLayout() {
   const bp = useBreakpoint();
+  const activeSections = useViewerStore((state) => state.activeSections);
+  const isSidePanelOpen = activeSections.length > 0;
 
   const [radialMenu, setRadialMenu] = useState<{ x: number; y: number } | null>(null);
 
@@ -106,9 +108,15 @@ function ViewerLayout() {
       ) : (
         <div className="flex w-screen h-screen">
           <IconRail />
-          <SidePanel />
-          <div className="flex-1 min-w-0">
-            <PersistentLayout />
+          <div className="relative flex-1 min-w-0">
+            <SidePanel />
+            <motion.div
+              className="absolute inset-0"
+              animate={{ left: isSidePanelOpen ? PANEL_WIDTH : 0 }}
+              transition={springWidth}
+            >
+              <PersistentLayout />
+            </motion.div>
           </div>
         </div>
       )}
