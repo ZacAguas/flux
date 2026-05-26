@@ -7,15 +7,13 @@ import {
 } from '@heroicons/react/24/outline';
 import { useViewerStore } from '../../store/viewerStore';
 import { getSectionContent, getSectionLabel } from './sectionContent';
-import { PANEL_WIDTH, ACCENT_COLOR, selectIs4D } from '../../utils/uiLayout';
+import { PANEL_WIDTH, ACCENT_COLOR, selectIs4D, springWidth } from '../../utils/uiLayout';
 import type { SectionId } from '../../utils/uiLayout';
 
 
 interface SidePanelProps {
   overlayMode?: boolean;
 }
-
-const springWidth = { type: 'spring' as const, stiffness: 420, damping: 38, mass: 0.7 };
 
 export function SidePanel({ overlayMode }: SidePanelProps) {
   const activeSections = useViewerStore((state) => state.activeSections);
@@ -58,7 +56,7 @@ export function SidePanel({ overlayMode }: SidePanelProps) {
 
   return (
     <motion.div
-      className="flex-shrink-0 bg-black/20 border-r border-white/8 flex flex-col overflow-hidden"
+      className="absolute inset-y-0 left-0 bg-black/20 border-r border-white/8 flex flex-col overflow-hidden z-10"
       animate={{ width: isOpen ? PANEL_WIDTH : 0 }}
       transition={springWidth}
     >

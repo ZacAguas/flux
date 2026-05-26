@@ -153,6 +153,10 @@ export function PersistentLayout() {
       <Canvas
         orthographic
         camera={{ zoom: 100, position: [0, 0, 5] }}
+        // NOTE: debounce:0 makes react-use-measure use the immediate (non-debounced) ResizeObserver
+        // callback, so R3F updates size every frame during panel open/close animations instead of
+        // 50ms after the last resize event (which causes a visible jolt in the 3D content).
+        resize={{ debounce: 0 }}
         style={{
           position: 'absolute',
           top: 0,
