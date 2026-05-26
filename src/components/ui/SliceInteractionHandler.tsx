@@ -28,7 +28,7 @@ import type { TicROI } from '../../types/tic';
 const DISTANCE_CURSOR = 'url("/icons/distance-cursor.svg") 12 12, crosshair';
 const ANGLE_CURSOR = 'url("/icons/angle-cursor.svg") 12 6, crosshair';
 
-type InteractionMode = 'crosshair' | 'pan' | 'windowLevel' | 'measurement' | 'tic';
+type InteractionMode = 'crosshair' | 'pan' | 'windowLevelPending' | 'windowLevel' | 'measurement' | 'tic';
 
 interface SliceInteractionHandlerProps {
   layoutMode: 'quad' | 'slices';
@@ -208,13 +208,12 @@ export function SliceInteractionHandler({
         zoom: cameraState.zoom,
       });
     } else if (e.button === 2) {
-      // Right button = window/level
-      mode = 'windowLevel';
+      // Right button = window/level, but only if the user actually drags
+      mode = 'windowLevelPending';
       setDragStartWindowLevel({
         center: windowLevel.center,
         width: windowLevel.width,
       });
-      e.preventDefault(); // Prevent context menu
     } else if (e.button === 0) {
       // Left button - check if TIC or measurement tool is active
       if (ticToolActive) {
@@ -308,6 +307,16 @@ export function SliceInteractionHandler({
       updateSliceIndicesFromPointer(e.clientX, e.clientY, activeOrientation);
     } else if (interactionMode === 'pan') {
       handlePanDrag(e);
+    } else if (interactionMode === 'windowLevelPending') {
+      // Commit to window/level only once the drag threshold is exceeded
+      if (dragStartPosition) {
+        const dx = e.clientX - dragStartPosition.x;
+        const dy = e.clientY - dragStartPosition.y;
+        if (dx * dx + dy * dy > 16) {
+          setInteractionMode('windowLevel');
+          handleWindowLevelDrag(e);
+        }
+      }
     } else if (interactionMode === 'windowLevel') {
       handleWindowLevelDrag(e);
     } else if (interactionMode === 'tic') {
@@ -483,7 +492,7 @@ export function SliceInteractionHandler({
   const getCursor = (): string => {
     if (isDragging) {
       if (interactionMode === 'pan') return 'grabbing';
-      if (interactionMode === 'windowLevel') return 'ns-resize';
+      if (interactionMode === 'windowLevel' || interactionMode === 'windowLevelPending') return 'ns-resize';
       if (interactionMode === 'tic') return 'crosshair';
       if (interactionMode === 'measurement') {
         if (activeTool === 'distance') return DISTANCE_CURSOR;
