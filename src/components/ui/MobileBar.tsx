@@ -3,6 +3,7 @@ import { useViewerStore } from '../../store/viewerStore';
 import { inject4D, ACCENT_COLOR, selectIs4D } from '../../utils/uiLayout';
 import type { SectionId } from '../../utils/uiLayout';
 import { NAV_SECTIONS, NAV_SECTION_4D, NAV_LAYOUTS } from '../../utils/navConstants';
+import { SunIcon, MoonIcon } from '@heroicons/react/24/outline';
 
 export function MobileBar() {
   const activeSections    = useViewerStore((state) => state.activeSections);
@@ -10,6 +11,11 @@ export function MobileBar() {
   const layoutMode        = useViewerStore((state) => state.layoutMode);
   const setLayoutMode     = useViewerStore((state) => state.setLayoutMode);
   const is4D              = useViewerStore(selectIs4D);
+  const theme             = useViewerStore((state) => state.theme);
+  const toggleTheme       = useViewerStore((state) => state.toggleTheme);
+  const isDark = theme === 'dark';
+  const fg40 = isDark ? 'rgba(255,255,255,0.4)' : 'rgba(0,0,0,0.4)';
+  const fg30 = isDark ? 'rgba(255,255,255,0.3)' : 'rgba(0,0,0,0.3)';
 
   const tabs = inject4D(NAV_SECTIONS, NAV_SECTION_4D, is4D, 4);
 
@@ -21,7 +27,7 @@ export function MobileBar() {
 
   return (
     <div
-      className="absolute bottom-0 left-0 right-0 h-[60px] bg-black/90 backdrop-blur-[14px] border-t border-white/8 flex z-30 overflow-x-auto"
+      className="absolute bottom-0 left-0 right-0 h-[60px] bg-white/95 dark:bg-black/90 backdrop-blur-[14px] border-t border-black/8 dark:border-white/8 flex z-30 overflow-x-auto"
       style={{ scrollbarWidth: 'none' }}
     >
       {NAV_LAYOUTS.map(({ id, icon: Icon, label }) => {
@@ -42,14 +48,14 @@ export function MobileBar() {
               />
             )}
             <motion.div
-              animate={{ color: isActive ? ACCENT_COLOR : 'rgba(255,255,255,0.4)', scale: isActive ? 1 : 0.95 }}
+              animate={{ color: isActive ? ACCENT_COLOR : fg40, scale: isActive ? 1 : 0.95 }}
               transition={{ type: 'spring', stiffness: 400, damping: 30 }}
             >
               <Icon className="w-5 h-5" />
             </motion.div>
             <motion.span
               className="text-[9px] font-semibold uppercase tracking-wider"
-              animate={{ color: isActive ? ACCENT_COLOR : 'rgba(255,255,255,0.3)' }}
+              animate={{ color: isActive ? ACCENT_COLOR : fg30 }}
             >
               {label}
             </motion.span>
@@ -57,7 +63,7 @@ export function MobileBar() {
         );
       })}
 
-      <div className="flex-shrink-0 w-px bg-white/20 my-3" />
+      <div className="flex-shrink-0 w-px bg-black/20 dark:bg-white/20 my-3" />
 
       {tabs.map(({ id, icon: Icon, label }) => {
         const isActive = activeId === id;
@@ -77,20 +83,39 @@ export function MobileBar() {
               />
             )}
             <motion.div
-              animate={{ color: isActive ? ACCENT_COLOR : 'rgba(255,255,255,0.4)', scale: isActive ? 1 : 0.95 }}
+              animate={{ color: isActive ? ACCENT_COLOR : fg40, scale: isActive ? 1 : 0.95 }}
               transition={{ type: 'spring', stiffness: 400, damping: 30 }}
             >
               <Icon className="w-5 h-5" />
             </motion.div>
             <motion.span
               className="text-[9px] font-semibold uppercase tracking-wider"
-              animate={{ color: isActive ? ACCENT_COLOR : 'rgba(255,255,255,0.3)' }}
+              animate={{ color: isActive ? ACCENT_COLOR : fg30 }}
             >
               {label}
             </motion.span>
           </motion.button>
         );
       })}
+
+      <div className="flex-shrink-0 w-px bg-black/20 dark:bg-white/20 my-3" />
+
+      <motion.button
+        onClick={toggleTheme}
+        title={isDark ? 'Light mode' : 'Dark mode'}
+        className="!p-0 !border-0 rounded-none flex-shrink-0 w-[52px] flex flex-col items-center justify-center gap-1"
+        whileTap={{ scale: 0.88 }}
+      >
+        <motion.div animate={{ color: fg40 }}>
+          {isDark ? <SunIcon className="w-5 h-5" /> : <MoonIcon className="w-5 h-5" />}
+        </motion.div>
+        <motion.span
+          className="text-[9px] font-semibold uppercase tracking-wider"
+          animate={{ color: fg30 }}
+        >
+          {isDark ? 'Light' : 'Dark'}
+        </motion.span>
+      </motion.button>
     </div>
   );
 }

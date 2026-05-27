@@ -37,12 +37,12 @@ export function ColorPickerInput({ value, onChange, label }: ColorPickerInputPro
       <ColorPicker.Trigger className="flex items-center gap-2 cursor-pointer outline-none group !bg-transparent !border-0 !shadow-none !p-0 !rounded-none">
         <ColorSwatch size="sm" className="rounded-md shrink-0" />
         {label && (
-          <span className="text-white/50 text-xs font-medium group-hover:text-white/70 transition-colors duration-200">
+          <span className="text-black/50 dark:text-white/50 text-xs font-medium group-hover:text-black/70 dark:group-hover:text-white/70 transition-colors duration-200">
             {label}
           </span>
         )}
       </ColorPicker.Trigger>
-      <ColorPicker.Popover className="max-w-62 gap-2 bg-black/80 backdrop-blur-md border border-white/15 rounded-xl p-3 shadow-xl">
+      <ColorPicker.Popover className="max-w-62 gap-2 bg-white/92 dark:bg-black/80 backdrop-blur-md border border-black/12 dark:border-white/15 rounded-xl p-3 shadow-xl">
         <ColorArea
           className="max-w-full rounded-lg overflow-hidden"
           colorSpace="hsb"
@@ -52,8 +52,8 @@ export function ColorPickerInput({ value, onChange, label }: ColorPickerInputPro
           <ColorArea.Thumb className="border-2 border-white shadow-md" />
         </ColorArea>
         <ColorSlider channel="hue" className="gap-1 px-1" colorSpace="hsb">
-          <Label className="text-white/50 text-xs font-medium">Hue</Label>
-          <ColorSlider.Output className="text-white/40 text-xs" />
+          <Label className="text-black/50 dark:text-white/50 text-xs font-medium">Hue</Label>
+          <ColorSlider.Output className="text-black/40 dark:text-white/40 text-xs" />
           <ColorSlider.Track>
             <ColorSlider.Thumb />
           </ColorSlider.Track>
@@ -65,21 +65,21 @@ export function ColorPickerInput({ value, onChange, label }: ColorPickerInputPro
           className="w-full"
           onChange={(val) => setColorSpace(val as ColorSpace)}
         >
-          <Select.Trigger className="bg-white/10 border border-white/15 rounded-lg text-white/70 text-xs px-2 py-1.5 h-auto">
-            <Select.Value className="uppercase text-xs text-white/70" />
-            <Select.Indicator className="text-white/40" />
+          <Select.Trigger className="bg-black/8 dark:bg-white/10 border border-black/12 dark:border-white/15 rounded-lg text-black/65 dark:text-white/70 text-xs px-2 py-1.5 h-auto">
+            <Select.Value className="uppercase text-xs text-black/65 dark:text-white/70" />
+            <Select.Indicator className="text-black/40 dark:text-white/40" />
           </Select.Trigger>
-          <Select.Popover className="bg-black/80 backdrop-blur-md border border-white/15 rounded-lg overflow-hidden">
+          <Select.Popover className="bg-white/92 dark:bg-black/80 backdrop-blur-md border border-black/12 dark:border-white/15 rounded-lg overflow-hidden">
             <ListBox className="bg-transparent p-1">
               {Object.keys(colorChannelsByColorSpace).map((space) => (
                 <ListBox.Item
                   key={space}
                   id={space}
                   textValue={space}
-                  className="uppercase text-xs text-white/70 rounded-md px-2 py-1.5 cursor-pointer hover:bg-white/10 data-[focused=true]:bg-white/10 outline-none"
+                  className="uppercase text-xs text-black/65 dark:text-white/70 rounded-md px-2 py-1.5 cursor-pointer hover:bg-black/8 dark:hover:bg-white/10 data-[focused=true]:bg-black/8 dark:data-[focused=true]:bg-white/10 outline-none"
                 >
                   {space}
-                  <ListBox.ItemIndicator className="text-white/50" />
+                  <ListBox.ItemIndicator className="text-black/50 dark:text-white/50" />
                 </ListBox.Item>
               ))}
             </ListBox>
@@ -95,9 +95,9 @@ export function ColorPickerInput({ value, onChange, label }: ColorPickerInputPro
             >
               <ColorField.Group
                 variant="secondary"
-                className="bg-white/10 border border-white/15 rounded-lg overflow-hidden"
+                className="bg-black/8 dark:bg-white/10 border border-black/12 dark:border-white/15 rounded-lg overflow-hidden"
               >
-                <ColorField.Input className="text-white/70 text-xs text-center bg-transparent px-1 py-1.5 w-full outline-none" />
+                <ColorField.Input className="text-black/65 dark:text-white/70 text-xs text-center bg-transparent px-1 py-1.5 w-full outline-none" />
               </ColorField.Group>
             </ColorField>
           ))}

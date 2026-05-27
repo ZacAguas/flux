@@ -109,8 +109,9 @@ export function RadialMenu({ x, y, onClose }: RadialMenuProps) {
 
         {/* Center hover label */}
         <motion.div
-          className="absolute text-[10px] font-semibold text-white/80 whitespace-nowrap pointer-events-none select-none text-center"
+          className="absolute text-[10px] font-semibold whitespace-nowrap pointer-events-none select-none text-center"
           style={{
+            color: 'var(--c-fg-80)',
             left: '50%',
             top: '50%',
             transform: 'translate(-50%, -50%)',
@@ -153,19 +154,19 @@ export function RadialMenu({ x, y, onClose }: RadialMenuProps) {
               <motion.button
                 className="w-full h-full flex items-center justify-center rounded-full border select-none focus:outline-none"
                 style={{
-                  background: 'rgba(13,13,18,0.88)',
+                  background: 'var(--c-bg-glass)',
                   backdropFilter: 'blur(14px)',
-                  borderColor: item.accent ? `${ACCENT_COLOR}4d` : 'rgba(255,255,255,0.11)',
-                  color: item.accent ? ACCENT_COLOR : 'rgba(255,255,255,0.65)',
-                  boxShadow: '0 2px 12px rgba(0,0,0,0.45)',
+                  borderColor: item.accent ? `${ACCENT_COLOR}4d` : 'var(--c-fg-08)',
+                  color: item.accent ? ACCENT_COLOR : 'var(--c-fg-65)',
+                  boxShadow: '0 2px 12px rgba(0,0,0,0.25)',
                 }}
                 whileHover={{
                   scale: 1.18,
-                  borderColor: item.accent ? ACCENT_COLOR : 'rgba(255,255,255,0.32)',
-                  color: item.accent ? ACCENT_COLOR : '#ffffff',
+                  borderColor: item.accent ? ACCENT_COLOR : 'var(--c-fg-30)',
+                  color: item.accent ? ACCENT_COLOR : 'var(--c-fg-85)',
                   boxShadow: item.accent
-                    ? `0 0 18px ${ACCENT_COLOR}40, 0 2px 12px rgba(0,0,0,0.5)`
-                    : '0 4px 18px rgba(0,0,0,0.55)',
+                    ? `0 0 18px ${ACCENT_COLOR}40, 0 2px 12px rgba(0,0,0,0.35)`
+                    : '0 4px 18px rgba(0,0,0,0.25)',
                 }}
                 whileTap={{ scale: 0.9 }}
                 onMouseDown={(e) => e.stopPropagation()}

@@ -33,7 +33,7 @@ export function SaveSessionModal({
   return (
     <AppModal isOpen={isOpen} onClose={handleCancel} maxWidth="max-w-md">
       <ModalHeader>
-        <ModalIcon className="bg-white/10 text-white/70">
+        <ModalIcon className="bg-black/8 dark:bg-white/10 text-black/60 dark:text-white/70">
           <BookmarkIcon className="size-4" />
         </ModalIcon>
         <ModalTitle>Save Session As</ModalTitle>
@@ -41,7 +41,7 @@ export function SaveSessionModal({
 
       <ModalBody className="space-y-4">
         <div>
-          <label htmlFor="session-name" className="block text-sm font-medium text-white/70 mb-2">
+          <label htmlFor="session-name" className="block text-sm font-medium text-black/60 dark:text-white/70 mb-2">
             Session Name
           </label>
           <input
@@ -55,18 +55,18 @@ export function SaveSessionModal({
             }}
             placeholder="My Analysis Session"
             autoFocus
-            className="w-full px-3 py-2 bg-white/10 border border-white/20 rounded text-sm text-white
-                       placeholder-white/40 focus:outline-none focus:border-blue-500"
+            className="w-full px-3 py-2 bg-black/5 dark:bg-white/10 border border-black/15 dark:border-white/20 rounded text-sm text-black dark:text-white
+                       placeholder-black/30 dark:placeholder-white/40 focus:outline-none focus:border-blue-500"
           />
         </div>
 
-        <div className="text-xs text-white/50 space-y-1">
+        <div className="text-xs text-black/50 dark:text-white/50 space-y-1">
           <p>
-            <span className="font-medium text-white/60">Volume:</span>{' '}
+            <span className="font-medium text-black/55 dark:text-white/60">Volume:</span>{' '}
             {volumeFileName || 'Unknown'}
           </p>
           <p>
-            <span className="font-medium text-white/60">Date:</span>{' '}
+            <span className="font-medium text-black/55 dark:text-white/60">Date:</span>{' '}
             {new Date().toLocaleString()}
           </p>
         </div>
@@ -74,7 +74,7 @@ export function SaveSessionModal({
 
       <ModalFooter>
         <Button size="sm" variant="secondary" onPress={handleCancel}
-          className="!bg-white/10 !border-white/20 !text-white text-xs">
+          className="!bg-black/8 dark:!bg-white/10 !border-black/15 dark:!border-white/20 !text-black dark:!text-white text-xs">
           Cancel
         </Button>
         <Button size="sm" variant="primary" onPress={handleSave}

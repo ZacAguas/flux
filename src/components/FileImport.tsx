@@ -77,19 +77,19 @@ export function FileImport() {
   return (
     <div
       onClick={handleBrowseClick}
-      className={`border border-white/10 bg-white/[0.03] rounded-[0.625rem] py-12 px-13 text-center transition-all duration-300 ${isLoading ? 'cursor-not-allowed' : 'cursor-pointer'}`}
+      className={`border border-black/10 dark:border-white/10 bg-black/[0.03] dark:bg-white/[0.03] rounded-[0.625rem] py-12 px-13 text-center transition-all duration-300 ${isLoading ? 'cursor-not-allowed' : 'cursor-pointer'}`}
     >
       {isLoading ? (
         <div>
-          <p className="text-[1.05rem] text-white/55 mb-2">Loading...</p>
-          <p className="text-[0.85rem] text-white/30 m-0">Parsing NIfTI file...</p>
+          <p className="text-[1.05rem] text-black/55 dark:text-white/55 mb-2">Loading...</p>
+          <p className="text-[0.85rem] text-black/30 dark:text-white/30 m-0">Parsing NIfTI file...</p>
         </div>
       ) : (
         <div>
-          <p className="text-[1.05rem] text-white/55 mb-2">
+          <p className="text-[1.05rem] text-black/55 dark:text-white/55 mb-2">
             Click to browse or drop a file
           </p>
-          <p className="text-[0.85rem] text-white/25 m-0">.nii/.nii.gz</p>
+          <p className="text-[0.85rem] text-black/25 dark:text-white/25 m-0">.nii/.nii.gz</p>
         </div>
       )}
 

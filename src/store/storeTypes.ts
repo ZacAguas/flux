@@ -64,12 +64,14 @@ export interface LayoutSlice {
   popoverOpen: boolean;
   helpModalOpen: boolean;
   activeSections: SectionId[];
+  theme: 'dark' | 'light';
 
   setLayoutMode: (mode: LayoutMode) => void;
   setPopoverOpen: (open: boolean) => void;
   setHelpModalOpen: (open: boolean) => void;
   setActiveSections: (sections: SectionId[]) => void;
   toggleSection: (id: SectionId) => void;
+  toggleTheme: () => void;
 }
 
 export interface ViewSlice {

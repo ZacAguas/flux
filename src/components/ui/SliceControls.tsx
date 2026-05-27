@@ -30,9 +30,9 @@ export function SliceControls() {
         step={1}
         className="w-full"
       >
-        <Label className="text-white/50 text-xs font-medium">Axial</Label>
+        <Label className="text-black/50 dark:text-white/50 text-xs font-medium">Axial</Label>
         <Slider.Output className="text-xs" />
-        <Slider.Track className="bg-white/15 backdrop-blur-sm rounded-md">
+        <Slider.Track className="bg-black/10 dark:bg-white/15 backdrop-blur-sm rounded-md">
           <Slider.Fill />
           <Slider.Thumb />
         </Slider.Track>
@@ -49,9 +49,9 @@ export function SliceControls() {
         step={1}
         className="w-full"
       >
-        <Label className="text-white/50 text-xs font-medium">Coronal</Label>
+        <Label className="text-black/50 dark:text-white/50 text-xs font-medium">Coronal</Label>
         <Slider.Output className="text-xs" />
-        <Slider.Track className="bg-white/15 backdrop-blur-sm rounded-md">
+        <Slider.Track className="bg-black/10 dark:bg-white/15 backdrop-blur-sm rounded-md">
           <Slider.Fill />
           <Slider.Thumb />
         </Slider.Track>
@@ -68,9 +68,9 @@ export function SliceControls() {
         step={1}
         className="w-full"
       >
-        <Label className="text-white/50 text-xs font-medium">Sagittal</Label>
+        <Label className="text-black/50 dark:text-white/50 text-xs font-medium">Sagittal</Label>
         <Slider.Output className="text-xs" />
-        <Slider.Track className="bg-white/15 backdrop-blur-sm rounded-md">
+        <Slider.Track className="bg-black/10 dark:bg-white/15 backdrop-blur-sm rounded-md">
           <Slider.Fill />
           <Slider.Thumb />
         </Slider.Track>

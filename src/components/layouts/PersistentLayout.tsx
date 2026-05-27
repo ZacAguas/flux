@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Canvas, useThree } from '@react-three/fiber';
 import * as THREE from 'three/webgpu';
 import { useVolumeSetup } from '../../hooks/useVolumeSetup';
@@ -44,16 +44,33 @@ function SceneResources() {
   useThumbnailCapture({ volumeMesh, sliceScenes, sliceCameras });
 
   return (
-    <ActiveRenderer
-        volumeMesh={volumeMesh}
-        volumeDimensions={volumeDimensions}
-        updateCameraUniforms={updateCameraUniforms}
-        cropBoxMeshes={cropBoxMeshes}
-        sliceScenes={sliceScenes}
-        sliceCameras={sliceCameras}
-        resizeCameras={resizeCameras}
-    />
+    <>
+      <BackgroundSync />
+      <ActiveRenderer
+          volumeMesh={volumeMesh}
+          volumeDimensions={volumeDimensions}
+          updateCameraUniforms={updateCameraUniforms}
+          cropBoxMeshes={cropBoxMeshes}
+          sliceScenes={sliceScenes}
+          sliceCameras={sliceCameras}
+          resizeCameras={resizeCameras}
+      />
+    </>
   );
+}
+
+function BackgroundSync() {
+  const theme = useViewerStore((state) => state.theme);
+  const { gl, scene } = useThree();
+  const colorRef = useRef(new THREE.Color());
+
+  useEffect(() => {
+    colorRef.current.setHex(theme === 'dark' ? 0x0d0d12 : 0xe8eaed);
+    gl.setClearColor(colorRef.current, 1);
+    scene.background = colorRef.current;
+  }, [theme, gl, scene]);
+
+  return null;
 }
 
 /**

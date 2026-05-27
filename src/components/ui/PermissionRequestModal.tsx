@@ -27,24 +27,24 @@ export function PermissionRequestModal({
       </ModalHeader>
 
       <ModalBody>
-        <p className="text-sm text-white/70 mb-3">This session was saved with the file:</p>
+        <p className="text-sm text-black/60 dark:text-white/70 mb-3">This session was saved with the file:</p>
         {fileName && (
-          <p className="text-sm text-white font-medium bg-white/5 px-3 py-2 rounded truncate mb-3">
+          <p className="text-sm text-black dark:text-white font-medium bg-black/5 dark:bg-white/5 px-3 py-2 rounded truncate mb-3">
             {fileName}
           </p>
         )}
-        <p className="text-sm text-white/70">
+        <p className="text-sm text-black/60 dark:text-white/70">
           Click &ldquo;Allow Access&rdquo; to grant permission to read this file.
         </p>
       </ModalBody>
 
       <ModalFooter>
         <Button size="sm" variant="secondary" onPress={onCancel}
-          className="!bg-white/10 !border-white/20 !text-white text-xs">
+          className="!bg-black/8 dark:!bg-white/10 !border-black/15 dark:!border-white/20 !text-black dark:!text-white text-xs">
           Cancel
         </Button>
         <Button size="sm" variant="secondary" onPress={onSelectDifferentFile}
-          className="!bg-white/10 !border-white/20 !text-white text-xs whitespace-nowrap">
+          className="!bg-black/8 dark:!bg-white/10 !border-black/15 dark:!border-white/20 !text-black dark:!text-white text-xs whitespace-nowrap">
           Select File
         </Button>
         <Button size="sm" variant="primary" onPress={onGrantPermission}

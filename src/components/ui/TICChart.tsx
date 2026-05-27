@@ -16,6 +16,7 @@
  */
 
 import { useRef, useState, useEffect, useId, useImperativeHandle } from 'react';
+import { useViewerStore } from '../../store/viewerStore';
 import { Zoom } from '@visx/zoom';
 import { useTooltip, TooltipWithBounds, defaultStyles } from '@visx/tooltip';
 import { LinePath } from '@visx/shape';
@@ -45,17 +46,19 @@ const WHEEL_ZOOM_STEP = 0.025;
 
 const TOOLTIP_STYLES: React.CSSProperties = {
   ...defaultStyles,
-  background: 'rgba(15,15,15,0.95)',
-  border: '1px solid rgba(255,255,255,0.15)',
+  background: 'var(--c-bg-chart)',
+  border: '1px solid var(--c-chart-border)',
   borderRadius: 4,
-  color: 'white',
+  color: 'var(--c-fg-85)',
   fontSize: 11,
   padding: '6px 8px',
   pointerEvents: 'none',
-  boxShadow: '0 2px 8px rgba(0,0,0,0.5)',
+  boxShadow: '0 2px 8px rgba(0,0,0,0.3)',
 };
 
 export function TICChart({ ref, rois, curves, height = 180, onZoomChange }: TICChartProps) {
+  const theme = useViewerStore((state) => state.theme);
+  const isDark = theme === 'dark';
   const containerRef = useRef<HTMLDivElement>(null);
   const [containerWidth, setContainerWidth] = useState(260);
   const uid = useId();
@@ -90,7 +93,7 @@ export function TICChart({ ref, rois, curves, height = 180, onZoomChange }: TICC
   const CURVE_WIDTH = isCompact ? 1.5 : 2;
 
   const TICK_LABEL_PROPS = {
-    fill: 'rgba(255,255,255,0.6)',
+    fill: 'var(--c-fg-60)',
     fontSize: TICK_FONT_SIZE,
     fontFamily: 'monospace',
   } as const;
@@ -254,7 +257,7 @@ export function TICChart({ ref, rois, curves, height = 180, onZoomChange }: TICC
                       x2={innerWidth}
                       y1={yScale(tick)}
                       y2={yScale(tick)}
-                      stroke="rgba(255,255,255,0.08)"
+                      stroke={isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.07)'}
                       strokeWidth={1}
                     />
                   ))}
@@ -265,7 +268,7 @@ export function TICChart({ ref, rois, curves, height = 180, onZoomChange }: TICC
                       x2={xScale(tick)}
                       y1={0}
                       y2={innerHeight}
-                      stroke="rgba(255,255,255,0.05)"
+                      stroke={isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.04)'}
                       strokeWidth={1}
                     />
                   ))}
@@ -304,7 +307,7 @@ export function TICChart({ ref, rois, curves, height = 180, onZoomChange }: TICC
                       x2={crosshairX}
                       y1={0}
                       y2={innerHeight}
-                      stroke="rgba(255,255,255,0.35)"
+                      stroke={isDark ? 'rgba(255,255,255,0.35)' : 'rgba(0,0,0,0.30)'}
                       strokeWidth={1}
                       strokeDasharray="4 3"
                     />
@@ -315,7 +318,7 @@ export function TICChart({ ref, rois, curves, height = 180, onZoomChange }: TICC
                         cy={yScale(p.intensity)}
                         r={isCompact ? 3 : 4}
                         fill={p.color}
-                        stroke="rgba(255,255,255,0.8)"
+                        stroke={isDark ? 'rgba(255,255,255,0.8)' : 'rgba(0,0,0,0.6)'}
                         strokeWidth={1.5}
                       />
                     ))}
@@ -337,13 +340,13 @@ export function TICChart({ ref, rois, curves, height = 180, onZoomChange }: TICC
                 <AxisBottom
                   scale={xScale}
                   top={innerHeight}
-                  stroke="rgba(255,255,255,0.3)"
-                  tickStroke="rgba(255,255,255,0.3)"
+                  stroke="var(--c-fg-30)"
+                  tickStroke="var(--c-fg-30)"
                   tickLabelProps={TICK_LABEL_PROPS}
                   numTicks={NUM_TICKS_X}
                   label={xLabel}
                   labelProps={{
-                    fill: 'rgba(255,255,255,0.5)',
+                    fill: 'var(--c-fg-50)',
                     fontSize: TICK_FONT_SIZE,
                     fontFamily: 'monospace',
                     textAnchor: 'middle',
@@ -351,8 +354,8 @@ export function TICChart({ ref, rois, curves, height = 180, onZoomChange }: TICC
                 />
                 <AxisLeft
                   scale={yScale}
-                  stroke="rgba(255,255,255,0.3)"
-                  tickStroke="rgba(255,255,255,0.3)"
+                  stroke="var(--c-fg-30)"
+                  tickStroke="var(--c-fg-30)"
                   tickLabelProps={TICK_LABEL_PROPS}
                   numTicks={NUM_TICKS_Y}
                 />
@@ -365,7 +368,7 @@ export function TICChart({ ref, rois, curves, height = 180, onZoomChange }: TICC
       {/* Tooltip, positioned relative to the container div */}
       {tooltipOpen && tooltipData && (
         <TooltipWithBounds left={tooltipLeft} top={tooltipTop} style={TOOLTIP_STYLES}>
-          <div style={{ marginBottom: 4, color: 'rgba(255,255,255,0.45)', fontSize: 10 }}>
+          <div style={{ marginBottom: 4, color: 'var(--c-fg-45)', fontSize: 10 }}>
             {tooltipData.usesSeconds
               ? `t = ${tooltipData.timeValue.toFixed(2)} s`
               : `step ${tooltipData.timeValue}`}
@@ -385,8 +388,8 @@ export function TICChart({ ref, rois, curves, height = 180, onZoomChange }: TICC
                   flexShrink: 0,
                 }}
               />
-              <span style={{ color: 'rgba(255,255,255,0.6)' }}>{p.label}:</span>
-              <span style={{ color: 'white', fontFamily: 'monospace' }}>
+              <span style={{ color: 'var(--c-fg-60)' }}>{p.label}:</span>
+              <span style={{ color: 'var(--c-fg-85)', fontFamily: 'monospace' }}>
                 {p.intensity.toFixed(2)}
               </span>
             </div>
@@ -404,7 +407,7 @@ export function TICChart({ ref, rois, curves, height = 180, onZoomChange }: TICC
               className={`inline-block h-0.5 rounded ${isCompact ? 'w-3' : 'w-4'}`}
               style={{ backgroundColor: roi.color }}
             />
-            <span className={`text-white/50 ${isCompact ? 'text-[9px]' : 'text-[10px]'}`}>
+            <span className={`text-black/50 dark:text-white/50 ${isCompact ? 'text-[9px]' : 'text-[10px]'}`}>
               {roi.label}
             </span>
           </div>
