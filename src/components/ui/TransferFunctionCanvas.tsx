@@ -164,7 +164,7 @@ export function TransferFunctionCanvas({
       >
         {/* Define linear gradient for color strip */}
         <defs>
-          <LinearGradient id="transfer-function-gradient" from="#000" to="#fff">
+          <LinearGradient id="transfer-function-gradient" from="#000" to="#fff" vertical={false}>
             {sortedPoints.map((point) => (
               <stop
                 key={point.id}
