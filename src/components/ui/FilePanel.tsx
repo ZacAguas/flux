@@ -11,9 +11,9 @@ function formatBytes(bytes: number): string {
 function SectionDivider({ label }: { label?: string }) {
   return (
     <div className="flex items-center gap-2 my-1">
-      <div className="flex-1 h-px bg-white/8" />
-      {label && <span className="text-[9px] font-semibold text-white/30 uppercase tracking-wider">{label}</span>}
-      <div className="flex-1 h-px bg-white/8" />
+      <div className="flex-1 h-px bg-black/8 dark:bg-white/8" />
+      {label && <span className="text-[9px] font-semibold text-black/30 dark:text-white/30 uppercase tracking-wider">{label}</span>}
+      <div className="flex-1 h-px bg-black/8 dark:bg-white/8" />
     </div>
   );
 }
@@ -29,10 +29,10 @@ function ActionRow({ icon, label, shortcut, onClick, disabled }: {
     <button
       onClick={onClick}
       disabled={disabled}
-      className="w-full flex items-center justify-between gap-2 px-3 py-2 rounded-md text-left text-xs text-white/70 hover:text-white hover:bg-white/8 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+      className="w-full flex items-center justify-between gap-2 px-3 py-2 rounded-md text-left text-xs text-black/65 dark:text-white/70 hover:text-black dark:hover:text-white hover:bg-black/8 dark:hover:bg-white/8 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
     >
       <span className="flex items-center gap-2">
-        <span className="w-3.5 h-3.5 text-white/40">{icon}</span>
+        <span className="w-3.5 h-3.5 text-black/40 dark:text-white/40">{icon}</span>
         {label}
       </span>
       {shortcut}
@@ -48,17 +48,17 @@ export function FilePanel() {
 
   const displayName = currentSessionName ?? volumeFileMetadata?.fileName?.replace(/\.nii(\.gz)?$/i, '') ?? 'Untitled';
 
-  const kbdClass = 'text-[10px] text-white/40 bg-white/5 rounded px-1.5 py-0.5';
+  const kbdClass = 'text-[10px] text-black/40 dark:text-white/40 bg-black/5 dark:bg-white/5 rounded px-1.5 py-0.5';
 
   return (
     <div className="flex flex-col gap-1">
       {/* File card */}
       {volumeFileMetadata && (
-        <div className="px-3 py-2.5 bg-white/5 rounded-lg border border-white/8 mb-2">
+        <div className="px-3 py-2.5 bg-black/5 dark:bg-white/5 rounded-lg border border-black/8 dark:border-white/8 mb-2">
           <div className="flex items-start justify-between gap-2">
             <div className="min-w-0">
-              <div className="text-sm font-medium text-white/90 truncate">{displayName}</div>
-              <div className="text-[10px] text-white/35 mt-0.5">{volumeFileMetadata.fileName} · {formatBytes(volumeFileMetadata.fileSize)}</div>
+              <div className="text-sm font-medium text-black/85 dark:text-white/90 truncate">{displayName}</div>
+              <div className="text-[10px] text-black/35 dark:text-white/35 mt-0.5">{volumeFileMetadata.fileName} · {formatBytes(volumeFileMetadata.fileSize)}</div>
             </div>
             {isDirty && (
               <span className="text-[9px] font-semibold text-yellow-400/80 uppercase tracking-wider shrink-0 mt-0.5">unsaved</span>
@@ -105,14 +105,14 @@ export function FilePanel() {
         <button
           onClick={actions.onExportSession}
           disabled={!volumeFileMetadata}
-          className="flex-1 flex items-center justify-center gap-1.5 px-3 py-2 rounded-md text-xs text-white/60 hover:text-white bg-white/5 hover:bg-white/10 border border-white/8 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+          className="flex-1 flex items-center justify-center gap-1.5 px-3 py-2 rounded-md text-xs text-black/55 dark:text-white/60 hover:text-black dark:hover:text-white bg-black/5 dark:bg-white/5 hover:bg-black/8 dark:hover:bg-white/10 border border-black/8 dark:border-white/8 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
         >
           <DocumentArrowDownIcon className="w-3.5 h-3.5" />
           Export
         </button>
         <button
           onClick={actions.onImportSession}
-          className="flex-1 flex items-center justify-center gap-1.5 px-3 py-2 rounded-md text-xs text-white/60 hover:text-white bg-white/5 hover:bg-white/10 border border-white/8 transition-colors"
+          className="flex-1 flex items-center justify-center gap-1.5 px-3 py-2 rounded-md text-xs text-black/55 dark:text-white/60 hover:text-black dark:hover:text-white bg-black/5 dark:bg-white/5 hover:bg-black/8 dark:hover:bg-white/10 border border-black/8 dark:border-white/8 transition-colors"
         >
           <DocumentArrowUpIcon className="w-3.5 h-3.5" />
           Import

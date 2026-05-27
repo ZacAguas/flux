@@ -55,7 +55,7 @@ export function SessionErrorModal({
       </ModalHeader>
 
       <ModalBody className="space-y-4">
-        <p className="text-sm text-white/70">{getErrorMessage()}</p>
+        <p className="text-sm text-black/60 dark:text-white/70">{getErrorMessage()}</p>
 
         {isFileMismatch && validationResult && (
           <div className="border border-yellow-500/30 bg-yellow-600/10 rounded p-3 space-y-3">
@@ -65,14 +65,14 @@ export function SessionErrorModal({
             </p>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
               <div>
-                <p className="font-medium text-white/70 mb-1">Expected:</p>
-                <p className="text-white/50 truncate">{validationResult.expected.fileName}</p>
-                <p className="text-white/40">{(validationResult.expected.fileSize / 1024 / 1024).toFixed(2)} MB</p>
+                <p className="font-medium text-black/60 dark:text-white/70 mb-1">Expected:</p>
+                <p className="text-black/50 dark:text-white/50 truncate">{validationResult.expected.fileName}</p>
+                <p className="text-black/40 dark:text-white/40">{(validationResult.expected.fileSize / 1024 / 1024).toFixed(2)} MB</p>
               </div>
               <div>
-                <p className="font-medium text-white/70 mb-1">Actual:</p>
-                <p className="text-white/50 truncate">{validationResult.actual.fileName}</p>
-                <p className="text-white/40">{(validationResult.actual.fileSize / 1024 / 1024).toFixed(2)} MB</p>
+                <p className="font-medium text-black/60 dark:text-white/70 mb-1">Actual:</p>
+                <p className="text-black/50 dark:text-white/50 truncate">{validationResult.actual.fileName}</p>
+                <p className="text-black/40 dark:text-white/40">{(validationResult.actual.fileSize / 1024 / 1024).toFixed(2)} MB</p>
               </div>
             </div>
           </div>
@@ -80,10 +80,10 @@ export function SessionErrorModal({
 
         {Boolean(error.details) && (
           <details className="text-xs">
-            <summary className="cursor-pointer text-white/50 hover:text-white/70">
+            <summary className="cursor-pointer text-black/50 dark:text-white/50 hover:text-black/70 dark:hover:text-white/70">
               Technical Details
             </summary>
-            <pre className="mt-2 p-2 bg-black/30 rounded overflow-x-auto text-white/40 text-[10px]">
+            <pre className="mt-2 p-2 bg-black/8 dark:bg-black/30 rounded overflow-x-auto text-black/40 dark:text-white/40 text-[10px]">
               {typeof error.details === 'string' ? error.details : JSON.stringify(error.details, null, 2)}
             </pre>
           </details>
@@ -92,12 +92,12 @@ export function SessionErrorModal({
 
       <ModalFooter>
         <Button size="sm" variant="secondary" onPress={onClose}
-          className="!bg-white/10 !border-white/20 !text-white text-xs">
+          className="!bg-black/8 dark:!bg-white/10 !border-black/15 dark:!border-white/20 !text-black dark:!text-white text-xs">
           Close
         </Button>
         {onRetry && (
           <Button size="sm" variant="secondary" onPress={() => { onClose(); onRetry(); }}
-            className="!bg-white/10 !border-white/20 !text-white text-xs">
+            className="!bg-black/8 dark:!bg-white/10 !border-black/15 dark:!border-white/20 !text-black dark:!text-white text-xs">
             Try Again
           </Button>
         )}

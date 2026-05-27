@@ -33,7 +33,7 @@ export function MobileSheet() {
 
   return (
     <motion.div
-      className="absolute left-0 right-0 bottom-[60px] bg-neutral-900 border-t border-white/10 z-20 flex flex-col"
+      className="absolute left-0 right-0 bottom-[60px] bg-neutral-50 dark:bg-neutral-900 border-t border-black/10 dark:border-white/10 z-20 flex flex-col"
       style={{
         height: '64vh',
         borderRadius: '14px 14px 0 0',
@@ -50,15 +50,15 @@ export function MobileSheet() {
       {/* Drag handle */}
       <div className="flex justify-center pt-3 pb-2 flex-shrink-0 cursor-grab active:cursor-grabbing touch-none">
         <motion.div
-          className="w-8 h-1 rounded-full bg-white/20"
-          whileHover={{ backgroundColor: 'rgba(255,255,255,0.35)', width: 40 }}
+          className="w-8 h-1 rounded-full bg-black/20 dark:bg-white/20"
+          whileHover={{ width: 40 }}
           transition={{ duration: 0.15 }}
         />
       </div>
 
       {/* Header */}
-      <div className="flex items-center px-4 py-2 border-b border-white/8 flex-shrink-0">
-        <span className="text-sm font-semibold text-white/90">{label}</span>
+      <div className="flex items-center px-4 py-2 border-b border-black/8 dark:border-white/8 flex-shrink-0">
+        <span className="text-sm font-semibold text-black/85 dark:text-white/90">{label}</span>
       </div>
 
       {/* Content */}

@@ -38,7 +38,7 @@ export function TICControls() {
 
   if (!is4D) {
     return (
-      <p className="text-[10px] text-white/40 italic">
+      <p className="text-[10px] text-black/40 dark:text-white/40 italic">
         4D volume required for TIC analysis.
       </p>
     );
@@ -48,7 +48,7 @@ export function TICControls() {
     <div className="flex flex-col gap-3">
       {/* Tool toggle */}
       <div className="flex flex-col gap-2">
-        <span className="text-xs text-white/60">ROI Placement</span>
+        <span className="text-xs text-black/55 dark:text-white/60">ROI Placement</span>
         <Button
           size="sm"
           variant={ticToolActive ? 'primary' : 'secondary'}
@@ -59,7 +59,7 @@ export function TICControls() {
           <span className="text-xs ml-1">Place ROI</span>
         </Button>
         {ticToolActive && (
-          <p className="text-[10px] text-white/40 italic text-wrap break-words">
+          <p className="text-[10px] text-black/40 dark:text-white/40 italic text-wrap break-words">
             Click and drag on a slice to draw a circular ROI
           </p>
         )}
@@ -69,12 +69,12 @@ export function TICControls() {
       {ticRois.length > 0 && (
         <div className="flex flex-col gap-2">
           <div className="flex items-center justify-between">
-            <span className="text-xs text-white/60">ROIs ({ticRois.length})</span>
+            <span className="text-xs text-black/55 dark:text-white/60">ROIs ({ticRois.length})</span>
             <Button
               size="sm"
               variant="secondary"
               onPress={clearTicRois}
-              className="!px-2 !py-0.5 !text-[10px] text-white/60 hover:text-red-400"
+              className="!px-2 !py-0.5 !text-[10px] text-black/55 dark:text-white/60 hover:text-red-400"
             >
               Clear All
             </Button>
@@ -83,22 +83,22 @@ export function TICControls() {
             {ticRois.map((roi) => (
               <div
                 key={roi.id}
-                className="flex items-center justify-between p-1.5 rounded hover:bg-white/5 transition-colors"
+                className="flex items-center justify-between p-1.5 rounded hover:bg-black/5 dark:hover:bg-white/5 transition-colors"
               >
-                <div className="flex items-center gap-2 text-xs text-white/80 min-w-0 overflow-hidden">
+                <div className="flex items-center gap-2 text-xs text-black/75 dark:text-white/80 min-w-0 overflow-hidden">
                   <span
-                    className="w-3 h-3 rounded-full flex-shrink-0 border border-white/20"
+                    className="w-3 h-3 rounded-full flex-shrink-0 border border-black/20 dark:border-white/20"
                     style={{ backgroundColor: roi.color }}
                   />
                   <span className="truncate">{roi.label}</span>
-                  <span className="text-white/40 shrink-0 text-[10px]">
+                  <span className="text-black/40 dark:text-white/40 shrink-0 text-[10px]">
                     ({roi.orientation.charAt(0).toUpperCase()}:{roi.sliceIndex})
                   </span>
                 </div>
                 <Button
                   size="sm"
                   variant="secondary"
-                  className="!px-2 !py-1 !min-w-6 !h-6 !text-[10px] text-white/60 hover:text-red-400"
+                  className="!px-2 !py-1 !min-w-6 !h-6 !text-[10px] text-black/55 dark:text-white/60 hover:text-red-400"
                   onPress={() => deleteTicRoi(roi.id)}
                 >
                   X
@@ -111,16 +111,16 @@ export function TICControls() {
 
       {/* Chart */}
       {ticRois.length > 0 && (
-        <div className="border-t border-white/10 pt-2">
+        <div className="border-t border-black/10 dark:border-white/10 pt-2">
           <div className="flex items-center justify-between mb-1">
-            <span className="text-xs text-white/60">Chart</span>
+            <span className="text-xs text-black/55 dark:text-white/60">Chart</span>
             <div className="flex items-center gap-1">
               <Button
                 size="sm"
                 variant="secondary"
                 isDisabled={!isChartZoomed}
                 onPress={() => chartRef.current?.reset()}
-                className="!px-1.5 !py-1 !min-w-6 !h-6 text-white/50 hover:text-white/80"
+                className="!px-1.5 !py-1 !min-w-6 !h-6 text-black/50 dark:text-white/50 hover:text-black/80 dark:hover:text-white/80"
                 aria-label="Reset zoom"
               >
                 <ArrowUturnLeftIcon className="w-3 h-3" />
@@ -129,7 +129,7 @@ export function TICControls() {
                 size="sm"
                 variant="secondary"
                 onPress={() => setChartModalOpen(true)}
-                className="!px-1.5 !py-1 !min-w-6 !h-6 text-white/50 hover:text-white/80"
+                className="!px-1.5 !py-1 !min-w-6 !h-6 text-black/50 dark:text-white/50 hover:text-black/80 dark:hover:text-white/80"
                 aria-label="Expand chart"
               >
                 <ArrowsPointingOutIcon className="w-3 h-3" />
@@ -154,7 +154,7 @@ export function TICControls() {
 
       {/* Empty state */}
       {ticRois.length === 0 && !ticToolActive && (
-        <p className="text-[10px] text-white/40 italic">
+        <p className="text-[10px] text-black/40 dark:text-white/40 italic">
           Activate the tool and drag on a slice to place a ROI.
         </p>
       )}

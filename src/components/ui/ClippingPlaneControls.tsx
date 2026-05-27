@@ -22,7 +22,7 @@ export function ClippingPlaneControls() {
     <div className="flex flex-col gap-3">
       {/* Global enabled toggle */}
       <div className="flex items-center justify-between gap-2">
-        <Label className="text-white/50 text-xs font-medium">Enable Crop Box</Label>
+        <Label className="text-black/50 dark:text-white/50 text-xs font-medium">Enable Crop Box</Label>
         <Switch
           size="sm"
           isSelected={cropBox.enabled}
@@ -32,7 +32,7 @@ export function ClippingPlaneControls() {
           {({ isSelected }) => (
             <>
               <Switch.Control
-                className={`backdrop-blur-sm rounded-full ${isSelected ? '' : 'bg-white/15'}`}
+                className={`backdrop-blur-sm rounded-full ${isSelected ? '' : 'bg-black/10 dark:bg-white/15'}`}
               >
                 <Switch.Thumb />
               </Switch.Control>
@@ -55,13 +55,13 @@ export function ClippingPlaneControls() {
           step={0.01}
           className="w-full"
         >
-          <Label className="text-white/50 text-xs font-medium">Axial (Z)</Label>
-          <Slider.Output className="text-xs text-white/50">
+          <Label className="text-black/50 dark:text-white/50 text-xs font-medium">Axial (Z)</Label>
+          <Slider.Output className="text-xs text-black/50 dark:text-white/50">
             {({ state }) =>
               `${Number(state.getThumbValueLabel(0)).toFixed(2)} \u2013 ${Number(state.getThumbValueLabel(1)).toFixed(2)}`
             }
           </Slider.Output>
-          <Slider.Track className="bg-white/15 backdrop-blur-sm rounded-md">
+          <Slider.Track className="bg-black/10 dark:bg-white/15 backdrop-blur-sm rounded-md">
             <Slider.Fill />
             <Slider.Thumb index={0} />
             <Slider.Thumb index={1} />
@@ -83,13 +83,13 @@ export function ClippingPlaneControls() {
           step={0.01}
           className="w-full"
         >
-          <Label className="text-white/50 text-xs font-medium">Coronal (Y)</Label>
-          <Slider.Output className="text-xs text-white/50">
+          <Label className="text-black/50 dark:text-white/50 text-xs font-medium">Coronal (Y)</Label>
+          <Slider.Output className="text-xs text-black/50 dark:text-white/50">
             {({ state }) =>
               `${Number(state.getThumbValueLabel(0)).toFixed(2)} \u2013 ${Number(state.getThumbValueLabel(1)).toFixed(2)}`
             }
           </Slider.Output>
-          <Slider.Track className="bg-white/15 backdrop-blur-sm rounded-md">
+          <Slider.Track className="bg-black/10 dark:bg-white/15 backdrop-blur-sm rounded-md">
             <Slider.Fill />
             <Slider.Thumb index={0} />
             <Slider.Thumb index={1} />
@@ -111,13 +111,13 @@ export function ClippingPlaneControls() {
           step={0.01}
           className="w-full"
         >
-          <Label className="text-white/50 text-xs font-medium">Sagittal (X)</Label>
-          <Slider.Output className="text-xs text-white/50">
+          <Label className="text-black/50 dark:text-white/50 text-xs font-medium">Sagittal (X)</Label>
+          <Slider.Output className="text-xs text-black/50 dark:text-white/50">
             {({ state }) =>
               `${Number(state.getThumbValueLabel(0)).toFixed(2)} \u2013 ${Number(state.getThumbValueLabel(1)).toFixed(2)}`
             }
           </Slider.Output>
-          <Slider.Track className="bg-white/15 backdrop-blur-sm rounded-md">
+          <Slider.Track className="bg-black/10 dark:bg-white/15 backdrop-blur-sm rounded-md">
             <Slider.Fill />
             <Slider.Thumb index={0} />
             <Slider.Thumb index={1} />
@@ -130,13 +130,13 @@ export function ClippingPlaneControls() {
         size="sm"
         onPress={resetCropBox}
         isDisabled={isDisabled}
-        className="bg-transparent! hover:bg-red-500/20 text-white/70 hover:text-red-400 transition-all duration-200 disabled:opacity-30 border border-white/10! hover:border-red-500/40!"
+        className="bg-transparent! hover:bg-red-500/20 text-black/65 dark:text-white/70 hover:text-red-400 transition-all duration-200 disabled:opacity-30 border border-black/10! dark:border-white/10! hover:border-red-500/40!"
       >
         Reset Crop Box
       </Button>
 
       {/* Helper Text */}
-      <div className="text-[10px] text-white/40 italic">
+      <div className="text-[10px] text-black/40 dark:text-white/40 italic">
         Drag handles in 3D view or use range sliders above
       </div>
     </div>

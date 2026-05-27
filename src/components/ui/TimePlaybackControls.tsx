@@ -80,7 +80,7 @@ export function TimePlaybackControls() {
           size="sm"
           onPress={() => setIsPlaying(!isPlaying)}
           isDisabled={isLoadingTimeStep}
-          className="flex-1 !justify-center !bg-white/15 backdrop-blur-sm hover:!bg-white/25 text-white !px-0 py-1 rounded-md"
+          className="flex-1 !justify-center !bg-black/10 dark:!bg-white/15 backdrop-blur-sm hover:!bg-black/15 dark:hover:!bg-white/25 text-black dark:text-white !px-0 py-1 rounded-md"
         >
           {isPlaying
             ? <PauseIcon className="w-4 h-4" />
@@ -94,8 +94,8 @@ export function TimePlaybackControls() {
           onPress={() => setLoop(!loop)}
           className={`flex-1 !justify-center !px-0 py-1 rounded-md transition-all duration-200 ${
             loop
-              ? '!bg-white/15 backdrop-blur-sm text-white'
-              : '!bg-transparent text-white/50 hover:text-white/70'
+              ? '!bg-black/10 dark:!bg-white/15 backdrop-blur-sm text-black dark:text-white'
+              : '!bg-transparent text-black/50 dark:text-white/50 hover:text-black/70 dark:hover:text-white/70'
           }`}
         >
           {loop
@@ -112,7 +112,7 @@ export function TimePlaybackControls() {
             setIsPlaying(false);
           }}
           isDisabled={isLoadingTimeStep || timeStep === 0}
-          className="flex-1 !justify-center !bg-white/10 backdrop-blur-sm hover:!bg-white/15 text-white !px-0 py-1 rounded-md"
+          className="flex-1 !justify-center !bg-black/8 dark:!bg-white/10 backdrop-blur-sm hover:!bg-black/12 dark:hover:!bg-white/15 text-black dark:text-white !px-0 py-1 rounded-md"
         >
           <ArrowUturnLeftIcon className="w-4 h-4" />
         </Button>
@@ -127,9 +127,9 @@ export function TimePlaybackControls() {
         step={1}
         className="w-full min-w-0"
       >
-        <Label className="text-white/50 text-xs font-medium">Speed (FPS)</Label>
+        <Label className="text-black/50 dark:text-white/50 text-xs font-medium">Speed (FPS)</Label>
         <Slider.Output className="text-xs" />
-        <Slider.Track className="bg-white/15 backdrop-blur-sm rounded-md">
+        <Slider.Track className="bg-black/10 dark:bg-white/15 backdrop-blur-sm rounded-md">
           <Slider.Fill />
           <Slider.Thumb />
         </Slider.Track>

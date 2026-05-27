@@ -33,7 +33,7 @@ export function getSectionContent(id: string, is4D: boolean) {
     case 'slices':   return (
       <div className="flex flex-col gap-3">
         <SliceControls />
-        <hr className="border-t border-white/8" />
+        <hr className="border-t border-black/8 dark:border-white/8" />
         <WindowLevelControls />
       </div>
     );
@@ -41,7 +41,7 @@ export function getSectionContent(id: string, is4D: boolean) {
       <div className="flex flex-col gap-3">
         <TimeStepControls />
         <TimePlaybackControls />
-        {is4D && <><hr className="border-t border-white/8" /><TICControls /></>}
+        {is4D && <><hr className="border-t border-black/8 dark:border-white/8" /><TICControls /></>}
       </div>
     );
     case 'display':  return <ViewOptionsControls />;

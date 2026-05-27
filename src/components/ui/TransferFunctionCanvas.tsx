@@ -156,7 +156,7 @@ export function TransferFunctionCanvas({
         viewBox={`0 0 ${CANVAS_WIDTH} ${CANVAS_HEIGHT}`}
         width="100%"
         style={{ display: 'block', aspectRatio: `${CANVAS_WIDTH} / ${CANVAS_HEIGHT}` }}
-        className="bg-white/5 rounded border border-white/20"
+        className="bg-black/5 dark:bg-white/5 rounded border border-black/15 dark:border-white/20"
         onMouseMove={handleMouseMove}
         onMouseUp={handleMouseUp}
         onMouseLeave={handleMouseUp}
@@ -198,7 +198,7 @@ export function TransferFunctionCanvas({
                 cy={yScale(point.opacity)}
                 r={isSelected || isDragging ? 6 : 4}
                 fill={rgbToRgbaString(point.color, point.opacity)}
-                stroke={isSelected || isDragging ? '#ffffff' : 'rgba(255,255,255,0.5)'}
+                stroke={isSelected || isDragging ? 'var(--c-fg-85)' : 'var(--c-fg-50)'}
                 strokeWidth={2}
                 // Disable transitions on points when dragging to avoid lagging behind line
                 className={`cursor-move ${isDragging ? '' : 'transition-all'}`}
@@ -235,10 +235,10 @@ export function TransferFunctionCanvas({
           top={CANVAS_HEIGHT - MARGIN.bottom}
           scale={xScale}
           numTicks={5}
-          stroke="rgba(255, 255, 255, 0.2)"
-          tickStroke="rgba(255, 255, 255, 0.2)"
+          stroke="var(--c-fg-20)"
+          tickStroke="var(--c-fg-20)"
           tickLabelProps={() => ({
-            fill: 'rgba(255, 255, 255, 0.5)',
+            fill: 'var(--c-fg-50)',
             fontSize: 10,
             textAnchor: 'middle',
           })}
@@ -248,7 +248,7 @@ export function TransferFunctionCanvas({
         <text
           x={MARGIN.left + 5}
           y={MARGIN.top + 10}
-          fill="rgba(255, 255, 255, 0.5)"
+          fill="var(--c-fg-50)"
           fontSize={10}
         >
           Opacity
@@ -256,7 +256,7 @@ export function TransferFunctionCanvas({
         <text
           x={MARGIN.left + 5}
           y={CANVAS_HEIGHT - MARGIN.bottom - 5}
-          fill="rgba(255, 255, 255, 0.5)"
+          fill="var(--c-fg-50)"
           fontSize={10}
         >
           0.0
@@ -264,7 +264,7 @@ export function TransferFunctionCanvas({
         <text
           x={MARGIN.left + 5}
           y={MARGIN.top + 25}
-          fill="rgba(255, 255, 255, 0.5)"
+          fill="var(--c-fg-50)"
           fontSize={10}
         >
           1.0

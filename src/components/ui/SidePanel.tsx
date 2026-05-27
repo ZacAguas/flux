@@ -43,7 +43,7 @@ export function SidePanel({ overlayMode }: SidePanelProps) {
 
         {/* Overlay panel */}
         <motion.div
-          className="absolute top-0 bottom-0 left-12 bg-black/40 backdrop-blur-sm border-r border-white/8 z-20 flex flex-col overflow-hidden"
+          className="absolute top-0 bottom-0 left-12 bg-white/85 dark:bg-black/40 backdrop-blur-sm border-r border-black/8 dark:border-white/8 z-20 flex flex-col overflow-hidden"
           animate={{ width: isOpen ? PANEL_WIDTH : 0 }}
           transition={springWidth}
           style={{ boxShadow: isOpen ? '6px 0 28px rgba(0,0,0,0.4)' : 'none' }}
@@ -56,7 +56,7 @@ export function SidePanel({ overlayMode }: SidePanelProps) {
 
   return (
     <motion.div
-      className="absolute inset-y-0 left-0 bg-black/20 border-r border-white/8 flex flex-col overflow-hidden z-10"
+      className="absolute inset-y-0 left-0 bg-white/75 dark:bg-black/20 border-r border-black/8 dark:border-white/8 flex flex-col overflow-hidden z-10"
       animate={{ width: isOpen ? PANEL_WIDTH : 0 }}
       transition={springWidth}
     >
@@ -107,13 +107,13 @@ function PanelContents() {
   return (
     <div style={{ width: PANEL_WIDTH }} className="flex flex-col h-full min-h-0 select-none">
       {/* Header */}
-      <div className="flex items-center justify-between px-3.5 py-2 border-b border-white/8 flex-shrink-0 min-h-[40px]">
-        <span className="text-[9px] font-semibold text-white/30 uppercase tracking-[0.1em]">Controls</span>
+      <div className="flex items-center justify-between px-3.5 py-2 border-b border-black/8 dark:border-white/8 flex-shrink-0 min-h-[40px]">
+        <span className="text-[9px] font-semibold text-black/30 dark:text-white/30 uppercase tracking-[0.1em]">Controls</span>
         <div className="flex gap-0.5">
           <motion.button
             onClick={closeAll}
             title="Close all"
-            className="!p-0 !border-0 w-6 h-6 flex items-center justify-center rounded text-white/30 hover:text-white/60 hover:bg-white/8"
+            className="!p-0 !border-0 w-6 h-6 flex items-center justify-center rounded text-black/30 dark:text-white/30 hover:text-black/60 dark:hover:text-white/60 hover:bg-black/8 dark:hover:bg-white/8"
             whileTap={{ scale: 0.88 }}
           >
             <XMarkIcon className="w-3.5 h-3.5" />
@@ -132,7 +132,7 @@ function PanelContents() {
               <motion.div
                 key={id}
                 ref={(el) => { if (el) sectionEls.current.set(id, el); else sectionEls.current.delete(id); }}
-                className={idx > 0 ? 'border-t border-white/6' : ''}
+                className={idx > 0 ? 'border-t border-black/6 dark:border-white/6' : ''}
                 style={{ outline: dragOverId === id ? '1px solid rgba(19,221,209,0.4)' : 'none' }}
                 initial={{ opacity: 0, x: -12 }}
                 animate={{ opacity: 1, x: 0 }}
@@ -141,10 +141,10 @@ function PanelContents() {
                 layout
               >
                 {/* Section header */}
-                <div className="sticky top-0 z-[1] flex items-center gap-1.5 px-2 py-1.5 bg-black/20 backdrop-blur-[6px] border-b border-white/6">
+                <div className="sticky top-0 z-[1] flex items-center gap-1.5 px-2 py-1.5 bg-white/70 dark:bg-black/20 backdrop-blur-[6px] border-b border-black/6 dark:border-white/6">
                   {/* Drag grip */}
                   <div
-                    className="cursor-grab active:cursor-grabbing text-white/20 hover:text-white/40 flex-shrink-0 flex items-center"
+                    className="cursor-grab active:cursor-grabbing text-black/20 dark:text-white/20 hover:text-black/40 dark:hover:text-white/40 flex-shrink-0 flex items-center"
                     style={{ touchAction: 'none' }}
                     onPointerDown={(e) => {
                       e.currentTarget.setPointerCapture(e.pointerId);
@@ -181,14 +181,14 @@ function PanelContents() {
                   <div className="w-0.5 h-3 rounded-full opacity-70 flex-shrink-0" style={{ backgroundColor: ACCENT_COLOR }} />
 
                   {/* Title */}
-                  <span className="flex-1 text-xs font-semibold text-white/80 tracking-[0.01em] min-w-0 truncate">
+                  <span className="flex-1 text-xs font-semibold text-black/75 dark:text-white/80 tracking-[0.01em] min-w-0 truncate">
                     {label}
                   </span>
 
                   {/* Collapse chevron */}
                   <motion.button
                     onClick={() => toggleCollapse(id)}
-                    className="!p-0 !border-0 w-5 h-5 flex items-center justify-center rounded text-white/30 hover:text-white/60 hover:bg-white/8 flex-shrink-0"
+                    className="!p-0 !border-0 w-5 h-5 flex items-center justify-center rounded text-black/30 dark:text-white/30 hover:text-black/60 dark:hover:text-white/60 hover:bg-black/8 dark:hover:bg-white/8 flex-shrink-0"
                     animate={{ rotate: isCollapsed ? -90 : 0 }}
                     transition={{ type: 'spring', stiffness: 400, damping: 28 }}
                     whileTap={{ scale: 0.88 }}
@@ -199,7 +199,7 @@ function PanelContents() {
                   {/* Close */}
                   <motion.button
                     onClick={() => closeOne(id)}
-                    className="!p-0 !border-0 w-5 h-5 flex items-center justify-center rounded text-white/25 hover:text-white/55 hover:bg-white/8 flex-shrink-0"
+                    className="!p-0 !border-0 w-5 h-5 flex items-center justify-center rounded text-black/25 dark:text-white/25 hover:text-black/55 dark:hover:text-white/55 hover:bg-black/8 dark:hover:bg-white/8 flex-shrink-0"
                     whileTap={{ scale: 0.88 }}
                   >
                     <XMarkIcon className="w-3.5 h-3.5" />
@@ -230,7 +230,7 @@ function PanelContents() {
 
         {activeSections.length === 0 && (
           <motion.div
-            className="p-7 text-center text-xs text-white/20"
+            className="p-7 text-center text-xs text-black/20 dark:text-white/20"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 0.1 }}

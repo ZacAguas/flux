@@ -1,6 +1,8 @@
 @import "tailwindcss";
 @import "@heroui/styles";
 
+@custom-variant dark (&:where(.dark, .dark *));
+
 :root {
   --accent: #13ddd1;
 
@@ -8,14 +10,58 @@
   line-height: 1.5;
   font-weight: 400;
 
-  color-scheme: light dark;
-  color: rgba(255, 255, 255, 0.87);
-  background-color: #242424;
-
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+
+  /* Light mode CSS vars for inline styles */
+  --c-fg-85: rgba(0,0,0,0.85);
+  --c-fg-80: rgba(0,0,0,0.80);
+  --c-fg-65: rgba(0,0,0,0.65);
+  --c-fg-60: rgba(0,0,0,0.60);
+  --c-fg-50: rgba(0,0,0,0.50);
+  --c-fg-45: rgba(0,0,0,0.45);
+  --c-fg-40: rgba(0,0,0,0.40);
+  --c-fg-35: rgba(0,0,0,0.35);
+  --c-fg-30: rgba(0,0,0,0.30);
+  --c-fg-20: rgba(0,0,0,0.20);
+  --c-fg-08: rgba(0,0,0,0.08);
+  --c-fg-05: rgba(0,0,0,0.05);
+  --c-fg-00: rgba(0,0,0,0);
+  --c-bg-glass: rgba(255,255,255,0.92);
+  --c-bg-modal: #f8f9fa;
+  --c-bg-chart: rgba(245,246,248,0.98);
+  --c-chart-border: rgba(0,0,0,0.12);
+
+  color-scheme: light;
+  color: rgba(0, 0, 0, 0.87);
+  background-color: #e8eaed;
+}
+
+.dark {
+  /* Dark mode CSS vars for inline styles */
+  --c-fg-85: rgba(255,255,255,0.85);
+  --c-fg-80: rgba(255,255,255,0.80);
+  --c-fg-65: rgba(255,255,255,0.65);
+  --c-fg-60: rgba(255,255,255,0.60);
+  --c-fg-50: rgba(255,255,255,0.50);
+  --c-fg-45: rgba(255,255,255,0.45);
+  --c-fg-40: rgba(255,255,255,0.40);
+  --c-fg-35: rgba(255,255,255,0.35);
+  --c-fg-30: rgba(255,255,255,0.30);
+  --c-fg-20: rgba(255,255,255,0.20);
+  --c-fg-08: rgba(255,255,255,0.08);
+  --c-fg-05: rgba(255,255,255,0.05);
+  --c-fg-00: rgba(255,255,255,0);
+  --c-bg-glass: rgba(13,13,18,0.88);
+  --c-bg-modal: #171717;
+  --c-bg-chart: rgba(15,15,15,0.95);
+  --c-chart-border: rgba(255,255,255,0.15);
+
+  color-scheme: dark;
+  color: rgba(255, 255, 255, 0.87);
+  background-color: #0d0d12;
 }
 
 a {
@@ -53,12 +99,3 @@ h1 {
   box-shadow: none !important;
 }
 
-@media (prefers-color-scheme: light) {
-  :root {
-    color: #213547;
-    background-color: #ffffff;
-  }
-  a:hover {
-    color: #747bff;
-  }
-}

@@ -141,6 +141,11 @@ function App() {
   const currentSessionName = useViewerStore((state) => state.currentSessionName);
   const helpModalOpen = useViewerStore((state) => state.helpModalOpen);
   const setHelpModalOpen = useViewerStore((state) => state.setHelpModalOpen);
+  const theme = useViewerStore((state) => state.theme);
+
+  useEffect(() => {
+    document.documentElement.classList.toggle('dark', theme === 'dark');
+  }, [theme]);
 
   useEffect(() => {
     const label = currentSessionName
@@ -230,8 +235,8 @@ function App() {
             key="drag-overlay"
             className="fixed inset-0 z-[9999] pointer-events-none flex items-center justify-center"
             initial={{ opacity: 0, backdropFilter: 'blur(0px)' }}
-            animate={{ opacity: 1, backdropFilter: 'blur(6px)', backgroundColor: 'rgba(0,0,0,0.35)' }}
-            exit={{ opacity: 0, backdropFilter: 'blur(0px)', backgroundColor: 'rgba(0,0,0,0)' }}
+            animate={{ opacity: 1, backdropFilter: 'blur(6px)', backgroundColor: theme === 'dark' ? 'rgba(0,0,0,0.35)' : 'rgba(255,255,255,0.35)' }}
+            exit={{ opacity: 0, backdropFilter: 'blur(0px)', backgroundColor: theme === 'dark' ? 'rgba(0,0,0,0)' : 'rgba(255,255,255,0)' }}
             transition={{ duration: 0.2 }}
           >
             <motion.div

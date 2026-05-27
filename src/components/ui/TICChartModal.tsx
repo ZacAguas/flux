@@ -14,14 +14,14 @@ export function TICChartModal({ isOpen, onClose, rois, curves }: TICChartModalPr
   return (
     <AppModal isOpen={isOpen} onClose={onClose} maxWidth="max-w-3xl" showClose>
       <ModalHeader>
-        <ModalIcon className="bg-white/10 text-white/70">
+        <ModalIcon className="bg-black/8 dark:bg-white/10 text-black/60 dark:text-white/70">
           <PresentationChartLineIcon className="size-4" />
         </ModalIcon>
         <ModalTitle>Time Intensity Curves</ModalTitle>
       </ModalHeader>
 
       <ModalBody className="!overflow-visible">
-        <p className="text-[10px] text-white/30 mb-3">
+        <p className="text-[10px] text-black/30 dark:text-white/30 mb-3">
           Scroll to zoom · Drag to pan · Double-click to reset
         </p>
         <TICChart rois={rois} curves={curves} height={380} />

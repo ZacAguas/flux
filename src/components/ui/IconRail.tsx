@@ -1,5 +1,5 @@
 import { motion, AnimatePresence } from 'motion/react';
-import { QuestionMarkCircleIcon } from '@heroicons/react/24/outline';
+import { QuestionMarkCircleIcon, SunIcon, MoonIcon } from '@heroicons/react/24/outline';
 import { useViewerStore } from '../../store/viewerStore';
 import { inject4D, ACCENT_COLOR, selectIs4D } from '../../utils/uiLayout';
 import { NAV_SECTIONS, NAV_SECTION_4D, NAV_LAYOUTS } from '../../utils/navConstants';
@@ -11,14 +11,24 @@ export function IconRail() {
   const layoutMode     = useViewerStore((state) => state.layoutMode);
   const setLayoutMode  = useViewerStore((state) => state.setLayoutMode);
   const setHelpModalOpen = useViewerStore((state) => state.setHelpModalOpen);
+  const theme          = useViewerStore((state) => state.theme);
+  const toggleTheme    = useViewerStore((state) => state.toggleTheme);
+
+  const isDark = theme === 'dark';
+  const fg35   = isDark ? 'rgba(255,255,255,0.35)' : 'rgba(0,0,0,0.35)';
+  const fg65   = isDark ? 'rgba(255,255,255,0.65)' : 'rgba(0,0,0,0.65)';
+  const fg85   = isDark ? 'rgba(255,255,255,0.85)' : 'rgba(0,0,0,0.85)';
+  const bg0    = isDark ? 'rgba(255,255,255,0)'    : 'rgba(0,0,0,0)';
+  const bgAct  = isDark ? 'rgba(255,255,255,0.10)' : 'rgba(0,0,0,0.08)';
+  const bgHov  = isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)';
 
   const sections = inject4D(NAV_SECTIONS, NAV_SECTION_4D, is4D, 4);
 
   return (
-    <div className="w-12 flex-shrink-0 flex flex-col bg-black/30 border-r border-white/8 z-10 select-none">
+    <div className="w-12 flex-shrink-0 flex flex-col bg-white/80 dark:bg-black/30 border-r border-black/8 dark:border-white/8 z-10 select-none">
       {/* Logo */}
       <motion.div
-        className="flex items-center justify-center py-3 border-b border-white/8"
+        className="flex items-center justify-center py-3 border-b border-black/8 dark:border-white/8"
         whileHover={{ scale: 1.08 }}
         whileTap={{ scale: 0.94 }}
         transition={{ type: 'spring', stiffness: 500, damping: 28 }}
@@ -27,7 +37,7 @@ export function IconRail() {
       </motion.div>
 
       {/* Layout modes */}
-      <div className="flex flex-col border-b border-white/8 py-1">
+      <div className="flex flex-col border-b border-black/8 dark:border-white/8 py-1">
         {NAV_LAYOUTS.map(({ id, icon: Icon, label }) => {
           const isActive = layoutMode === id;
           return (
@@ -37,12 +47,12 @@ export function IconRail() {
               title={label}
               className="!p-0 !border-0 rounded-none w-full h-9 flex items-center justify-center"
               animate={{
-                backgroundColor: isActive ? 'rgba(255,255,255,0.1)' : 'rgba(255,255,255,0)',
-                color: isActive ? 'rgba(255,255,255,0.85)' : 'rgba(255,255,255,0.35)',
+                backgroundColor: isActive ? bgAct : bg0,
+                color: isActive ? fg85 : fg35,
               }}
               whileHover={{
-                backgroundColor: isActive ? 'rgba(255,255,255,0.1)' : 'rgba(255,255,255,0.06)',
-                color: isActive ? 'rgba(255,255,255,0.85)' : 'rgba(255,255,255,0.65)',
+                backgroundColor: isActive ? bgAct : bgHov,
+                color: isActive ? fg85 : fg65,
               }}
               whileTap={{ scale: 0.88 }}
               transition={{ type: 'spring', stiffness: 500, damping: 30 }}
@@ -65,12 +75,12 @@ export function IconRail() {
               style={{ padding: '11px 0' }}
               className="relative rounded-none w-full flex flex-col items-center justify-center gap-1"
               animate={{
-                backgroundColor: isActive ? 'rgba(19,221,209,0.09)' : 'rgba(255,255,255,0)',
-                color: isActive ? ACCENT_COLOR : 'rgba(255,255,255,0.40)',
+                backgroundColor: isActive ? 'rgba(19,221,209,0.09)' : bg0,
+                color: isActive ? ACCENT_COLOR : fg35,
               }}
               whileHover={{
-                backgroundColor: isActive ? 'rgba(19,221,209,0.09)' : 'rgba(255,255,255,0.05)',
-                color: isActive ? ACCENT_COLOR : 'rgba(255,255,255,0.65)',
+                backgroundColor: isActive ? 'rgba(19,221,209,0.09)' : bgHov,
+                color: isActive ? ACCENT_COLOR : fg65,
               }}
               whileTap={{ scale: 0.9 }}
               transition={{ type: 'spring', stiffness: 500, damping: 30 }}
@@ -98,14 +108,25 @@ export function IconRail() {
         })}
       </div>
 
-      {/* Help */}
-      <div className="border-t border-white/8">
+      {/* Help + theme toggle */}
+      <div className="border-t border-black/8 dark:border-white/8">
+        <motion.button
+          onClick={toggleTheme}
+          title={isDark ? 'Switch to light mode' : 'Switch to dark mode'}
+          className="!p-0 !border-0 rounded-none w-12 h-10 flex items-center justify-center"
+          animate={{ color: fg35, backgroundColor: bg0 }}
+          whileHover={{ color: fg65, backgroundColor: bgHov }}
+          whileTap={{ scale: 0.9 }}
+          transition={{ type: 'spring', stiffness: 500, damping: 30 }}
+        >
+          {isDark ? <SunIcon className="w-[17px] h-[17px]" /> : <MoonIcon className="w-[17px] h-[17px]" />}
+        </motion.button>
         <motion.button
           onClick={() => setHelpModalOpen(true)}
           title="Help"
-          className="!p-0 !border-0 rounded-none w-12 h-12 flex items-center justify-center"
-          animate={{ color: 'rgba(255,255,255,0.35)', backgroundColor: 'rgba(255,255,255,0)' }}
-          whileHover={{ color: 'rgba(255,255,255,0.65)', backgroundColor: 'rgba(255,255,255,0.05)' }}
+          className="!p-0 !border-0 rounded-none w-12 h-10 flex items-center justify-center"
+          animate={{ color: fg35, backgroundColor: bg0 }}
+          whileHover={{ color: fg65, backgroundColor: bgHov }}
           whileTap={{ scale: 0.9 }}
           transition={{ type: 'spring', stiffness: 500, damping: 30 }}
         >

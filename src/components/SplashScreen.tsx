@@ -1,7 +1,7 @@
 import { motion } from 'motion/react';
 import { ThreadsBackground } from './ui/ThreadsBackground';
 import { FileImport } from './FileImport';
-import { QuestionMarkCircleIcon } from '@heroicons/react/24/outline';
+import { QuestionMarkCircleIcon, SunIcon, MoonIcon } from '@heroicons/react/24/outline';
 import { useViewerStore } from '../store/viewerStore';
 
 const stagger = {
@@ -16,9 +16,11 @@ const fadeUp = {
 
 export function SplashScreen() {
   const setHelpModalOpen = useViewerStore((state) => state.setHelpModalOpen);
+  const theme = useViewerStore((state) => state.theme);
+  const toggleTheme = useViewerStore((state) => state.toggleTheme);
 
   return (
-    <div className="fixed inset-0 bg-[#0d0d10] flex items-center justify-center overflow-hidden">
+    <div className="fixed inset-0 bg-[#e8eaed] dark:bg-[#0d0d10] flex items-center justify-center overflow-hidden">
       <ThreadsBackground />
 
       <motion.div
@@ -48,7 +50,7 @@ export function SplashScreen() {
           <h1 className="m-0 text-6xl font-light tracking-[0.35em] pl-[0.35em] bg-gradient-to-r from-[#13ddd1] to-[#0a72f5] bg-clip-text text-transparent">
             FLUX
           </h1>
-          <p className="mt-3 mb-0 text-lg text-white/50 tracking-[0.22em] uppercase">
+          <p className="mt-3 mb-0 text-lg text-black/50 dark:text-white/50 tracking-[0.22em] uppercase">
             4D Medical Imaging Viewer
           </p>
         </motion.div>
@@ -59,24 +61,37 @@ export function SplashScreen() {
         </motion.div>
 
         {/* Hint */}
-        <motion.p className="m-0 text-sm text-white/40 tracking-[0.08em]" variants={fadeUp}>
+        <motion.p className="m-0 text-sm text-black/40 dark:text-white/40 tracking-[0.08em]" variants={fadeUp}>
           Drop a NIfTI file anywhere to get started (.nii/.nii.gz)
         </motion.p>
       </motion.div>
 
-      {/* Help button */}
-      <motion.button
-        onClick={() => setHelpModalOpen(true)}
-        className="absolute bottom-6 right-6 z-10 p-2 text-white/40 hover:text-white/70 transition-colors"
-        aria-label="Open help"
+      {/* Bottom-right buttons: theme toggle + help */}
+      <motion.div
+        className="absolute bottom-6 right-6 z-10 flex items-center gap-1"
         initial={{ opacity: 0, y: 8 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.5, duration: 0.35 }}
-        whileHover={{ scale: 1.12 }}
-        whileTap={{ scale: 0.92 }}
       >
-        <QuestionMarkCircleIcon className="w-6 h-6" />
-      </motion.button>
+        <motion.button
+          onClick={toggleTheme}
+          className="p-2 text-black/40 dark:text-white/40 hover:text-black/70 dark:hover:text-white/70 transition-colors"
+          aria-label="Toggle theme"
+          whileHover={{ scale: 1.12 }}
+          whileTap={{ scale: 0.92 }}
+        >
+          {theme === 'dark' ? <SunIcon className="w-6 h-6" /> : <MoonIcon className="w-6 h-6" />}
+        </motion.button>
+        <motion.button
+          onClick={() => setHelpModalOpen(true)}
+          className="p-2 text-black/40 dark:text-white/40 hover:text-black/70 dark:hover:text-white/70 transition-colors"
+          aria-label="Open help"
+          whileHover={{ scale: 1.12 }}
+          whileTap={{ scale: 0.92 }}
+        >
+          <QuestionMarkCircleIcon className="w-6 h-6" />
+        </motion.button>
+      </motion.div>
     </div>
   );
 }

@@ -45,21 +45,21 @@ const TABS: Tab[] = [
     icon: <RocketLaunchIcon className="w-4 h-4" />,
     content: (
       <div className="space-y-4">
-        <h3 className="text-base font-semibold text-white">Getting Started</h3>
-        <p className="text-sm text-white/70">
+        <h3 className="text-base font-semibold text-black dark:text-white">Getting Started</h3>
+        <p className="text-sm text-black/60 dark:text-white/70">
           Flux is a 4D medical imaging viewer for NIfTI files. It renders volumetric data in 3D using GPU-accelerated raymarching and provides 2D slice views for detailed inspection.
         </p>
         <div className="space-y-2">
-          <h4 className="text-sm font-medium text-white/90">Importing a file</h4>
-          <ol className="list-decimal list-inside space-y-1 text-sm text-white/70">
-            <li>Drag a <code className="bg-white/10 px-1 rounded text-xs">.nii</code> or <code className="bg-white/10 px-1 rounded text-xs">.nii.gz</code> file anywhere on the page, or click the import zone on the home screen to browse.</li>
+          <h4 className="text-sm font-medium text-black/80 dark:text-white/90">Importing a file</h4>
+          <ol className="list-decimal list-inside space-y-1 text-sm text-black/60 dark:text-white/70">
+            <li>Drag a <code className="bg-black/8 dark:bg-white/10 px-1 rounded text-xs">.nii</code> or <code className="bg-black/8 dark:bg-white/10 px-1 rounded text-xs">.nii.gz</code> file anywhere on the page, or click the import zone on the home screen to browse.</li>
             <li>The volume will be parsed and loaded into the 3D viewer automatically.</li>
             <li>For 4D volumes (e.g. dynamic MRIs, fMRIs) time controls will appear in the Playback section.</li>
           </ol>
         </div>
         <div className="space-y-2">
-          <h4 className="text-sm font-medium text-white/90">First steps after loading</h4>
-          <ul className="list-disc list-inside space-y-1 text-sm text-white/70">
+          <h4 className="text-sm font-medium text-black/80 dark:text-white/90">First steps after loading</h4>
+          <ul className="list-disc list-inside space-y-1 text-sm text-black/60 dark:text-white/70">
             <li>Use the Layout buttons in the control panel to switch between Single, Slices, and Quad views.</li>
             <li>Open the Transfer Function section to adjust how intensity values map to color and opacity.</li>
             <li>Use the Volume Rendering section to change quality and step size.</li>
@@ -74,27 +74,27 @@ const TABS: Tab[] = [
     icon: <CursorArrowRaysIcon className="w-4 h-4" />,
     content: (
       <div className="space-y-4">
-        <h3 className="text-base font-semibold text-white">Navigation</h3>
+        <h3 className="text-base font-semibold text-black dark:text-white">Navigation</h3>
         <div className="space-y-2">
-          <h4 className="text-sm font-medium text-white/90">3D Volume View</h4>
-          <ul className="list-disc list-inside space-y-1 text-sm text-white/70">
-            <li><span className="text-white/90">Rotate:</span> Left-click and drag</li>
-            <li><span className="text-white/90">Pan:</span> Right-click and drag, or <Kbd className="text-[10px] text-white/70 bg-white/5 backdrop-blur-sm rounded-md px-2 py-1"><Kbd.Abbr keyValue="shift" /><Kbd.Content>Click</Kbd.Content></Kbd> and drag</li>
-            <li><span className="text-white/90">Zoom:</span> Scroll wheel</li>
+          <h4 className="text-sm font-medium text-black/80 dark:text-white/90">3D Volume View</h4>
+          <ul className="list-disc list-inside space-y-1 text-sm text-black/60 dark:text-white/70">
+            <li><span className="text-black/80 dark:text-white/90">Rotate:</span> Left-click and drag</li>
+            <li><span className="text-black/80 dark:text-white/90">Pan:</span> Right-click and drag, or <Kbd className="text-[10px] text-black/60 dark:text-white/70 bg-black/5 dark:bg-white/5 backdrop-blur-sm rounded-md px-2 py-1"><Kbd.Abbr keyValue="shift" /><Kbd.Content>Click</Kbd.Content></Kbd> and drag</li>
+            <li><span className="text-black/80 dark:text-white/90">Zoom:</span> Scroll wheel</li>
           </ul>
         </div>
         <div className="space-y-2">
-          <h4 className="text-sm font-medium text-white/90">Slice Views</h4>
-          <ul className="list-disc list-inside space-y-1 text-sm text-white/70">
-            <li><span className="text-white/90">Move crosshair:</span> Left-click and drag</li>
-            <li><span className="text-white/90">Pan view:</span> Middle-click drag, or <Kbd className="text-[10px] text-white/70 bg-white/5 backdrop-blur-sm rounded-md px-2 py-1"><Kbd.Abbr keyValue="ctrl" /><Kbd.Content>Click</Kbd.Content></Kbd> and drag</li>
-            <li><span className="text-white/90">Zoom:</span> Scroll wheel</li>
-            <li><span className="text-white/90">Window / Level:</span> Right-click and drag</li>
+          <h4 className="text-sm font-medium text-black/80 dark:text-white/90">Slice Views</h4>
+          <ul className="list-disc list-inside space-y-1 text-sm text-black/60 dark:text-white/70">
+            <li><span className="text-black/80 dark:text-white/90">Move crosshair:</span> Left-click and drag</li>
+            <li><span className="text-black/80 dark:text-white/90">Pan view:</span> Middle-click drag, or <Kbd className="text-[10px] text-black/60 dark:text-white/70 bg-black/5 dark:bg-white/5 backdrop-blur-sm rounded-md px-2 py-1"><Kbd.Abbr keyValue="ctrl" /><Kbd.Content>Click</Kbd.Content></Kbd> and drag</li>
+            <li><span className="text-black/80 dark:text-white/90">Zoom:</span> Scroll wheel</li>
+            <li><span className="text-black/80 dark:text-white/90">Window / Level:</span> Right-click and drag</li>
           </ul>
         </div>
         <div className="space-y-2">
-          <h4 className="text-sm font-medium text-white/90">Control Panel</h4>
-          <ul className="list-disc list-inside space-y-1 text-sm text-white/70">
+          <h4 className="text-sm font-medium text-black/80 dark:text-white/90">Control Panel</h4>
+          <ul className="list-disc list-inside space-y-1 text-sm text-black/60 dark:text-white/70">
             <li>The panel slides open when you hover over the top edge of the screen.</li>
             <li>Click the pin icon to keep it open permanently.</li>
             <li>Click the pin icon again (shown as an up arrow) to unpin and let it auto-hide.</li>
@@ -109,22 +109,22 @@ const TABS: Tab[] = [
     icon: <Squares2X2Icon className="w-4 h-4" />,
     content: (
       <div className="space-y-4">
-        <h3 className="text-base font-semibold text-white">Layouts</h3>
-        <p className="text-sm text-white/70">
+        <h3 className="text-base font-semibold text-black dark:text-white">Layouts</h3>
+        <p className="text-sm text-black/60 dark:text-white/70">
           Use the Layout buttons in the control panel to switch between three viewing modes.
         </p>
         <div className="space-y-3">
-          <div className="p-3 bg-white/5 rounded border border-white/10">
-            <h4 className="text-sm font-medium text-white/90 mb-1">Single</h4>
-            <p className="text-xs text-white/60">Full-screen 3D volume rendering. Best for overall structural examination and transfer function tuning.</p>
+          <div className="p-3 bg-black/5 dark:bg-white/5 rounded border border-black/10 dark:border-white/10">
+            <h4 className="text-sm font-medium text-black/80 dark:text-white/90 mb-1">Single</h4>
+            <p className="text-xs text-black/55 dark:text-white/60">Full-screen 3D volume rendering. Best for overall structural examination and transfer function tuning.</p>
           </div>
-          <div className="p-3 bg-white/5 rounded border border-white/10">
-            <h4 className="text-sm font-medium text-white/90 mb-1">Slices</h4>
-            <p className="text-xs text-white/60">Three orthogonal slice views (axial, coronal, sagittal) side by side. Best for precise anatomical navigation and measurement.</p>
+          <div className="p-3 bg-black/5 dark:bg-white/5 rounded border border-black/10 dark:border-white/10">
+            <h4 className="text-sm font-medium text-black/80 dark:text-white/90 mb-1">Slices</h4>
+            <p className="text-xs text-black/55 dark:text-white/60">Three orthogonal slice views (axial, coronal, sagittal) side by side. Best for precise anatomical navigation and measurement.</p>
           </div>
-          <div className="p-3 bg-white/5 rounded border border-white/10">
-            <h4 className="text-sm font-medium text-white/90 mb-1">Quad</h4>
-            <p className="text-xs text-white/60">All three slice views plus the 3D volume rendering in a four-panel grid. Best for correlating 2D slices with the 3D structure simultaneously.</p>
+          <div className="p-3 bg-black/5 dark:bg-white/5 rounded border border-black/10 dark:border-white/10">
+            <h4 className="text-sm font-medium text-black/80 dark:text-white/90 mb-1">Quad</h4>
+            <p className="text-xs text-black/55 dark:text-white/60">All three slice views plus the 3D volume rendering in a four-panel grid. Best for correlating 2D slices with the 3D structure simultaneously.</p>
           </div>
         </div>
       </div>
@@ -136,23 +136,23 @@ const TABS: Tab[] = [
     icon: <PhotoIcon className="w-4 h-4" />,
     content: (
       <div className="space-y-4">
-        <h3 className="text-base font-semibold text-white">Slice Views</h3>
+        <h3 className="text-base font-semibold text-black dark:text-white">Slice Views</h3>
         <div className="space-y-2">
-          <h4 className="text-sm font-medium text-white/90">Slice Navigation</h4>
-          <p className="text-sm text-white/70">
+          <h4 className="text-sm font-medium text-black/80 dark:text-white/90">Slice Navigation</h4>
+          <p className="text-sm text-black/60 dark:text-white/70">
             Use the Slice Navigation section in the control panel to set the axial, coronal, and sagittal slice positions precisely. You can also scroll over each slice panel directly.
           </p>
         </div>
         <div className="space-y-2">
-          <h4 className="text-sm font-medium text-white/90">Window / Level (Contrast)</h4>
-          <ul className="list-disc list-inside space-y-1 text-sm text-white/70">
-            <li><span className="text-white/90">Window:</span> Controls the range of intensities displayed. A narrower window increases contrast.</li>
-            <li><span className="text-white/90">Level:</span> Sets the center intensity value. Adjusting this shifts the displayed range up or down.</li>
+          <h4 className="text-sm font-medium text-black/80 dark:text-white/90">Window / Level (Contrast)</h4>
+          <ul className="list-disc list-inside space-y-1 text-sm text-black/60 dark:text-white/70">
+            <li><span className="text-black/80 dark:text-white/90">Window:</span> Controls the range of intensities displayed. A narrower window increases contrast.</li>
+            <li><span className="text-black/80 dark:text-white/90">Level:</span> Sets the center intensity value. Adjusting this shifts the displayed range up or down.</li>
           </ul>
         </div>
         <div className="space-y-2">
-          <h4 className="text-sm font-medium text-white/90">Crosshairs</h4>
-          <p className="text-sm text-white/70">
+          <h4 className="text-sm font-medium text-black/80 dark:text-white/90">Crosshairs</h4>
+          <p className="text-sm text-black/60 dark:text-white/70">
             Toggle crosshairs from the Display section. Crosshairs show the intersection point across all three slice views, helping you correlate positions.
           </p>
         </div>
@@ -165,31 +165,31 @@ const TABS: Tab[] = [
     icon: <CubeIcon className="w-4 h-4" />,
     content: (
       <div className="space-y-4">
-        <h3 className="text-base font-semibold text-white">Volume Rendering</h3>
-        <p className="text-sm text-white/70">
+        <h3 className="text-base font-semibold text-black dark:text-white">Volume Rendering</h3>
+        <p className="text-sm text-black/60 dark:text-white/70">
           Volume rendering uses GPU-accelerated raymarching to visualize the full 3D dataset.
         </p>
         <div className="space-y-2">
-          <h4 className="text-sm font-medium text-white/90">Quality Presets</h4>
-          <p className="text-sm text-white/70">
+          <h4 className="text-sm font-medium text-black/80 dark:text-white/90">Quality Presets</h4>
+          <p className="text-sm text-black/60 dark:text-white/70">
             Choose from Low, Medium, High, or Ultra quality. Higher quality uses more ray samples per pixel for smoother rendering but is more demanding on the GPU.
           </p>
         </div>
         <div className="space-y-2">
-          <h4 className="text-sm font-medium text-white/90">Step Size</h4>
-          <p className="text-sm text-white/70">
+          <h4 className="text-sm font-medium text-black/80 dark:text-white/90">Step Size</h4>
+          <p className="text-sm text-black/60 dark:text-white/70">
             Controls how far apart samples are taken along each ray. Smaller step sizes produce more accurate results but increase rendering cost.
           </p>
         </div>
         <div className="space-y-2">
-          <h4 className="text-sm font-medium text-white/90">Shading</h4>
-          <p className="text-sm text-white/70">
+          <h4 className="text-sm font-medium text-black/80 dark:text-white/90">Shading</h4>
+          <p className="text-sm text-black/60 dark:text-white/70">
             Toggles whether or not volume shading is applied (Blinn-Phong). NOTE: requires WebGPU.
           </p>
         </div>
         <div className="space-y-2">
-          <h4 className="text-sm font-medium text-white/90">Threshold</h4>
-          <p className="text-sm text-white/70">
+          <h4 className="text-sm font-medium text-black/80 dark:text-white/90">Threshold</h4>
+          <p className="text-sm text-black/60 dark:text-white/70">
             Sets the minimum opacity threshold for early ray termination. Rays stop accumulating once this threshold is reached, improving performance.
           </p>
         </div>
@@ -202,23 +202,23 @@ const TABS: Tab[] = [
     icon: <ChartBarSquareIcon className="w-4 h-4" />,
     content: (
       <div className="space-y-4">
-        <h3 className="text-base font-semibold text-white">Transfer Function</h3>
-        <p className="text-sm text-white/70">
+        <h3 className="text-base font-semibold text-black dark:text-white">Transfer Function</h3>
+        <p className="text-sm text-black/60 dark:text-white/70">
           The transfer function maps voxel intensity values to colors and opacity. It controls which tissues are visible and how they are colored in the 3D view.
         </p>
         <div className="space-y-2">
-          <h4 className="text-sm font-medium text-white/90">Presets</h4>
-          <p className="text-sm text-white/70">
+          <h4 className="text-sm font-medium text-black/80 dark:text-white/90">Presets</h4>
+          <p className="text-sm text-black/60 dark:text-white/70">
             Select from built-in presets such as CT-Bone, CT-AAA, and MRI-Default.
           </p>
         </div>
         <div className="space-y-2">
-          <h4 className="text-sm font-medium text-white/90">Control Points</h4>
-          <ul className="list-disc list-inside space-y-1 text-sm text-white/70">
-            <li><span className="text-white/90">Add a point:</span> Double-click on an empty area of the editor.</li>
-            <li><span className="text-white/90">Move a point:</span> Click and drag an existing control point.</li>
-            <li><span className="text-white/90">Change color:</span> Click the color swatch on a control point.</li>
-            <li><span className="text-white/90">Remove a point:</span> <Kbd className="text-[10px] text-white/70 bg-white/5 backdrop-blur-sm rounded-md px-2 py-1"><Kbd.Abbr keyValue="alt" /></Kbd> + click (minimum 2 points required).</li>
+          <h4 className="text-sm font-medium text-black/80 dark:text-white/90">Control Points</h4>
+          <ul className="list-disc list-inside space-y-1 text-sm text-black/60 dark:text-white/70">
+            <li><span className="text-black/80 dark:text-white/90">Add a point:</span> Double-click on an empty area of the editor.</li>
+            <li><span className="text-black/80 dark:text-white/90">Move a point:</span> Click and drag an existing control point.</li>
+            <li><span className="text-black/80 dark:text-white/90">Change color:</span> Click the color swatch on a control point.</li>
+            <li><span className="text-black/80 dark:text-white/90">Remove a point:</span> <Kbd className="text-[10px] text-black/60 dark:text-white/70 bg-black/5 dark:bg-white/5 backdrop-blur-sm rounded-md px-2 py-1"><Kbd.Abbr keyValue="alt" /></Kbd> + click (minimum 2 points required).</li>
           </ul>
         </div>
       </div>
@@ -230,25 +230,25 @@ const TABS: Tab[] = [
     icon: <ScissorsIcon className="w-4 h-4" />,
     content: (
       <div className="space-y-4">
-        <h3 className="text-base font-semibold text-white">Clipping Planes</h3>
-        <p className="text-sm text-white/70">
+        <h3 className="text-base font-semibold text-black dark:text-white">Clipping Planes</h3>
+        <p className="text-sm text-black/60 dark:text-white/70">
           Clipping planes cut away portions of the volume to reveal internal structures. Up to three axis-aligned planes can be active simultaneously.
         </p>
         <div className="space-y-2">
-          <h4 className="text-sm font-medium text-white/90">Enabling a Plane</h4>
-          <p className="text-sm text-white/70">
+          <h4 className="text-sm font-medium text-black/80 dark:text-white/90">Enabling a Plane</h4>
+          <p className="text-sm text-black/60 dark:text-white/70">
             Toggle the checkbox next to the X, Y, or Z axis. Once enabled, use the position slider to move the cut.
           </p>
         </div>
         <div className="space-y-2">
-          <h4 className="text-sm font-medium text-white/90">Invert</h4>
-          <p className="text-sm text-white/70">
+          <h4 className="text-sm font-medium text-black/80 dark:text-white/90">Invert</h4>
+          <p className="text-sm text-black/60 dark:text-white/70">
             Flips which side of the plane is clipped.
           </p>
         </div>
         <div className="space-y-2">
-          <h4 className="text-sm font-medium text-white/90">Gizmos</h4>
-          <p className="text-sm text-white/70">
+          <h4 className="text-sm font-medium text-black/80 dark:text-white/90">Gizmos</h4>
+          <p className="text-sm text-black/60 dark:text-white/70">
             Enable gizmos to display interactive handles in the 3D view.
           </p>
         </div>
@@ -261,27 +261,27 @@ const TABS: Tab[] = [
     icon: <CalculatorIcon className="w-4 h-4" />,
     content: (
       <div className="space-y-4">
-        <h3 className="text-base font-semibold text-white">Measurements</h3>
-        <p className="text-sm text-white/70">
+        <h3 className="text-base font-semibold text-black dark:text-white">Measurements</h3>
+        <p className="text-sm text-black/60 dark:text-white/70">
           Place distance and angle markers directly on slice views.
         </p>
         <div className="space-y-2">
-          <h4 className="text-sm font-medium text-white/90">Distance Tool</h4>
-          <p className="text-sm text-white/70">
-            Press <Kbd className="text-[10px] text-white/70 bg-white/5 backdrop-blur-sm rounded-md px-2 py-1"><Kbd.Content>D</Kbd.Content></Kbd> or click Distance. Click two points to measure in millimetres.
+          <h4 className="text-sm font-medium text-black/80 dark:text-white/90">Distance Tool</h4>
+          <p className="text-sm text-black/60 dark:text-white/70">
+            Press <Kbd className="text-[10px] text-black/60 dark:text-white/70 bg-black/5 dark:bg-white/5 backdrop-blur-sm rounded-md px-2 py-1"><Kbd.Content>D</Kbd.Content></Kbd> or click Distance. Click two points to measure in millimetres.
           </p>
         </div>
         <div className="space-y-2">
-          <h4 className="text-sm font-medium text-white/90">Angle Tool</h4>
-          <p className="text-sm text-white/70">
-            Press <Kbd className="text-[10px] text-white/70 bg-white/5 backdrop-blur-sm rounded-md px-2 py-1"><Kbd.Content>A</Kbd.Content></Kbd> or click Angle. Click three points to measure degrees.
+          <h4 className="text-sm font-medium text-black/80 dark:text-white/90">Angle Tool</h4>
+          <p className="text-sm text-black/60 dark:text-white/70">
+            Press <Kbd className="text-[10px] text-black/60 dark:text-white/70 bg-black/5 dark:bg-white/5 backdrop-blur-sm rounded-md px-2 py-1"><Kbd.Content>A</Kbd.Content></Kbd> or click Angle. Click three points to measure degrees.
           </p>
         </div>
         <div className="space-y-2">
-          <h4 className="text-sm font-medium text-white/90">Managing Measurements</h4>
-          <ul className="list-disc list-inside space-y-1 text-sm text-white/70">
-            <li>Press <Kbd className="text-[10px] text-white/70 bg-white/5 backdrop-blur-sm rounded-md px-2 py-1"><Kbd.Content>Esc</Kbd.Content></Kbd> to cancel in-progress.</li>
-            <li>Select and press <Kbd className="text-[10px] text-white/70 bg-white/5 backdrop-blur-sm rounded-md px-2 py-1"><Kbd.Content>Delete</Kbd.Content></Kbd> to remove.</li>
+          <h4 className="text-sm font-medium text-black/80 dark:text-white/90">Managing Measurements</h4>
+          <ul className="list-disc list-inside space-y-1 text-sm text-black/60 dark:text-white/70">
+            <li>Press <Kbd className="text-[10px] text-black/60 dark:text-white/70 bg-black/5 dark:bg-white/5 backdrop-blur-sm rounded-md px-2 py-1"><Kbd.Content>Esc</Kbd.Content></Kbd> to cancel in-progress.</li>
+            <li>Select and press <Kbd className="text-[10px] text-black/60 dark:text-white/70 bg-black/5 dark:bg-white/5 backdrop-blur-sm rounded-md px-2 py-1"><Kbd.Content>Delete</Kbd.Content></Kbd> to remove.</li>
           </ul>
         </div>
       </div>
@@ -293,24 +293,24 @@ const TABS: Tab[] = [
     icon: <PresentationChartLineIcon className="w-4 h-4" />,
     content: (
       <div className="space-y-4">
-        <h3 className="text-base font-semibold text-white">Time Intensity Curves (4D)</h3>
-        <p className="text-sm text-white/70">
+        <h3 className="text-base font-semibold text-black dark:text-white">Time Intensity Curves (4D)</h3>
+        <p className="text-sm text-black/60 dark:text-white/70">
           Plots mean voxel intensity inside a circular ROI across every time step.
           Available only when a 4D volume is loaded.
         </p>
         <div className="space-y-2">
-          <h4 className="text-sm font-medium text-white/90">Placing a ROI</h4>
-          <ol className="list-decimal list-inside space-y-1 text-sm text-white/70">
+          <h4 className="text-sm font-medium text-black/80 dark:text-white/90">Placing a ROI</h4>
+          <ol className="list-decimal list-inside space-y-1 text-sm text-black/60 dark:text-white/70">
             <li>Open the Time Intensity Curves section and click Place ROI.</li>
             <li>Click and drag on any slice view to draw a circular ROI.</li>
             <li>Release to confirm — the curve appears immediately.</li>
           </ol>
         </div>
         <div className="space-y-2">
-          <h4 className="text-sm font-medium text-white/90">Chart axes</h4>
-          <ul className="list-disc list-inside space-y-1 text-sm text-white/70">
-            <li><span className="text-white/90">X:</span> Time in seconds (or step index if TR is absent).</li>
-            <li><span className="text-white/90">Y:</span> Raw mean voxel intensity inside the ROI.</li>
+          <h4 className="text-sm font-medium text-black/80 dark:text-white/90">Chart axes</h4>
+          <ul className="list-disc list-inside space-y-1 text-sm text-black/60 dark:text-white/70">
+            <li><span className="text-black/80 dark:text-white/90">X:</span> Time in seconds (or step index if TR is absent).</li>
+            <li><span className="text-black/80 dark:text-white/90">Y:</span> Raw mean voxel intensity inside the ROI.</li>
           </ul>
         </div>
       </div>
@@ -322,17 +322,17 @@ const TABS: Tab[] = [
     icon: <FilmIcon className="w-4 h-4" />,
     content: (
       <div className="space-y-4">
-        <h3 className="text-base font-semibold text-white">Playback (4D)</h3>
-        <p className="text-sm text-white/70">
+        <h3 className="text-base font-semibold text-black dark:text-white">Playback (4D)</h3>
+        <p className="text-sm text-black/60 dark:text-white/70">
           Appears automatically when a 4D NIfTI file is loaded.
         </p>
         <div className="space-y-2">
-          <h4 className="text-sm font-medium text-white/90">Controls</h4>
-          <ul className="list-disc list-inside space-y-1 text-sm text-white/70">
-            <li><span className="text-white/90">Play / Pause:</span> Start or stop automatic time step progression.</li>
-            <li><span className="text-white/90">Loop:</span> Restart from the first frame after the last.</li>
-            <li><span className="text-white/90">FPS:</span> Set the playback speed in frames per second.</li>
-            <li><span className="text-white/90">Time Slider:</span> Scrub to any specific time step.</li>
+          <h4 className="text-sm font-medium text-black/80 dark:text-white/90">Controls</h4>
+          <ul className="list-disc list-inside space-y-1 text-sm text-black/60 dark:text-white/70">
+            <li><span className="text-black/80 dark:text-white/90">Play / Pause:</span> Start or stop automatic time step progression.</li>
+            <li><span className="text-black/80 dark:text-white/90">Loop:</span> Restart from the first frame after the last.</li>
+            <li><span className="text-black/80 dark:text-white/90">FPS:</span> Set the playback speed in frames per second.</li>
+            <li><span className="text-black/80 dark:text-white/90">Time Slider:</span> Scrub to any specific time step.</li>
           </ul>
         </div>
       </div>
@@ -344,26 +344,26 @@ const TABS: Tab[] = [
     icon: <CircleStackIcon className="w-4 h-4" />,
     content: (
       <div className="space-y-4">
-        <h3 className="text-base font-semibold text-white">Sessions</h3>
-        <p className="text-sm text-white/70">
+        <h3 className="text-base font-semibold text-black dark:text-white">Sessions</h3>
+        <p className="text-sm text-black/60 dark:text-white/70">
           Save and restore the complete viewer state: volume, camera, transfer function, clipping planes, measurements, and display settings.
         </p>
         <div className="space-y-2">
-          <h4 className="text-sm font-medium text-white/90">Saving</h4>
-          <ul className="list-disc list-inside space-y-1 text-sm text-white/70">
-            <li><span className="text-white/90">Save</span> (<Kbd className="text-[10px] text-white/70 bg-white/5 backdrop-blur-sm rounded-md px-2 py-1"><Kbd.Abbr keyValue="command" /><Kbd.Content>S</Kbd.Content></Kbd>): Overwrite or name on first save.</li>
-            <li><span className="text-white/90">Save As</span> (<Kbd className="text-[10px] text-white/70 bg-white/5 backdrop-blur-sm rounded-md px-2 py-1"><Kbd.Abbr keyValue="shift" /><Kbd.Abbr keyValue="command" /><Kbd.Content>S</Kbd.Content></Kbd>): Save to a new named session.</li>
+          <h4 className="text-sm font-medium text-black/80 dark:text-white/90">Saving</h4>
+          <ul className="list-disc list-inside space-y-1 text-sm text-black/60 dark:text-white/70">
+            <li><span className="text-black/80 dark:text-white/90">Save</span> (<Kbd className="text-[10px] text-black/60 dark:text-white/70 bg-black/5 dark:bg-white/5 backdrop-blur-sm rounded-md px-2 py-1"><Kbd.Abbr keyValue="command" /><Kbd.Content>S</Kbd.Content></Kbd>): Overwrite or name on first save.</li>
+            <li><span className="text-black/80 dark:text-white/90">Save As</span> (<Kbd className="text-[10px] text-black/60 dark:text-white/70 bg-black/5 dark:bg-white/5 backdrop-blur-sm rounded-md px-2 py-1"><Kbd.Abbr keyValue="shift" /><Kbd.Abbr keyValue="command" /><Kbd.Content>S</Kbd.Content></Kbd>): Save to a new named session.</li>
           </ul>
         </div>
         <div className="space-y-2">
-          <h4 className="text-sm font-medium text-white/90">Import / Export</h4>
-          <p className="text-sm text-white/70">
-            Export to a portable <code className="bg-white/10 px-1 rounded text-xs">.flux</code> file. Import to restore on any machine.
+          <h4 className="text-sm font-medium text-black/80 dark:text-white/90">Import / Export</h4>
+          <p className="text-sm text-black/60 dark:text-white/70">
+            Export to a portable <code className="bg-black/8 dark:bg-white/10 px-1 rounded text-xs">.flux</code> file. Import to restore on any machine.
           </p>
         </div>
         <div className="space-y-2">
-          <h4 className="text-sm font-medium text-white/90">Auto-Save</h4>
-          <p className="text-sm text-white/70">
+          <h4 className="text-sm font-medium text-black/80 dark:text-white/90">Auto-Save</h4>
+          <p className="text-sm text-black/60 dark:text-white/70">
             Flux auto-saves periodically. If closed unexpectedly, you will be offered a restore prompt on next launch.
           </p>
         </div>
@@ -376,29 +376,29 @@ const TABS: Tab[] = [
     icon: <CommandLineIcon className="w-4 h-4" />,
     content: (
       <div className="space-y-4">
-        <h3 className="text-base font-semibold text-white">Keyboard Shortcuts</h3>
+        <h3 className="text-base font-semibold text-black dark:text-white">Keyboard Shortcuts</h3>
         <table className="w-full text-sm">
           <thead>
-            <tr className="border-b border-white/10">
-              <th className="text-left py-2 pr-4 text-xs font-semibold text-white/50 uppercase tracking-wide">Action</th>
-              <th className="text-left py-2 text-xs font-semibold text-white/50 uppercase tracking-wide">Shortcut</th>
+            <tr className="border-b border-black/10 dark:border-white/10">
+              <th className="text-left py-2 pr-4 text-xs font-semibold text-black/50 dark:text-white/50 uppercase tracking-wide">Action</th>
+              <th className="text-left py-2 text-xs font-semibold text-black/50 dark:text-white/50 uppercase tracking-wide">Shortcut</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-white/5">
+          <tbody className="divide-y divide-black/5 dark:divide-white/5">
             {(
               [
-                ['New Volume', <Kbd className="text-[10px] text-white/70 bg-white/5 backdrop-blur-sm rounded-md px-2 py-1"><Kbd.Abbr keyValue="command" /><Kbd.Content>N</Kbd.Content></Kbd>],
-                ['Save Session', <Kbd className="text-[10px] text-white/70 bg-white/5 backdrop-blur-sm rounded-md px-2 py-1"><Kbd.Abbr keyValue="command" /><Kbd.Content>S</Kbd.Content></Kbd>],
-                ['Save Session As', <Kbd className="text-[10px] text-white/70 bg-white/5 backdrop-blur-sm rounded-md px-2 py-1"><Kbd.Abbr keyValue="shift" /><Kbd.Abbr keyValue="command" /><Kbd.Content>S</Kbd.Content></Kbd>],
-                ['Load Session', <Kbd className="text-[10px] text-white/70 bg-white/5 backdrop-blur-sm rounded-md px-2 py-1"><Kbd.Abbr keyValue="command" /><Kbd.Content>O</Kbd.Content></Kbd>],
-                ['Distance Measurement', <Kbd className="text-[10px] text-white/70 bg-white/5 backdrop-blur-sm rounded-md px-2 py-1"><Kbd.Content>D</Kbd.Content></Kbd>],
-                ['Angle Measurement', <Kbd className="text-[10px] text-white/70 bg-white/5 backdrop-blur-sm rounded-md px-2 py-1"><Kbd.Content>A</Kbd.Content></Kbd>],
-                ['Cancel Measurement', <Kbd className="text-[10px] text-white/70 bg-white/5 backdrop-blur-sm rounded-md px-2 py-1"><Kbd.Content>Esc</Kbd.Content></Kbd>],
-                ['Delete Measurement', <Kbd className="text-[10px] text-white/70 bg-white/5 backdrop-blur-sm rounded-md px-2 py-1"><Kbd.Content>Delete</Kbd.Content></Kbd>],
+                ['New Volume', <Kbd className="text-[10px] text-black/60 dark:text-white/70 bg-black/5 dark:bg-white/5 backdrop-blur-sm rounded-md px-2 py-1"><Kbd.Abbr keyValue="command" /><Kbd.Content>N</Kbd.Content></Kbd>],
+                ['Save Session', <Kbd className="text-[10px] text-black/60 dark:text-white/70 bg-black/5 dark:bg-white/5 backdrop-blur-sm rounded-md px-2 py-1"><Kbd.Abbr keyValue="command" /><Kbd.Content>S</Kbd.Content></Kbd>],
+                ['Save Session As', <Kbd className="text-[10px] text-black/60 dark:text-white/70 bg-black/5 dark:bg-white/5 backdrop-blur-sm rounded-md px-2 py-1"><Kbd.Abbr keyValue="shift" /><Kbd.Abbr keyValue="command" /><Kbd.Content>S</Kbd.Content></Kbd>],
+                ['Load Session', <Kbd className="text-[10px] text-black/60 dark:text-white/70 bg-black/5 dark:bg-white/5 backdrop-blur-sm rounded-md px-2 py-1"><Kbd.Abbr keyValue="command" /><Kbd.Content>O</Kbd.Content></Kbd>],
+                ['Distance Measurement', <Kbd className="text-[10px] text-black/60 dark:text-white/70 bg-black/5 dark:bg-white/5 backdrop-blur-sm rounded-md px-2 py-1"><Kbd.Content>D</Kbd.Content></Kbd>],
+                ['Angle Measurement', <Kbd className="text-[10px] text-black/60 dark:text-white/70 bg-black/5 dark:bg-white/5 backdrop-blur-sm rounded-md px-2 py-1"><Kbd.Content>A</Kbd.Content></Kbd>],
+                ['Cancel Measurement', <Kbd className="text-[10px] text-black/60 dark:text-white/70 bg-black/5 dark:bg-white/5 backdrop-blur-sm rounded-md px-2 py-1"><Kbd.Content>Esc</Kbd.Content></Kbd>],
+                ['Delete Measurement', <Kbd className="text-[10px] text-black/60 dark:text-white/70 bg-black/5 dark:bg-white/5 backdrop-blur-sm rounded-md px-2 py-1"><Kbd.Content>Delete</Kbd.Content></Kbd>],
               ] as [string, React.ReactNode][]
             ).map(([action, shortcut]) => (
               <tr key={action}>
-                <td className="py-2 pr-4 text-white/70">{action}</td>
+                <td className="py-2 pr-4 text-black/60 dark:text-white/70">{action}</td>
                 <td className="py-2">{shortcut}</td>
               </tr>
             ))}
@@ -434,7 +434,7 @@ export function HelpModal({ isOpen, onClose }: HelpModalProps) {
       showClose
     >
       <ModalHeader>
-        <ModalIcon className="bg-white/10 text-white/70">
+        <ModalIcon className="bg-black/8 dark:bg-white/10 text-black/60 dark:text-white/70">
           <QuestionMarkCircleIcon className="size-4" />
         </ModalIcon>
         <ModalTitle>Help</ModalTitle>
@@ -446,7 +446,7 @@ export function HelpModal({ isOpen, onClose }: HelpModalProps) {
           /* Mobile: horizontal scrolling tab strip */
           <div className="flex flex-col min-h-0 w-full">
             <div
-              className="flex overflow-x-auto border-b border-white/10 shrink-0"
+              className="flex overflow-x-auto border-b border-black/10 dark:border-white/10 shrink-0"
               style={{ scrollbarWidth: 'none' }}
             >
               {TABS.map((tab) => (
@@ -455,8 +455,8 @@ export function HelpModal({ isOpen, onClose }: HelpModalProps) {
                   onClick={() => switchTab(tab.id)}
                   className={`flex-shrink-0 flex items-center gap-1.5 px-4 py-3 text-xs whitespace-nowrap border-b-2 transition-colors ${
                     activeTabId === tab.id
-                      ? 'border-[#13ddd1] text-white'
-                      : 'border-transparent text-white/45 hover:text-white/70'
+                      ? 'border-[#13ddd1] text-black dark:text-white'
+                      : 'border-transparent text-black/45 dark:text-white/45 hover:text-black/70 dark:hover:text-white/70'
                   }`}
                 >
                   <span className="shrink-0">{tab.icon}</span>
@@ -490,15 +490,15 @@ export function HelpModal({ isOpen, onClose }: HelpModalProps) {
         ) : (
           /* Desktop: sidebar + content */
           <>
-            <nav className="w-48 shrink-0 border-r border-white/10 py-2 overflow-y-auto" style={{ scrollbarWidth: 'thin' }}>
+            <nav className="w-48 shrink-0 border-r border-black/10 dark:border-white/10 py-2 overflow-y-auto" style={{ scrollbarWidth: 'thin' }}>
               {TABS.map((tab) => (
                 <motion.button
                   key={tab.id}
                   onClick={() => switchTab(tab.id)}
                   className={`w-full flex items-center gap-2.5 px-4 py-2 text-left text-xs transition-colors ${
                     activeTabId === tab.id
-                      ? 'bg-white/10 text-white'
-                      : 'text-white/50 hover:text-white/80 hover:bg-white/5'
+                      ? 'bg-black/8 dark:bg-white/10 text-black dark:text-white'
+                      : 'text-black/50 dark:text-white/50 hover:text-black/80 dark:hover:text-white/80 hover:bg-black/5 dark:hover:bg-white/5'
                   }`}
                   whileTap={{ scale: 0.97 }}
                 >
@@ -535,7 +535,7 @@ export function HelpModal({ isOpen, onClose }: HelpModalProps) {
 
       <ModalFooter>
         <Button size="sm" variant="secondary" onPress={onClose}
-          className="!bg-white/10 !border-white/20 !text-white text-xs">
+          className="!bg-black/8 dark:!bg-white/10 !border-black/15 dark:!border-white/20 !text-black dark:!text-white text-xs">
           Close
         </Button>
       </ModalFooter>

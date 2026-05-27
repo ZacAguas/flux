@@ -79,24 +79,24 @@ function MeasurementListItem({ measurement, isSelected, onSelect, onDelete }: Me
 
   return (
     <div
-      className={`flex items-center justify-between p-1.5 rounded cursor-pointer transition-colors ${isSelected ? 'bg-white/20' : 'hover:bg-white/10'
+      className={`flex items-center justify-between p-1.5 rounded cursor-pointer transition-colors ${isSelected ? 'bg-black/12 dark:bg-white/20' : 'hover:bg-black/8 dark:hover:bg-white/10'
         }`}
       onClick={() => onSelect(isSelected ? null : measurement.id)}
     >
-      <div className="flex items-center gap-2 text-xs text-white/80 min-w-0 overflow-hidden">
+      <div className="flex items-center gap-2 text-xs text-black/75 dark:text-white/80 min-w-0 overflow-hidden">
         <span
           className="w-3 h-3 rounded-sm flex-shrink-0"
           style={{ backgroundColor: measurement.color }}
         />
         {icon}
         <span className="truncate">{valueText}</span>
-        <span className="text-white/40 shrink-0">({orientationLabel}:{measurement.sliceIndex})</span>
+        <span className="text-black/40 dark:text-white/40 shrink-0">({orientationLabel}:{measurement.sliceIndex})</span>
       </div>
       <div>
         <Button
           size="sm"
           variant="secondary"
-          className="!px-2 !py-1 !min-w-6 !h-6 !text-[10px] text-white/60 hover:text-red-400"
+          className="!px-2 !py-1 !min-w-6 !h-6 !text-[10px] text-black/55 dark:text-white/60 hover:text-red-400"
           onPress={() => onDelete(measurement.id)}
         >
           X
@@ -124,7 +124,7 @@ export function MeasurementControls() {
     <div className="flex flex-col gap-3">
       {/* Tool Selection */}
       <div className="flex flex-col gap-2">
-        <span className="text-xs text-white/60">Tools</span>
+        <span className="text-xs text-black/55 dark:text-white/60">Tools</span>
         <div className="flex gap-2">
           <ToolButton
             tool="distance"
@@ -142,7 +142,7 @@ export function MeasurementControls() {
           />
         </div>
         {activeTool !== 'none' && (
-          <p className="text-[10px] text-white/40 italic text-wrap break-words">
+          <p className="text-[10px] text-black/40 dark:text-white/40 italic text-wrap break-words">
             {activeTool === 'distance'
               ? 'Click two points to measure distance'
               : 'Click three points to measure angle'}
@@ -160,7 +160,7 @@ export function MeasurementControls() {
             <Checkbox.Indicator />
           </Checkbox.Control>
           <Checkbox.Content>
-            <Label className="text-white/80 text-xs font-medium">Show Measurements</Label>
+            <Label className="text-black/75 dark:text-white/80 text-xs font-medium">Show Measurements</Label>
           </Checkbox.Content>
         </Checkbox>
       </div>
@@ -169,14 +169,14 @@ export function MeasurementControls() {
       {completeMeasurements.length > 0 && (
         <div className="flex flex-col gap-2">
           <div className="flex items-center justify-between">
-            <span className="text-xs text-white/60">
+            <span className="text-xs text-black/55 dark:text-white/60">
               Measurements ({completeMeasurements.length})
             </span>
             <Button
               size="sm"
               variant="secondary"
               onPress={clearAllMeasurements}
-              className="!px-2 !py-0.5 !text-[10px] text-white/60 hover:text-red-400"
+              className="!px-2 !py-0.5 !text-[10px] text-black/55 dark:text-white/60 hover:text-red-400"
             >
               Clear All
             </Button>
@@ -197,13 +197,13 @@ export function MeasurementControls() {
 
       {/* Empty State */}
       {completeMeasurements.length === 0 && (
-        <p className="text-[10px] text-white/40 italic">
+        <p className="text-[10px] text-black/40 dark:text-white/40 italic">
           No measurements yet. Select a tool and click on a slice view to start measuring.
         </p>
       )}
 
       {/* Keyboard Shortcuts Hint */}
-      <div className="text-[10px] text-white/30 border-t border-white/10 pt-2 mt-1 text-wrap break-words">
+      <div className="text-[10px] text-black/30 dark:text-white/30 border-t border-black/10 dark:border-white/10 pt-2 mt-1 text-wrap break-words">
         <span className="font-medium">Shortcuts:</span> D = Distance, A = Angle, Esc = Cancel, Del = Delete
       </div>
     </div>

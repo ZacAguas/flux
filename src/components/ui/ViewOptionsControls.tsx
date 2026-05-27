@@ -33,11 +33,11 @@ export function ViewOptionsControls() {
         {({ isSelected }) => (
           <>
             <Switch.Control
-              className={`backdrop-blur-sm rounded-full ${isSelected ? '' : 'bg-white/15'}`}
+              className={`backdrop-blur-sm rounded-full ${isSelected ? '' : 'bg-black/10 dark:bg-white/15'}`}
             >
               <Switch.Thumb />
             </Switch.Control>
-            <Label className="text-white/50 text-xs font-medium">Crosshairs</Label>
+            <Label className="text-black/50 dark:text-white/50 text-xs font-medium">Crosshairs</Label>
           </>
         )}
       </Switch>
@@ -61,11 +61,11 @@ export function ViewOptionsControls() {
           step={0.05}
           className="w-full"
         >
-          <Label className="text-white/50 text-xs font-medium">Crosshair Opacity</Label>
+          <Label className="text-black/50 dark:text-white/50 text-xs font-medium">Crosshair Opacity</Label>
           <Slider.Output className="text-xs">
             {({ state }) => Number(state.getThumbValueLabel(0)).toFixed(2)}
           </Slider.Output>
-          <Slider.Track className="bg-white/15 backdrop-blur-sm rounded-md">
+          <Slider.Track className="bg-black/10 dark:bg-white/15 backdrop-blur-sm rounded-md">
             <Slider.Fill />
             <Slider.Thumb />
           </Slider.Track>
@@ -80,11 +80,11 @@ export function ViewOptionsControls() {
         {({ isSelected }) => (
           <>
             <Switch.Control
-              className={`backdrop-blur-sm rounded-full ${isSelected ? '' : 'bg-white/15'}`}
+              className={`backdrop-blur-sm rounded-full ${isSelected ? '' : 'bg-black/10 dark:bg-white/15'}`}
             >
               <Switch.Thumb />
             </Switch.Control>
-            <Label className="text-white/50 text-xs font-medium">Metric Overlays</Label>
+            <Label className="text-black/50 dark:text-white/50 text-xs font-medium">Metric Overlays</Label>
           </>
         )}
       </Switch>
@@ -116,7 +116,7 @@ export function ViewOptionsControls() {
                 <Checkbox.Indicator />
               </Checkbox.Control>
               <Checkbox.Content>
-                <Label className="text-white/50 text-xs font-medium">Slice Planes</Label>
+                <Label className="text-black/50 dark:text-white/50 text-xs font-medium">Slice Planes</Label>
               </Checkbox.Content>
             </Checkbox>
 
@@ -139,7 +139,7 @@ export function ViewOptionsControls() {
                     <Checkbox.Indicator />
                   </Checkbox.Control>
                   <Checkbox.Content>
-                    <Label className="text-white/50 text-xs font-medium">Axial</Label>
+                    <Label className="text-black/50 dark:text-white/50 text-xs font-medium">Axial</Label>
                   </Checkbox.Content>
                 </Checkbox>
 
@@ -148,7 +148,7 @@ export function ViewOptionsControls() {
                     <Checkbox.Indicator />
                   </Checkbox.Control>
                   <Checkbox.Content>
-                    <Label className="text-white/50 text-xs font-medium">Coronal</Label>
+                    <Label className="text-black/50 dark:text-white/50 text-xs font-medium">Coronal</Label>
                   </Checkbox.Content>
                 </Checkbox>
 
@@ -157,7 +157,7 @@ export function ViewOptionsControls() {
                     <Checkbox.Indicator />
                   </Checkbox.Control>
                   <Checkbox.Content>
-                    <Label className="text-white/50 text-xs font-medium">Sagittal</Label>
+                    <Label className="text-black/50 dark:text-white/50 text-xs font-medium">Sagittal</Label>
                   </Checkbox.Content>
                 </Checkbox>
               </CheckboxGroup>
@@ -166,7 +166,7 @@ export function ViewOptionsControls() {
             {/* Slice Plane Mode Selector */}
             {selectedPlanes.length > 0 && (
               <div className="flex flex-col gap-1">
-                <Label className="text-white/50 text-xs font-medium">Plane Style</Label>
+                <Label className="text-black/50 dark:text-white/50 text-xs font-medium">Plane Style</Label>
                 <Tabs
                   selectedKey={slicePlaneSettings.mode}
                   onSelectionChange={(key) => setSlicePlaneSettings({ mode: key.valueOf() as 'textured' | 'colored' })}
@@ -174,15 +174,15 @@ export function ViewOptionsControls() {
                   <Tabs.ListContainer>
                     <Tabs.List
                       aria-label="Plane Style"
-                      className="bg-transparent *:px-2 *:py-1 *:text-xs *:text-white/70 *:transition-all *:duration-200 *:data-[selected=true]:text-white *:rounded-md *:bg-transparent gap-1"
+                      className="bg-transparent *:px-2 *:py-1 *:text-xs *:text-black/65 dark:*:text-white/70 *:transition-all *:duration-200 *:data-[selected=true]:text-black dark:*:data-[selected=true]:text-white *:rounded-md *:bg-transparent gap-1"
                     >
                       <Tabs.Tab id="textured">
                         Textured
-                        <Tabs.Indicator className="bg-white/15 backdrop-blur-sm transition-all duration-300 ease-out rounded-md" />
+                        <Tabs.Indicator className="bg-black/10 dark:bg-white/15 backdrop-blur-sm transition-all duration-300 ease-out rounded-md" />
                       </Tabs.Tab>
                       <Tabs.Tab id="colored">
                         Colored
-                        <Tabs.Indicator className="bg-white/15 backdrop-blur-sm transition-all duration-300 ease-out rounded-md" />
+                        <Tabs.Indicator className="bg-black/10 dark:bg-white/15 backdrop-blur-sm transition-all duration-300 ease-out rounded-md" />
                       </Tabs.Tab>
                     </Tabs.List>
                   </Tabs.ListContainer>
@@ -203,11 +203,11 @@ export function ViewOptionsControls() {
           step={0.05}
           className="w-full"
         >
-          <Label className="text-white/50 text-xs font-medium">Slice Plane Opacity</Label>
+          <Label className="text-black/50 dark:text-white/50 text-xs font-medium">Slice Plane Opacity</Label>
           <Slider.Output className="text-xs">
             {({ state }) => Number(state.getThumbValueLabel(0)).toFixed(2)}
           </Slider.Output>
-          <Slider.Track className="bg-white/15 backdrop-blur-sm rounded-md">
+          <Slider.Track className="bg-black/10 dark:bg-white/15 backdrop-blur-sm rounded-md">
             <Slider.Fill />
             <Slider.Thumb />
           </Slider.Track>

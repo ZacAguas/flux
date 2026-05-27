@@ -95,10 +95,10 @@ export function AppModal({
   const variants = isMobile ? mobileVariants : desktopVariants;
 
   const dialogClasses = isMobile
-    ? `relative z-10 w-full bg-neutral-900 border-t border-white/15
+    ? `relative z-10 w-full bg-neutral-50 dark:bg-neutral-900 border-t border-black/12 dark:border-white/15
        rounded-t-2xl flex flex-col max-h-[88vh] overflow-hidden`
-    : `relative z-10 w-full ${maxWidth} ${heightClass ?? ''} bg-neutral-900
-       border border-white/15 rounded-2xl flex flex-col overflow-hidden
+    : `relative z-10 w-full ${maxWidth} ${heightClass ?? ''} bg-neutral-50 dark:bg-neutral-900
+       border border-black/12 dark:border-white/15 rounded-2xl flex flex-col overflow-hidden
        mx-4`;
 
   return createPortal(
@@ -133,8 +133,8 @@ export function AppModal({
             {showClose && (
               <button
                 onClick={onClose}
-                className="absolute top-3.5 right-3.5 z-10 p-1 rounded text-white/40
-                           hover:text-white/80 hover:bg-white/8 transition-colors"
+                className="absolute top-3.5 right-3.5 z-10 p-1 rounded text-black/40 dark:text-white/40
+                           hover:text-black/80 dark:hover:text-white/80 hover:bg-black/8 dark:hover:bg-white/8 transition-colors"
                 aria-label="Close"
               >
                 <XMarkIcon className="w-4 h-4" />
@@ -155,7 +155,7 @@ export function AppModal({
 
 export function ModalHeader({ children, className = '' }: { children: React.ReactNode; className?: string }) {
   return (
-    <div className={`flex items-center gap-3 px-6 py-4 border-b border-white/10 shrink-0 ${className}`}>
+    <div className={`flex items-center gap-3 px-6 py-4 border-b border-black/10 dark:border-white/10 shrink-0 ${className}`}>
       {children}
     </div>
   );
@@ -171,7 +171,7 @@ export function ModalIcon({ children, className = '' }: { children: React.ReactN
 
 export function ModalTitle({ children }: { children: React.ReactNode }) {
   const id = useContext(ModalTitleIdContext);
-  return <h2 id={id} className="text-sm font-semibold text-white">{children}</h2>;
+  return <h2 id={id} className="text-sm font-semibold text-black dark:text-white">{children}</h2>;
 }
 
 export function ModalBody({ children, className = '' }: { children: React.ReactNode; className?: string }) {
@@ -184,7 +184,7 @@ export function ModalBody({ children, className = '' }: { children: React.ReactN
 
 export function ModalFooter({ children, className = '' }: { children: React.ReactNode; className?: string }) {
   return (
-    <div className={`flex items-center justify-end gap-2 px-6 py-4 border-t border-white/10 shrink-0 flex-wrap ${className}`}>
+    <div className={`flex items-center justify-end gap-2 px-6 py-4 border-t border-black/10 dark:border-white/10 shrink-0 flex-wrap ${className}`}>
       {children}
     </div>
   );

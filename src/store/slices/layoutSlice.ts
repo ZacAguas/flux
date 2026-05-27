@@ -5,11 +5,14 @@ import type { SectionId } from '../../utils/uiLayout';
 // Canonical rail order for sections (used to sort activeSections)
 const RAIL_ORDER: readonly SectionId[] = ['file', 'volume', 'crop', 'slices', 'playback', 'display', 'transfer', 'measure'];
 
+const savedTheme = (localStorage.getItem('theme') as 'dark' | 'light' | null) ?? 'dark';
+
 export const createLayoutSlice: StateCreator<ViewerStore, [], [], LayoutSlice> = (set, get) => ({
   layoutMode: 'single',
   activeSections: ['slices'],
   popoverOpen: false,
   helpModalOpen: false,
+  theme: savedTheme,
 
   setLayoutMode: (mode) => set({ layoutMode: mode }),
 
@@ -28,6 +31,12 @@ export const createLayoutSlice: StateCreator<ViewerStore, [], [], LayoutSlice> =
       // Keep rail order
       set({ activeSections: RAIL_ORDER.filter(s => next.includes(s)) });
     }
+  },
+
+  toggleTheme: () => {
+    const next = get().theme === 'dark' ? 'light' : 'dark';
+    localStorage.setItem('theme', next);
+    set({ theme: next });
   },
 
 });

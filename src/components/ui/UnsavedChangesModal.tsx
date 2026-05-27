@@ -25,18 +25,18 @@ export function UnsavedChangesModal({
       </ModalHeader>
 
       <ModalBody>
-        <p className="text-sm text-white/70">
+        <p className="text-sm text-black/60 dark:text-white/70">
           You have unsaved changes. Would you like to save before continuing?
         </p>
       </ModalBody>
 
       <ModalFooter>
         <Button size="sm" variant="tertiary" onPress={onCancel}
-          className="!bg-white/10 !border-white/20 !text-white text-xs">
+          className="!bg-black/8 dark:!bg-white/10 !border-black/15 dark:!border-white/20 !text-black dark:!text-white text-xs">
           Cancel
         </Button>
         <Button size="sm" variant="tertiary" onPress={onDontSave}
-          className="!bg-white/10 !border-white/20 !text-white text-xs">
+          className="!bg-black/8 dark:!bg-white/10 !border-black/15 dark:!border-white/20 !text-black dark:!text-white text-xs">
           Don&apos;t Save
         </Button>
         <Button size="sm" variant="primary" onPress={onSave}

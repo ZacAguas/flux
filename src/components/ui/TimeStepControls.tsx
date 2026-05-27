@@ -29,9 +29,9 @@ export function TimeStepControls() {
         isDisabled={isLoadingTimeStep}
       >
         <div className="flex items-center gap-2">
-          <Label className="text-white/50 text-xs font-medium">Time Step</Label>
+          <Label className="text-black/50 dark:text-white/50 text-xs font-medium">Time Step</Label>
           {isLoadingTimeStep && (
-            <div className="w-3 h-3 border-2 border-white/30 border-t-white/70 rounded-full animate-spin" />
+            <div className="w-3 h-3 border-2 border-black/30 dark:border-white/30 border-t-black/70 dark:border-t-white/70 rounded-full animate-spin" />
           )}
         </div>
         <Slider.Output className="text-xs tabular-nums">
@@ -41,7 +41,7 @@ export function TimeStepControls() {
             return `${state.getThumbValueLabel(0).padStart(pad, '0')} / ${total}`;
           }}
         </Slider.Output>
-        <Slider.Track className="bg-white/15 backdrop-blur-sm rounded-md">
+        <Slider.Track className="bg-black/10 dark:bg-white/15 backdrop-blur-sm rounded-md">
           <Slider.Fill />
           <Slider.Thumb />
         </Slider.Track>

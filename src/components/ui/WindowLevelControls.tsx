@@ -33,11 +33,11 @@ export function WindowLevelControls() {
         step={range / 1000}
         className="w-full"
       >
-        <Label className="text-white/50 text-xs font-medium">W Center</Label>
+        <Label className="text-black/50 dark:text-white/50 text-xs font-medium">W Center</Label>
         <Slider.Output className="text-xs">
           {({ state }) => Math.round(state.getThumbValue(0))}
         </Slider.Output>
-        <Slider.Track className="bg-white/15 backdrop-blur-sm rounded-md">
+        <Slider.Track className="bg-black/10 dark:bg-white/15 backdrop-blur-sm rounded-md">
           <Slider.Fill />
           <Slider.Thumb />
         </Slider.Track>
@@ -54,11 +54,11 @@ export function WindowLevelControls() {
         step={range / 1000}
         className="w-full"
       >
-        <Label className="text-white/50 text-xs font-medium">W Width</Label>
+        <Label className="text-black/50 dark:text-white/50 text-xs font-medium">W Width</Label>
         <Slider.Output className="text-xs">
           {({ state }) => Math.round(state.getThumbValue(0))}
         </Slider.Output>
-        <Slider.Track className="bg-white/15 backdrop-blur-sm rounded-md">
+        <Slider.Track className="bg-black/10 dark:bg-white/15 backdrop-blur-sm rounded-md">
           <Slider.Fill />
           <Slider.Thumb />
         </Slider.Track>

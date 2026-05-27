@@ -33,28 +33,28 @@ export function TransferFunctionEditor() {
           }}
           onOpenChange={setPopoverOpen}
         >
-          <Label className="text-white/50 text-xs font-medium">Preset</Label>
-          <Select.Trigger className="!bg-white/10 backdrop-blur-sm !border-white/20 text-white text-xs">
+          <Label className="text-black/50 dark:text-white/50 text-xs font-medium">Preset</Label>
+          <Select.Trigger className="!bg-black/8 dark:!bg-white/10 backdrop-blur-sm !border-black/15 dark:!border-white/20 text-black dark:text-white text-xs">
             <Select.Value>
               {TRANSFER_FUNCTION_PRESETS.find((p) => p.name === activePreset)
                 ?.name.replace(/-/g, ' ').toUpperCase() || 'Custom'}
             </Select.Value>
             <Select.Indicator />
           </Select.Trigger>
-          <Select.Popover className="bg-black/70 backdrop-blur-sm border border-white/20 rounded-md shadow-lg">
+          <Select.Popover className="bg-white/90 dark:bg-black/70 backdrop-blur-sm border border-black/15 dark:border-white/20 rounded-md shadow-lg">
             <ListBox>
               {TRANSFER_FUNCTION_PRESETS.map((preset) => (
                 <ListBox.Item
                   key={preset.name}
                   id={preset.name}
                   textValue={preset.name}
-                  className="text-white text-xs px-3 py-2 hover:bg-white/10 cursor-pointer"
+                  className="text-black dark:text-white text-xs px-3 py-2 hover:bg-black/8 dark:hover:bg-white/10 cursor-pointer"
                 >
                   <div className="flex flex-col">
                     <span className="font-medium">
                       {preset.name.replace(/-/g, ' ').toUpperCase()}
                     </span>
-                    <span className="text-white/50 text-xs">
+                    <span className="text-black/50 dark:text-white/50 text-xs">
                       {preset.description}
                     </span>
                   </div>
