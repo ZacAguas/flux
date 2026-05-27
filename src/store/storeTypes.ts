@@ -65,6 +65,7 @@ export interface LayoutSlice {
   helpModalOpen: boolean;
   activeSections: SectionId[];
   theme: 'dark' | 'light';
+  isWebGPUAvailable: boolean | null;
 
   setLayoutMode: (mode: LayoutMode) => void;
   setPopoverOpen: (open: boolean) => void;
@@ -72,6 +73,7 @@ export interface LayoutSlice {
   setActiveSections: (sections: SectionId[]) => void;
   toggleSection: (id: SectionId) => void;
   toggleTheme: () => void;
+  setWebGPUAvailable: (value: boolean) => void; // null initial → false/true once renderer init resolves
 }
 
 export interface ViewSlice {

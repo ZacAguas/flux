@@ -21,9 +21,12 @@ export function RenderingControls() {
   const layoutMode = useViewerStore((state) => state.layoutMode);
   const raymarchSettings = useViewerStore((state) => state.raymarchSettings);
   const setRaymarchSettings = useViewerStore((state) => state.setRaymarchSettings);
+  const isWebGPUAvailable = useViewerStore((state) => state.isWebGPUAvailable);
 
   // Disable when in slices-only mode (no volume rendering)
   const isDisabled = layoutMode === 'slices';
+  // Shading requires WebGPU compute shaders for gradient texture generation
+  const isShadingDisabled = isDisabled || isWebGPUAvailable === false;
 
   // Handle preset selection
   const handlePresetChange = (preset: RenderQualityPreset) => {
@@ -99,11 +102,13 @@ export function RenderingControls() {
 
       {/* Shading Toggle */}
       <div className="flex items-center justify-between gap-2">
-        <Label className="text-black/50 dark:text-white/50 text-xs font-medium">Shading</Label>
+        <Label className={`text-xs font-medium ${isShadingDisabled ? 'text-black/30 dark:text-white/30' : 'text-black/50 dark:text-white/50'}`}>
+          Shading{isWebGPUAvailable === false ? ' (WebGPU only)' : ''}
+        </Label>
         <Switch
           size="sm"
           isSelected={raymarchSettings.shadingEnabled}
-          isDisabled={isDisabled}
+          isDisabled={isShadingDisabled}
           onChange={(e) => setRaymarchSettings({ shadingEnabled: e })}
         >
           {({ isSelected }) => (
@@ -118,8 +123,8 @@ export function RenderingControls() {
         </Switch>
       </div>
 
-      {/* Shading Coefficients (visible when shading is enabled) */}
-      {raymarchSettings.shadingEnabled && (
+      {/* Shading Coefficients (visible when shading is enabled and WebGPU is confirmed available) */}
+      {raymarchSettings.shadingEnabled && isWebGPUAvailable === true && (
         <>
           <Slider
             value={raymarchSettings.ambientStrength}

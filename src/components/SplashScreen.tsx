@@ -1,7 +1,7 @@
 import { motion } from 'motion/react';
 import { ThreadsBackground } from './ui/ThreadsBackground';
 import { FileImport } from './FileImport';
-import { QuestionMarkCircleIcon, SunIcon, MoonIcon } from '@heroicons/react/24/outline';
+import { QuestionMarkCircleIcon, SunIcon, MoonIcon, ExclamationTriangleIcon } from '@heroicons/react/24/outline';
 import { useViewerStore } from '../store/viewerStore';
 
 const stagger = {
@@ -18,6 +18,7 @@ export function SplashScreen() {
   const setHelpModalOpen = useViewerStore((state) => state.setHelpModalOpen);
   const theme = useViewerStore((state) => state.theme);
   const toggleTheme = useViewerStore((state) => state.toggleTheme);
+  const isWebGPUAvailable = useViewerStore((state) => state.isWebGPUAvailable);
 
   return (
     <div className="fixed inset-0 bg-[#e8eaed] dark:bg-[#0d0d10] flex items-center justify-center overflow-hidden">
@@ -64,6 +65,22 @@ export function SplashScreen() {
         <motion.p className="m-0 text-sm text-black/40 dark:text-white/40 tracking-[0.08em]" variants={fadeUp}>
           Drop a NIfTI file anywhere to get started (.nii/.nii.gz)
         </motion.p>
+
+        {/* WebGL2 fallback notice — only shown once renderer init confirms WebGPU is unavailable */}
+        {isWebGPUAvailable === false && (
+          <motion.div
+            className="w-full flex items-start gap-3 px-4 py-3 rounded-xl border border-amber-500/30 bg-amber-500/10 dark:bg-amber-400/8 text-amber-700 dark:text-amber-300"
+            variants={fadeUp}
+          >
+            <ExclamationTriangleIcon className="w-5 h-5 mt-0.5 shrink-0 opacity-80" />
+            <div className="flex flex-col gap-0.5">
+              <span className="text-sm font-medium">WebGPU unavailable</span>
+              <span className="text-xs opacity-70">
+                Running on WebGL2; volume shading is disabled. For the best experience, use a Chrome-based browser with WebGPU enabled.
+              </span>
+            </div>
+          </motion.div>
+        )}
       </motion.div>
 
       {/* Bottom-right buttons: theme toggle + help */}
