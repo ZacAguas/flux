@@ -136,11 +136,10 @@ export const createRenderingSlice: StateCreator<ViewerStore, [], [], RenderingSl
   setCropBoxAxis: (axis, bounds) =>
     set((state) => {
       const current = state.cropBox[axis];
-      const newMin = bounds.min !== undefined ? Math.max(0, Math.min(bounds.min, current.max - 0.01)) : current.min;
-      const newMax = bounds.max !== undefined ? Math.min(1, Math.max(bounds.max, current.min + 0.01)) : current.max;
-      // Enforce min <= max - 0.01
-      const clampedMin = Math.min(newMin, newMax - 0.01);
-      const clampedMax = Math.max(newMax, newMin + 0.01);
+      const min = bounds.min !== undefined ? Math.max(0, Math.min(bounds.min, 0.99)) : current.min;
+      const max = bounds.max !== undefined ? Math.min(1, Math.max(bounds.max, 0.01)) : current.max;
+      const clampedMin = Math.min(min, max - 0.01);
+      const clampedMax = Math.max(max, min + 0.01);
       return {
         cropBox: {
           ...state.cropBox,

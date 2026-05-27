@@ -83,6 +83,7 @@ function BackgroundSync() {
  */
 export function PersistentLayout() {
   const [isDraggingFile, setIsDraggingFile] = useState(false);
+  const [webGPUError, setWebGPUError] = useState<string | null>(null);
 
   // Store state and actions
   const isDirty = useViewerStore((state) => state.isDirty);
@@ -90,6 +91,7 @@ export function PersistentLayout() {
   const clearCurrentSession = useViewerStore((state) => state.clearCurrentSession);
   const setPendingNewVolumeFile = useViewerStore((state) => state.setPendingNewVolumeFile);
   const setShowNewVolumeUnsavedModal = useViewerStore((state) => state.setShowNewVolumeUnsavedModal);
+  const setWebGPUAvailable = useViewerStore((state) => state.setWebGPUAvailable);
 
   /**
    * Load a volume file directly (when no unsaved changes).
@@ -162,6 +164,36 @@ export function PersistentLayout() {
     handleNewVolume(niftiFile);
   };
 
+  if (webGPUError !== null) {
+    return (
+      <div style={{
+        width: '100%',
+        height: '100%',
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        justifyContent: 'center',
+        background: '#0d0d12',
+        color: '#e8eaed',
+        fontFamily: 'system-ui, sans-serif',
+        gap: '12px',
+        padding: '32px',
+        textAlign: 'center',
+      }}>
+        <p style={{ fontSize: '18px', fontWeight: 600, margin: 0 }}>WebGPU is not supported</p>
+        <p style={{ fontSize: '14px', color: '#9aa0a6', margin: 0, maxWidth: '420px' }}>
+          This application requires WebGPU. Use Chrome 113+ or Edge 113+ with WebGPU enabled.
+          Firefox and Safari do not yet support WebGPU.
+        </p>
+        {import.meta.env.DEV && (
+          <p style={{ fontSize: '12px', color: '#5f6368', margin: 0, fontFamily: 'monospace' }}>
+            {webGPUError}
+          </p>
+        )}
+      </div>
+    );
+  }
+
   return (
     <div
       style={{ width: '100%', height: '100%', position: 'relative' }}
@@ -182,14 +214,21 @@ export function PersistentLayout() {
           height: '100%',
         }}
         gl={async (props) => {
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          const renderer = new THREE.WebGPURenderer(props as any);
-          if (import.meta.env.DEV) {
-            const ThreeInspector = await import('three/examples/jsm/inspector/Inspector.js');
-            renderer.inspector = new ThreeInspector.Inspector();
+          try {
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            const renderer = new THREE.WebGPURenderer(props as any);
+            if (import.meta.env.DEV) {
+              const ThreeInspector = await import('three/examples/jsm/inspector/Inspector.js');
+              renderer.inspector = new ThreeInspector.Inspector();
+            }
+            await renderer.init();
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            setWebGPUAvailable((renderer.backend as any)?.isWebGPUBackend === true);
+            return renderer;
+          } catch (err) {
+            setWebGPUError(err instanceof Error ? err.message : String(err));
+            throw err;
           }
-          await renderer.init();
-          return renderer;
         }}
       >
         <SceneResources />

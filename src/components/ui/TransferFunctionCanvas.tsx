@@ -127,19 +127,13 @@ export function TransferFunctionCanvas({
       color: interpolatedColor,
     };
 
-    // Add the new point
+    // Snapshot existing ids before insertion so we can identify the new point by exclusion
+    const existingIds = new Set(useViewerStore.getState().transferFunction.points.map((p) => p.id));
     addPoint(newPoint);
 
-    // Find and select the newly added point
-    // The store sorts points after adding, so find where it ended up
+    // Find the newly added point by id (float equality is unreliable after sort)
     const updatedPoints = useViewerStore.getState().transferFunction.points;
-    const newPointIndex = updatedPoints.findIndex(
-      (p) => p.value === newPoint.value &&
-        p.opacity === newPoint.opacity &&
-        p.color.r === newPoint.color.r &&
-        p.color.g === newPoint.color.g &&
-        p.color.b === newPoint.color.b
-    );
+    const newPointIndex = updatedPoints.findIndex((p) => !existingIds.has(p.id));
 
     if (newPointIndex !== -1) {
       onSelectPoint(newPointIndex);

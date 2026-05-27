@@ -84,15 +84,11 @@ export function useVolumeSetup() {
     };
   }, [volume]); // Only depend on volume, not volumeTexture (buffer persists across time steps)
 
-  // Compute gradient texture when volume changes (WebGPU compute shader, runs on GPU)
-  // NOTE: Uses the current volumeTexture's normalized data (t=0 for 4D volumes).
-  // TODO: cache/recalculate gradient texture for t>0 (important for non-static geometry)
+  // Compute gradient texture when volume or time step changes (WebGPU compute shader, runs on GPU)
   useEffect(() => {
     if (!volume) return;
 
-    // Access current texture directly from store (not subscribed) to avoid
-    // recomputing gradient on every volumeTexture change (e.g. 4D time steps)
-    const currentTexture = useViewerStore.getState().volumeTexture;
+    const currentTexture = volumeTexture;
     if (!currentTexture) return;
 
     const { x: width, y: height, z: depth } = volume.dimensions;
@@ -119,7 +115,7 @@ export function useVolumeSetup() {
       }
       setGradientTexture(null);
     };
-  }, [volume, gl]);
+  }, [volume, volumeTexture, gl]);
 
   // Create/update material separately
   useEffect(() => {
