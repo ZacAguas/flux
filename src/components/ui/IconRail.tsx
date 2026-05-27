@@ -35,7 +35,7 @@ export function IconRail() {
               key={id}
               onClick={() => setLayoutMode(id)}
               title={label}
-              className="!p-0 !border-0 w-full h-9 flex items-center justify-center"
+              className="!p-0 !border-0 rounded-none w-full h-9 flex items-center justify-center"
               animate={{
                 backgroundColor: isActive ? 'rgba(255,255,255,0.1)' : 'rgba(255,255,255,0)',
                 color: isActive ? 'rgba(255,255,255,0.85)' : 'rgba(255,255,255,0.35)',
@@ -63,7 +63,7 @@ export function IconRail() {
               onClick={() => toggleSection(id)}
               title={label}
               style={{ padding: '11px 0' }}
-              className="relative w-full flex flex-col items-center justify-center gap-1"
+              className="relative rounded-none w-full flex flex-col items-center justify-center gap-1"
               animate={{
                 backgroundColor: isActive ? 'rgba(19,221,209,0.09)' : 'rgba(255,255,255,0)',
                 color: isActive ? ACCENT_COLOR : 'rgba(255,255,255,0.40)',
@@ -103,7 +103,7 @@ export function IconRail() {
         <motion.button
           onClick={() => setHelpModalOpen(true)}
           title="Help"
-          className="!p-0 !border-0 w-12 h-12 flex items-center justify-center"
+          className="!p-0 !border-0 rounded-none w-12 h-12 flex items-center justify-center"
           animate={{ color: 'rgba(255,255,255,0.35)', backgroundColor: 'rgba(255,255,255,0)' }}
           whileHover={{ color: 'rgba(255,255,255,0.65)', backgroundColor: 'rgba(255,255,255,0.05)' }}
           whileTap={{ scale: 0.9 }}

@@ -30,7 +30,7 @@ export function MobileBar() {
           <motion.button
             key={id}
             onClick={() => setLayoutMode(id)}
-            className="!p-0 !border-0 flex-shrink-0 w-[60px] flex flex-col items-center justify-center gap-1 relative"
+            className="!p-0 !border-0 rounded-none flex-shrink-0 w-[60px] flex flex-col items-center justify-center gap-1 relative"
             whileTap={{ scale: 0.88 }}
           >
             {isActive && (
@@ -65,7 +65,7 @@ export function MobileBar() {
           <motion.button
             key={id}
             onClick={() => handleSelect(id)}
-            className="!p-0 !border-0 flex-shrink-0 w-[72px] flex flex-col items-center justify-center gap-1 relative"
+            className="!p-0 !border-0 rounded-none flex-shrink-0 w-[72px] flex flex-col items-center justify-center gap-1 relative"
             whileTap={{ scale: 0.88 }}
           >
             {isActive && (

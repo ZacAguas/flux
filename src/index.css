@@ -1,19 +1,7 @@
 @import "tailwindcss";
 @import "@heroui/styles";
 
-@theme {
-  --radius-xs: 0;
-  --radius-sm: 0;
-  --radius-md: 0;
-  --radius-lg: 0;
-  --radius-xl: 0;
-  --radius-2xl: 0;
-  --radius-3xl: 0;
-  --radius-4xl: 0;
-}
-
 :root {
-  --radius: 0px;
   --accent: #13ddd1;
 
   font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
@@ -59,20 +47,6 @@ h1 {
   line-height: 1.1;
 }
 
-button {
-  border-radius: 0;
-  border: 1px solid transparent;
-  padding: 0.6em 1.2em;
-  font-size: 1em;
-  font-weight: 500;
-  font-family: inherit;
-  background-color: #1a1a1a;
-  cursor: pointer;
-  transition: border-color 0.25s;
-}
-button:hover {
-  border-color: #646cff;
-}
 /* Only show focus ring on keyboard navigation, not mouse clicks */
 *:focus:not(:focus-visible) {
   outline: none !important;
@@ -86,8 +60,5 @@ button:hover {
   }
   a:hover {
     color: #747bff;
-  }
-  button {
-    background-color: #f9f9f9;
   }
 }
