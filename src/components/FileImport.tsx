@@ -3,19 +3,19 @@
  * Drag-and-drop is handled globally by useGlobalDropHandler.
  */
 
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { parseNifti } from '../utils/niftiParser';
 import { createVolumeTexture, calculateTextureMemory } from '../utils/volumeTextureConverter';
-import { createVolumeReference, promptForVolumeFile } from '../utils/volumeReference';
+import { createVolumeReference } from '../utils/volumeReference';
 import { useViewerStore } from '../store/viewerStore';
 
 export function FileImport() {
   const setVolume = useViewerStore((state) => state.setVolume);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
 
   const handleFile = async (file: File, fileHandle?: FileSystemFileHandle) => {
-    // Validate file extension
     if (!file.name.match(/\.(nii|nii\.gz)$/i)) {
       setError('Please select a valid NIfTI file (.nii or .nii.gz)');
       return;
@@ -40,10 +40,9 @@ export function FileImport() {
       const texture = createVolumeTexture(volume, 0);
       setVolume(volume, texture, metadata);
 
-      // Log 4D dataset info
       if (volume.dimensions.t && volume.dimensions.t > 1) {
         const singleTextureMB = calculateTextureMemory(texture);
-        const windowMemoryMB = singleTextureMB * 3; // Window cache size
+        const windowMemoryMB = singleTextureMB * 3;
 
         console.log(`4D dataset: ${volume.dimensions.t} time steps`);
         console.log(`Single texture: ${singleTextureMB.toFixed(1)} MB`);
@@ -60,17 +59,37 @@ export function FileImport() {
     }
   };
 
-  const handleBrowseClick = async () => {
+  // NOTE: Must stay synchronous — async chains lose the user gesture trust required
+  // for showOpenFilePicker and input.click() to open a file dialog in browsers.
+  const handleBrowseClick = () => {
     if (isLoading) return;
 
-    try {
-      const { file, fileHandle } = await promptForVolumeFile();
-      handleFile(file, fileHandle);
-    } catch (err) {
-      // User cancelled or error occurred
-      if ((err as Error).message !== 'File selection cancelled') {
-        setError((err as Error).message);
-      }
+    if ('showOpenFilePicker' in window && typeof window.showOpenFilePicker === 'function') {
+      void (async () => {
+        try {
+          const [fileHandle] = await (window.showOpenFilePicker as (options?: unknown) => Promise<FileSystemFileHandle[]>)({
+            types: [{ description: 'NIfTI Files', accept: { 'application/octet-stream': ['.nii', '.gz'] } }],
+            multiple: false,
+          });
+          const file = await fileHandle.getFile();
+          handleFile(file, fileHandle);
+        } catch (err) {
+          if ((err as Error).name !== 'AbortError') {
+            setError((err as Error).message);
+          }
+        }
+      })();
+    } else {
+      inputRef.current?.click();
+    }
+  };
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      handleFile(file);
+      // Reset so the same file can be re-selected
+      e.target.value = '';
     }
   };
 
@@ -79,6 +98,13 @@ export function FileImport() {
       onClick={handleBrowseClick}
       className={`border border-black/10 dark:border-white/10 bg-black/[0.03] dark:bg-white/[0.03] rounded-[0.625rem] py-12 px-13 text-center transition-all duration-300 ${isLoading ? 'cursor-not-allowed' : 'cursor-pointer'}`}
     >
+      <input
+        ref={inputRef}
+        type="file"
+        accept=".nii,.nii.gz"
+        onChange={handleInputChange}
+        className="hidden"
+      />
       {isLoading ? (
         <div>
           <p className="text-[1.05rem] text-black/55 dark:text-white/55 mb-2">Loading...</p>
