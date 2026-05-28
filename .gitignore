@@ -12,6 +12,14 @@ dist
 dist-ssr
 *.local
 
+# AI assistant context files
+CLAUDE.md
+AGENTS.md
+.cursorrules
+.cursorignore
+.windsurfrules
+copilot-instructions.md
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json
