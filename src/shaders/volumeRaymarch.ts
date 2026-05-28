@@ -36,6 +36,32 @@ import type { CropBox } from '../types/clipping';
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type TSLNode = any;
 
+// Three.js TSL does not export types for uniform/texture nodes, so we define a
+// narrow interface to avoid repeated `as any` casts at every uniform access site.
+// Scalar uniforms expose { value: T }; TSL texture nodes expose { value: Texture }
+// via TSLNode since the library does not publish the exact node types.
+interface RaymarchMaterialUniforms {
+  stepSize: { value: number };
+  threshold: { value: number };
+  thresholdMax: { value: number };
+  shadingEnabled: { value: number };
+  ambientStrength: { value: number };
+  diffuseStrength: { value: number };
+  volumeTexture: TSLNode;
+  transferFunctionTexture: TSLNode;
+  gradientTexture: TSLNode | null;
+  inverseModelMatrix: { value: THREE.Matrix4 };
+  isOrtho: { value: number };
+  cameraWorldDirection: { value: THREE.Vector3 };
+  cropBoxEnabled: { value: number };
+  cropBoxMin: { value: THREE.Vector3 };
+  cropBoxMax: { value: THREE.Vector3 };
+}
+
+interface RaymarchMaterial extends THREE.MeshBasicNodeMaterial {
+  uniforms: RaymarchMaterialUniforms;
+}
+
 /**
  * Ray-box intersection function (inline)
  * Returns entry (tNear) and exit (tFar) distances along ray
@@ -285,8 +311,7 @@ export function createVolumeRaymarchMaterial(
   material.side = THREE.BackSide; // Render from inside the cube
 
   // Store uniforms for external access
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  (material as any).uniforms = {
+  (material as RaymarchMaterial).uniforms = {
     stepSize: stepSizeUniform,
     threshold: thresholdUniform,
     thresholdMax: thresholdMaxUniform,
@@ -321,8 +346,7 @@ export function updateRaymarchUniforms(
     diffuseStrength?: number;
   }
 ) {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const uniforms = (material as any).uniforms;
+  const uniforms = (material as RaymarchMaterial).uniforms;
 
   if (params.stepSize !== undefined) {
     uniforms.stepSize.value = params.stepSize;
@@ -352,8 +376,7 @@ export function updateVolumeTexture(
   material: THREE.MeshBasicNodeMaterial,
   texture: THREE.Data3DTexture
 ) {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const uniforms = (material as any).uniforms;
+  const uniforms = (material as RaymarchMaterial).uniforms;
 
   if (uniforms.volumeTexture) {
     uniforms.volumeTexture.value = texture;
@@ -367,8 +390,7 @@ export function updateGradientTexture(
   material: THREE.MeshBasicNodeMaterial,
   gradientTexture: THREE.Storage3DTexture
 ) {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const uniforms = (material as any).uniforms;
+  const uniforms = (material as RaymarchMaterial).uniforms;
 
   if (uniforms.gradientTexture) {
     uniforms.gradientTexture.value = gradientTexture;
@@ -382,8 +404,7 @@ export function updateTransferFunctionTexture(
   material: THREE.MeshBasicNodeMaterial,
   texture: THREE.DataTexture
 ) {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const uniforms = (material as any).uniforms;
+  const uniforms = (material as RaymarchMaterial).uniforms;
 
   if (uniforms.transferFunctionTexture) {
     uniforms.transferFunctionTexture.value = texture;
@@ -400,15 +421,11 @@ export function updateRaymarchCameraUniforms(
   material: THREE.MeshBasicNodeMaterial,
   camera: THREE.Camera
 ) {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const uniforms = (material as any).uniforms;
+  const uniforms = (material as RaymarchMaterial).uniforms;
   if (!uniforms) return;
 
   if (uniforms.isOrtho) {
-    // Set isOrtho uniform based on the camera type
-    // Drives the conditional ray generation in the shader
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    uniforms.isOrtho.value = (camera as any).isOrthographicCamera ? 1.0 : 0.0;
+    uniforms.isOrtho.value = (camera as THREE.OrthographicCamera).isOrthographicCamera ? 1.0 : 0.0;
   }
   if (uniforms.cameraWorldDirection) {
     // Update the camera's world direction vector for orthographic ray calculation
@@ -427,8 +444,7 @@ export function updateRaymarchMeshUniforms(
   material: THREE.MeshBasicNodeMaterial,
   mesh: THREE.Mesh
 ) {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const uniforms = (material as any).uniforms;
+  const uniforms = (material as RaymarchMaterial).uniforms;
   if (!uniforms) return;
 
   if (uniforms.inverseModelMatrix) {
@@ -449,8 +465,7 @@ export function updateCropBoxUniforms(
   material: THREE.MeshBasicNodeMaterial,
   cropBox: CropBox
 ) {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const uniforms = (material as any).uniforms;
+  const uniforms = (material as RaymarchMaterial).uniforms;
   if (!uniforms) return;
 
   if (uniforms.cropBoxEnabled) {

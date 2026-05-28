@@ -22,6 +22,18 @@ import {
 import * as THREE from 'three/webgpu';
 import type { SliceOrientation } from '../types/layout';
 
+// Three.js TSL does not export types for uniform nodes, so we define a narrow
+// interface to avoid repeated `as any` casts at every uniform access site.
+interface SliceMaterialUniforms {
+  sliceIndex: { value: number };
+  windowCenter: { value: number };
+  windowWidth: { value: number };
+}
+
+interface SliceMaterial extends THREE.MeshBasicNodeMaterial {
+  uniforms: SliceMaterialUniforms;
+}
+
 /**
  * Create slice extraction material
  *
@@ -106,8 +118,7 @@ export function createSliceMaterial(
   material.transparent = false;
 
   // Store uniforms for later updates
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  (material as any).uniforms = {
+  (material as SliceMaterial).uniforms = {
     sliceIndex: sliceIndexUniform,
     windowCenter: windowCenterUniform,
     windowWidth: windowWidthUniform,
@@ -130,8 +141,7 @@ export function updateSliceMaterial(
     windowWidth?: number;
   }
 ) {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const uniforms = (material as any).uniforms;
+  const uniforms = (material as SliceMaterial).uniforms;
 
   if (uniforms) {
     if (params.sliceIndex !== undefined) {

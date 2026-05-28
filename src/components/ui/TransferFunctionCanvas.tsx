@@ -15,8 +15,8 @@ import { rgbToRgbaString } from '../../utils/colorConversion';
 import { useState, useRef } from 'react';
 
 interface TransferFunctionCanvasProps {
-  selectedPointIndex: number | null;
-  onSelectPoint: (index: number | null) => void;
+  selectedPointId: string | null;
+  onSelectPoint: (id: string | null) => void;
 }
 
 const CANVAS_WIDTH = 320;
@@ -25,7 +25,7 @@ const MARGIN = { top: 10, right: 10, bottom: 30, left: 10 };
 const GRADIENT_HEIGHT = 20;
 
 export function TransferFunctionCanvas({
-  selectedPointIndex,
+  selectedPointId,
   onSelectPoint,
 }: TransferFunctionCanvasProps) {
   const transferFunction = useViewerStore((state) => state.transferFunction);
@@ -33,7 +33,7 @@ export function TransferFunctionCanvas({
   const addPoint = useViewerStore((state) => state.addTransferFunctionPoint);
   const removePoint = useViewerStore((state) => state.removeTransferFunctionPoint);
 
-  const [draggedPointIndex, setDraggedPointIndex] = useState<number | null>(null);
+  const [draggedPointId, setDraggedPointId] = useState<string | null>(null);
   const svgRef = useRef<SVGSVGElement>(null);
 
   // Calculate inner dimensions
@@ -51,14 +51,14 @@ export function TransferFunctionCanvas({
   });
 
   // Mouse event handlers for dragging
-  const handleMouseDown = (index: number) => (e: React.MouseEvent) => {
+  const handleMouseDown = (id: string) => (e: React.MouseEvent) => {
     e.preventDefault();
-    setDraggedPointIndex(index);
-    onSelectPoint(index);
+    setDraggedPointId(id);
+    onSelectPoint(id);
   };
 
   const handleMouseMove = (e: React.MouseEvent) => {
-    if (draggedPointIndex === null || !svgRef.current) return;
+    if (draggedPointId === null || !svgRef.current) return;
 
     const svgRect = svgRef.current.getBoundingClientRect();
     const scaleX = CANVAS_WIDTH / svgRect.width;
@@ -74,15 +74,15 @@ export function TransferFunctionCanvas({
     newValue = Math.max(0, Math.min(1, newValue));
     newOpacity = Math.max(0, Math.min(1, newOpacity));
 
-    // Update the point
-    updatePoint(draggedPointIndex, {
+    // Update the point by UUID
+    updatePoint(draggedPointId, {
       value: newValue,
       opacity: newOpacity,
     });
   };
 
   const handleMouseUp = () => {
-    setDraggedPointIndex(null);
+    setDraggedPointId(null);
   };
 
   const handleDoubleClick = (e: React.MouseEvent) => {
@@ -112,7 +112,7 @@ export function TransferFunctionCanvas({
 
     // Interpolate opacity and color between the two points
     const t = (clickValue - leftPoint.value) / (rightPoint.value - leftPoint.value) || 0;
-    // NOTE:We interpolate the opacity instead of using the opacity value where we click, so the new point
+    // NOTE: We interpolate the opacity instead of using the opacity value where we click, so the new point
     // is created along the existing curve, instead of immediately reshaping the curve (likely unintended)
     const interpolatedOpacity = leftPoint.opacity + (rightPoint.opacity - leftPoint.opacity) * t;
     const interpolatedColor = {
@@ -133,10 +133,10 @@ export function TransferFunctionCanvas({
 
     // Find the newly added point by id (float equality is unreliable after sort)
     const updatedPoints = useViewerStore.getState().transferFunction.points;
-    const newPointIndex = updatedPoints.findIndex((p) => !existingIds.has(p.id));
+    const newPoint_ = updatedPoints.find((p) => !existingIds.has(p.id));
 
-    if (newPointIndex !== -1) {
-      onSelectPoint(newPointIndex);
+    if (newPoint_) {
+      onSelectPoint(newPoint_.id);
     }
   };
 
@@ -180,9 +180,9 @@ export function TransferFunctionCanvas({
         />
 
         {/* Control points */}
-        {transferFunction.points.map((point, index) => {
-          const isSelected = index === selectedPointIndex;
-          const isDragging = index === draggedPointIndex;
+        {transferFunction.points.map((point) => {
+          const isSelected = point.id === selectedPointId;
+          const isDragging = point.id === draggedPointId;
 
           return (
             <g key={point.id}>
@@ -196,14 +196,14 @@ export function TransferFunctionCanvas({
                 strokeWidth={2}
                 // Disable transitions on points when dragging to avoid lagging behind line
                 className={`cursor-move ${isDragging ? '' : 'transition-all'}`}
-                onMouseDown={handleMouseDown(index)}
+                onMouseDown={handleMouseDown(point.id)}
                 onClick={(e) => {
                   // Alt/Option + click to delete point (minimum 2 points required)
                   if (e.altKey && transferFunction.points.length > 2) {
-                    removePoint(index);
+                    removePoint(point.id);
                     onSelectPoint(null);
                   } else {
-                    onSelectPoint(index);
+                    onSelectPoint(point.id);
                   }
                 }}
               />

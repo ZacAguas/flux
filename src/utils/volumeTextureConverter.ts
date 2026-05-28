@@ -134,9 +134,9 @@ export function createVolumeTexture(
  */
 export function calculateTextureMemory(texture: THREE.Data3DTexture): number {
   const { width, height, depth } = texture.image;
-  const bytesPerPixel = texture.type === THREE.FloatType ? 4 : 1;
-  const channels = texture.format === THREE.RedFormat ? 1 : 4;
-  const bytes = width * height * depth * bytesPerPixel * channels;
+  const bytesPerElement = texture.type === THREE.FloatType ? 4 : texture.type === THREE.HalfFloatType ? 2 : 1;
+  const channels = texture.format === THREE.RGBAFormat ? 4 : texture.format === THREE.RGFormat ? 2 : 1;
+  const bytes = width * height * depth * bytesPerElement * channels;
   return bytes / (1024 * 1024); // Convert to MB
 }
 

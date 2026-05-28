@@ -5,7 +5,6 @@
  * of the crop box in the 3D view. Uses @react-three/drei TransformControls.
  */
 
-import { useRef } from 'react';
 import { TransformControls } from '@react-three/drei';
 import type * as THREE from 'three';
 import { useViewerStore } from '../store/viewerStore';
@@ -36,7 +35,6 @@ export function CropBoxGizmos({
   const cropBox = useViewerStore((state) => state.cropBox);
   const setCropBoxAxis = useViewerStore((state) => state.setCropBoxAxis);
 
-  const isDraggingRef = useRef(false);
   const volDims = volume ? getVolumeDimensions(volume) : null;
 
   const handleAxialMin = () => {
@@ -98,8 +96,6 @@ export function CropBoxGizmos({
           showX={false}
           showY={false}
           showZ={true}
-          onMouseDown={() => { isDraggingRef.current = true; }}
-          onMouseUp={() => { isDraggingRef.current = false; }}
           onChange={handleAxialMin}
         />
       )}
@@ -110,8 +106,6 @@ export function CropBoxGizmos({
           showX={false}
           showY={false}
           showZ={true}
-          onMouseDown={() => { isDraggingRef.current = true; }}
-          onMouseUp={() => { isDraggingRef.current = false; }}
           onChange={handleAxialMax}
         />
       )}
@@ -122,8 +116,6 @@ export function CropBoxGizmos({
           showX={false}
           showY={true}
           showZ={false}
-          onMouseDown={() => { isDraggingRef.current = true; }}
-          onMouseUp={() => { isDraggingRef.current = false; }}
           onChange={handleCoronalMin}
         />
       )}
@@ -134,8 +126,6 @@ export function CropBoxGizmos({
           showX={false}
           showY={true}
           showZ={false}
-          onMouseDown={() => { isDraggingRef.current = true; }}
-          onMouseUp={() => { isDraggingRef.current = false; }}
           onChange={handleCoronalMax}
         />
       )}
@@ -146,8 +136,6 @@ export function CropBoxGizmos({
           showX={true}
           showY={false}
           showZ={false}
-          onMouseDown={() => { isDraggingRef.current = true; }}
-          onMouseUp={() => { isDraggingRef.current = false; }}
           onChange={handleSagittalMin}
         />
       )}
@@ -158,8 +146,6 @@ export function CropBoxGizmos({
           showX={true}
           showY={false}
           showZ={false}
-          onMouseDown={() => { isDraggingRef.current = true; }}
-          onMouseUp={() => { isDraggingRef.current = false; }}
           onChange={handleSagittalMax}
         />
       )}
