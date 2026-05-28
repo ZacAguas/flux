@@ -109,9 +109,9 @@ export interface RenderingSlice {
   setSlicePlaneSettings: (settings: Partial<SlicePlaneSettings>) => void;
   setRaymarchSettings: (settings: Partial<RaymarchSettings>) => void;
   setTransferFunction: (tf: TransferFunction) => void;
-  updateTransferFunctionPoint: (index: number, point: Partial<TransferFunctionPoint>) => void;
+  updateTransferFunctionPoint: (id: string, point: Partial<TransferFunctionPoint>) => void;
   addTransferFunctionPoint: (point: TransferFunctionPointData) => void;
-  removeTransferFunctionPoint: (index: number) => void;
+  removeTransferFunctionPoint: (id: string) => void;
   applyTransferFunctionPreset: (presetName: string) => void;
   setTransferFunctionTexture: (texture: THREE.DataTexture | null) => void;
   setCropBox: (update: Partial<CropBox>) => void;

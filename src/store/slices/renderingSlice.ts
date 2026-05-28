@@ -74,10 +74,12 @@ export const createRenderingSlice: StateCreator<ViewerStore, [], [], RenderingSl
 
   setTransferFunction: (tf) => set({ transferFunction: tf, activeTransferFunctionPreset: 'custom' }),
 
-  updateTransferFunctionPoint: (index, pointUpdate) =>
+  updateTransferFunctionPoint: (id, pointUpdate) =>
     set((state) => {
-      const newPoints = [...state.transferFunction.points];
-      newPoints[index] = { ...newPoints[index], ...pointUpdate };
+      const newPoints = state.transferFunction.points.map((p) =>
+        p.id === id ? { ...p, ...pointUpdate } : p
+      );
+      if ('value' in pointUpdate) newPoints.sort((a, b) => a.value - b.value);
       return {
         transferFunction: { ...state.transferFunction, points: newPoints },
         activeTransferFunctionPreset: 'custom',
@@ -95,14 +97,14 @@ export const createRenderingSlice: StateCreator<ViewerStore, [], [], RenderingSl
       };
     }),
 
-  removeTransferFunctionPoint: (index) =>
-    set((state) => {
-      const newPoints = state.transferFunction.points.filter((_, i) => i !== index);
-      return {
-        transferFunction: { ...state.transferFunction, points: newPoints },
-        activeTransferFunctionPreset: 'custom',
-      };
-    }),
+  removeTransferFunctionPoint: (id) =>
+    set((state) => ({
+      transferFunction: {
+        ...state.transferFunction,
+        points: state.transferFunction.points.filter((p) => p.id !== id),
+      },
+      activeTransferFunctionPreset: 'custom',
+    })),
 
   applyTransferFunctionPreset: (presetName) => {
     const preset = getPresetByName(presetName);

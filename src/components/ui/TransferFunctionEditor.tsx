@@ -16,7 +16,7 @@ export function TransferFunctionEditor() {
   const activePreset = useViewerStore((state) => state.activeTransferFunctionPreset);
   const applyPreset = useViewerStore((state) => state.applyTransferFunctionPreset);
   const setPopoverOpen = useViewerStore((state) => state.setPopoverOpen);
-  const [selectedPointIndex, setSelectedPointIndex] = useState<number | null>(null);
+  const [selectedPointId, setSelectedPointId] = useState<string | null>(null);
 
   return (
     <div className="flex flex-col gap-4">
@@ -28,7 +28,7 @@ export function TransferFunctionEditor() {
           onChange={(value) => {
             if (value) {
               applyPreset(String(value));
-              setSelectedPointIndex(null); // Clear selection when changing presets
+              setSelectedPointId(null); // Clear selection when changing presets
             }
           }}
           onOpenChange={setPopoverOpen}
@@ -68,14 +68,14 @@ export function TransferFunctionEditor() {
 
       {/* Visualization Canvas */}
       <TransferFunctionCanvas
-        selectedPointIndex={selectedPointIndex}
-        onSelectPoint={setSelectedPointIndex}
+        selectedPointId={selectedPointId}
+        onSelectPoint={setSelectedPointId}
       />
 
       {/* Control Point Editor Panel */}
       <ControlPointEditor
-        selectedPointIndex={selectedPointIndex}
-        onSelectPoint={setSelectedPointIndex}
+        selectedPointId={selectedPointId}
+        onSelectPoint={setSelectedPointId}
       />
     </div>
   );

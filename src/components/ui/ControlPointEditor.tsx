@@ -12,35 +12,36 @@ import { hexToRgb, rgbToHex } from '../../utils/colorConversion';
 import { ColorPickerInput } from './ColorPickerInput';
 
 interface ControlPointEditorProps {
-  selectedPointIndex: number | null;
-  onSelectPoint: (index: number | null) => void;
+  selectedPointId: string | null;
+  onSelectPoint: (id: string | null) => void;
 }
 
 export function ControlPointEditor({
-  selectedPointIndex,
+  selectedPointId,
 }: ControlPointEditorProps) {
   const transferFunction = useViewerStore((state) => state.transferFunction);
   const updatePoint = useViewerStore((state) => state.updateTransferFunctionPoint);
 
-  const selectedPoint =
-    selectedPointIndex !== null ? transferFunction.points[selectedPointIndex] : null;
+  const selectedPoint = selectedPointId !== null
+    ? transferFunction.points.find((p) => p.id === selectedPointId) ?? null
+    : null;
 
   const handleColorChange = (hex: string) => {
-    if (selectedPointIndex !== null) {
+    if (selectedPointId !== null) {
       const rgb = hexToRgb(hex);
-      updatePoint(selectedPointIndex, { color: rgb });
+      updatePoint(selectedPointId, { color: rgb });
     }
   };
 
   const handleIntensityChange = (value: number) => {
-    if (selectedPointIndex !== null) {
-      updatePoint(selectedPointIndex, { value });
+    if (selectedPointId !== null) {
+      updatePoint(selectedPointId, { value });
     }
   };
 
   const handleOpacityChange = (value: number) => {
-    if (selectedPointIndex !== null) {
-      updatePoint(selectedPointIndex, { opacity: value });
+    if (selectedPointId !== null) {
+      updatePoint(selectedPointId, { opacity: value });
     }
   };
 
@@ -50,7 +51,7 @@ export function ControlPointEditor({
         {selectedPoint ? (
           <>
             <div className="text-xs text-black/50 dark:text-white/50 font-medium">
-              Selected Point {selectedPointIndex !== null ? selectedPointIndex + 1 : ''}
+              Selected Point
             </div>
 
             {/* Intensity Slider */}

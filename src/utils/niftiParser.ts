@@ -93,6 +93,10 @@ export async function parseNifti(file: File): Promise<NiftiVolume> {
   const nz = dims[3];
   const nt = dims[4] > 1 ? dims[4] : undefined;
 
+  if (!nx || !ny || !nz || nx <= 0 || ny <= 0 || nz <= 0) {
+    throw new Error(`Invalid NIfTI dimensions: [${nx}, ${ny}, ${nz}]`);
+  }
+
   // Extract voxel spacing
   const pixdim = header.pixDims;
   const spacing = {
@@ -101,6 +105,11 @@ export async function parseNifti(file: File): Promise<NiftiVolume> {
     z: pixdim[3],
     t: nt ? pixdim[4] : undefined,
   };
+
+  if (!isFinite(spacing.x) || !isFinite(spacing.y) || !isFinite(spacing.z) ||
+      spacing.x <= 0 || spacing.y <= 0 || spacing.z <= 0) {
+    throw new Error(`Invalid NIfTI voxel spacing: [${spacing.x}, ${spacing.y}, ${spacing.z}]`);
+  }
 
   // Calculate data range
   const dataRange = calculateDataRange(typedData);
