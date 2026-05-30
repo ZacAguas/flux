@@ -1,79 +1,89 @@
-# 4D Medical Imaging Viewer
+<div align="center">
+  <img src="https://github.com/user-attachments/assets/4c0f39d6-f4da-4404-a819-1b2c0984ce37" alt="Flux Logo" width="150" />
+  <h1>Flux</h1>
+  <p><strong>4D</strong> medical imaging viewer powered by <strong>WebGPU</strong></p>
+</div>
 
-A WebGPU-accelerated medical imaging viewer for NIfTI files built with React, Three.js, and TypeScript.
+![Version](https://img.shields.io/badge/version-0.1.0-blue?style=for-the-badge)
+![React](https://img.shields.io/badge/react-%2320232a.svg?style=for-the-badge&logo=react&logoColor=%2361DAFB)
+![TypeScript](https://img.shields.io/badge/typescript-%23007ACC.svg?style=for-the-badge&logo=typescript&logoColor=white)
+![WebGPU](https://img.shields.io/badge/renderer-WebGPU-%23FF6D00?style=for-the-badge&logo=googlechrome&logoColor=white)
+![License](https://img.shields.io/badge/license-MIT-%2322c55e?style=for-the-badge)
+
+A privacy-first, browser-based 4D medical imaging viewer powered by WebGPU for instant, zero-installation NIfTI visualization.
+
+[Live Demo](#live-demo) &nbsp;|&nbsp; [Screenshots](#screenshots) &nbsp;|&nbsp; [Features](#features) &nbsp;|&nbsp; [Requirements](#requirements) &nbsp;|&nbsp; [Getting Started](#getting-started) &nbsp;|&nbsp; [Disclaimer](#disclaimer)
+
+## Live Demo
+
+<p align="center">
+  <a href="https://flux-gilt-ten.vercel.app" target="_blank"><strong>🔗 Launch the Live Viewer</strong></a>
+  <br />
+  <img width="800" height="538" alt="Flux Live Demo" src="https://github.com/user-attachments/assets/b0e0293f-cf60-418d-aff0-edb31a8a87fe" />
+</p>
+
+## Screenshots
+
+<table>
+  <tr>
+    <td align="center"><b>Quad Layout</b></td>
+    <td align="center"><b>TIC Analysis</b></td>
+  </tr>
+  <tr>
+    <td><img width="2049" height="1378" alt="CleanShot 2026-05-29 at 17 12 22" src="https://github.com/user-attachments/assets/c9bca3f9-7aeb-4f93-8005-3b30d9921989" /></td>
+    <td><img width="1232" height="985" alt="CleanShot 2026-05-30 at 22 12 17" src="https://github.com/user-attachments/assets/d2bbbd19-1685-4fe7-a6c4-abb7e0d7b060" /></td>
+  </tr>
+  <tr>
+    <td align="center"><b>Slice Views</b></td>
+    <td align="center"><b>Crop Box</b></td>
+  </tr>
+  <tr>
+    <td><img width="1972" height="1374" alt="CleanShot 2026-05-30 at 21 44 16" src="https://github.com/user-attachments/assets/d88ead70-65e1-4205-b921-31450a30c989" /></td>
+    <td><img width="2049" height="1378" alt="CleanShot 2026-05-29 at 17 19 14" src="https://github.com/user-attachments/assets/3243ef2a-d340-4051-8f9d-3b880d63fddb" /></td>
+  </tr>
+</table>
+
+## Features
+
+- **WebGPU volume rendering**: real-time raymarching with front-to-back compositing, early ray termination, and optional Blinn-Phong shading
+- **NIfTI support**: drag-and-drop `.nii` / `.nii.gz` with SHA-256 integrity validation across sessions
+- **2D slice viewers**: axial, coronal, and sagittal planes with window/level controls and synchronized crosshairs
+- **Transfer function editor**: interactive RGBA control points with built-in presets
+- **4D temporal navigation**: time slider, playback controls
+- **Time-intensity curves (TIC)**: place circular ROIs on any slice to extract and chart signal intensity over time
+- **Measurement tools**: distance (in mm using voxel spacing) and angle measurements
+- **Volume clipping**: interactive 3D crop box
+- **Session persistence**: IndexedDB-backed save and restore with auto-save, persistent file handles, and thumbnail previews
+- **Responsive multi-layout**: single volume, three-slice, or quad (volume + all three planes); light/dark theme
 
 ## Requirements
 
-**IMPORTANT**: This project requires **Three.js r181+** for WebGPU support and the Inspector API.
+- A browser with [WebGPU support](https://caniuse.com/webgpu) (Chrome 113+, Edge 113+)
+- Node.js 18+
+- pnpm
 
-Currently, two official plugins are available:
+## Getting Started
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+```bash
+# Install dependencies
+pnpm install
 
-## React Compiler
+# Start development server
+pnpm dev
 
-The React Compiler is enabled on this template. See [this documentation](https://react.dev/learn/react-compiler) for more information.
+# Build for production
+pnpm build
 
-Note: This will impact Vite dev & build performances.
-
-## Expanding the ESLint configuration
-
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
-
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+# Preview production build
+pnpm preview
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+## Disclaimer
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+Flux is a research and visualization tool, not a medical device. It is not intended for clinical diagnosis.
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+## License
+
+[MIT](LICENSE)
+
+If you use Flux in your work, please link back to this repository.
