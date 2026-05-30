@@ -48,6 +48,7 @@ export function useVolumeSetup() {
 
   const materialRef = useRef<THREE.MeshBasicNodeMaterial | undefined>(undefined);
   const [gradientTexture, setGradientTexture] = useState<THREE.Storage3DTexture | null>(null);
+  const gradientTextureRef = useRef<THREE.Storage3DTexture | null>(null);
   const [mesh, setMesh] = useState<THREE.Mesh | null>(null);
   const isGeneratingRef = useRef<boolean>(false);
   const bufferPoolRef = useRef<Float32Array | null>(null);
@@ -84,6 +85,22 @@ export function useVolumeSetup() {
     };
   }, [volume]); // Only depend on volume, not volumeTexture (buffer persists across time steps)
 
+  // Reset gradient state when volume file changes. Actual GPU disposal is deferred to the
+  // material effect so that we never dispose a texture the current material still references.
+  useEffect(() => {
+    return () => {
+      setGradientTexture(null);
+    };
+  }, [volume]);
+
+  // Dispose any lingering gradient on unmount
+  useEffect(() => {
+    return () => {
+      gradientTextureRef.current?.dispose();
+      gradientTextureRef.current = null;
+    };
+  }, []);
+
   // Compute gradient texture when volume or time step changes (WebGPU compute shader, runs on GPU)
   useEffect(() => {
     if (!volume) return;
@@ -94,11 +111,9 @@ export function useVolumeSetup() {
     const { x: width, y: height, z: depth } = volume.dimensions;
 
     let cancelled = false;
-    let gradTex: THREE.Storage3DTexture | null = null;
 
     computeGradientTexture(gl as unknown as THREE.WebGPURenderer, currentTexture, width, height, depth)
       .then((tex) => {
-        gradTex = tex;
         if (cancelled) {
           tex.dispose();
         } else {
@@ -109,17 +124,18 @@ export function useVolumeSetup() {
 
     return () => {
       cancelled = true;
-      // If async has already resolved, dispose immediately. Otherwise the .then() handler disposes
-      if (gradTex) {
-        gradTex.dispose();
-      }
-      setGradientTexture(null);
+      // Do NOT setGradientTexture(null) — keep the existing gradient visible during time step
+      // transitions to prevent the shading flash. Gradient is cleared on volume change above.
+      // GPU disposal of gradient textures is handled by the material effect below.
     };
   }, [volume, volumeTexture, gl]);
 
   // Create/update material separately
   useEffect(() => {
     if (!volumeTexture || !volume || !mesh) return;
+
+    // Capture previous gradient before updating — disposed below after new material is assigned
+    const prevGradient = gradientTextureRef.current;
 
     // Dispose old material
     if (materialRef.current) {
@@ -154,6 +170,13 @@ export function useVolumeSetup() {
     // Assign material to mesh
     mesh.material = newMaterial;
     materialRef.current = newMaterial;
+
+    // Dispose previous gradient now that the new material is active and no longer references it.
+    // Disposing here (vs. in the gradient effect) ensures WebGPU never tries to bind a freed texture.
+    if (prevGradient && prevGradient !== gradientTexture) {
+      prevGradient.dispose();
+    }
+    gradientTextureRef.current = gradientTexture ?? null;
 
     return () => {
       materialRef.current?.dispose();
